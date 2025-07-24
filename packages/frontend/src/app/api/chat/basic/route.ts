@@ -1,43 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { AIFeatureRequest } from "@/core/types/AIFeatures";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAIProcessor } from '@/server/lib/aiProcessor';
+import { AIFeatureRequest } from '@/core/types/AIFeatures';
 
-export const runtime = "nodejs";
-
-/**
- * 基本チャット API
- * Vertex AI Directを使用
- */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { message } = body;
-
-    // 入力検証
-    if (!message || typeof message !== 'string') {
+    const body = await request.json();
+    
+    // リクエストの検証
+    if (!body.message || typeof body.message !== 'string') {
       return NextResponse.json(
-        { error: "メッセージが必要です" },
+        { error: 'メッセージが必要です' },
         { status: 400 }
       );
     }
 
-    // 基本チャット機能リクエスト
-    const featureRequest: AIFeatureRequest = {
-      feature: "basic_chat",
-      input: message,
-      sessionId: 'demo-session' // 固定セッションID
+    // AI処理リクエストを構築
+    const aiRequest: AIFeatureRequest = {
+      feature: 'basic_chat',
+      input: body.message,
+      sessionId: body.sessionId,
     };
 
-    // AI処理実行
+    // AI処理を実行
     const aiProcessor = getAIProcessor();
-    const response = await aiProcessor.processFeature(featureRequest);
+    const response = await aiProcessor.processFeature(aiRequest);
 
-    return NextResponse.json(response);
-
-  } catch {
-    // console.error("Basic Chat API error:", error);
+    return NextResponse.json({
+      message: response.result,
+      processingTimeMs: response.processingTimeMs,
+      sessionId: response.sessionId,
+    });
+    
+  } catch (error) {
+    console.error('Basic chat error:', error);
     return NextResponse.json(
-      { error: "内部エラーが発生しました" },
+      { 
+        error: 'チャット処理中にエラーが発生しました',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

@@ -24,7 +24,7 @@ export default function Navigation() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              基本チャット
+              シンプルチャット
             </Link>
             <Link 
               href="/ai-features" 

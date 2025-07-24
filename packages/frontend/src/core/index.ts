@@ -42,8 +42,7 @@ export const AI_DEVELOPMENT_GUIDELINES = {
     "shared/は共通コード",
   ],
   aiFeatures: [
-    "basic_chat: Vertex AI直接（高速・シンプル）",
     "analysis_report: ADK Agent（複雑処理）",
-    "comparison_study: ADK Agent（マルチエージェント）",
+    "ui_generation: ADK Agent（UI生成）",
   ],
 } as const;

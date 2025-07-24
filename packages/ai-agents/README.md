@@ -29,7 +29,6 @@ packages/ai-agents/
 ├── deploy_all_agents.py   # 全エージェント一括デプロイ
 ├── deploy_analysis.py     # 分析エージェントデプロイ
 ├── deploy_ui_generation.py # UI生成エージェントデプロイ
-├── test-agents.py         # エージェントテストスクリプト
 ├── requirements.txt       # Python依存関係
 ├── ADK_ENDPOINTS.md       # ADKエンドポイント仕様
 ├── ADK_MULTI_AGENT_RULES.md # マルチエージェントルール
@@ -67,9 +66,6 @@ python deploy_all_agents.py
 
 ### 3. エージェント動作確認
 ```bash
-# デプロイ後のテスト
-python test-agents.py
-
 # 個別エンドポイントテスト（デプロイ後）
 curl -X POST https://YOUR_DEPLOYED_URL/analysis \
   -H "Content-Type: application/json" \

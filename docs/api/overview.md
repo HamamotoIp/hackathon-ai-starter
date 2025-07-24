@@ -378,7 +378,7 @@ print(result)
 curl http://localhost:3000/api/debug | jq .
 
 # 詳細デバッグ
-cd /workspaces/kokorone-app
+cd /workspaces/hackathon-ai-starter
 ./debug.sh
 
 # ログ確認（本番環境）

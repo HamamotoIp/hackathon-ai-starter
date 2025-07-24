@@ -87,19 +87,6 @@ export default async function DashboardPage() {
           </div>
         </div>
         
-        {/* ナビゲーション */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Navigation</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a
-              href="/simple-chat"
-              className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <h3 className="font-medium text-blue-600">Simple Chat</h3>
-              <p className="text-sm text-gray-600">Server Component中心のシンプルなAIチャット</p>
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );

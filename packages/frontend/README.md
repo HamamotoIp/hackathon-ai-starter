@@ -311,7 +311,7 @@ curl http://localhost:3000/api/debug | jq .
 ### 本番デプロイ
 ```bash
 # ルートディレクトリから統合デプロイ
-cd /workspaces/kokorone-app
+cd /workspaces/hackathon-ai-starter
 ./setup.sh
 
 # フロントエンドのみデプロイ

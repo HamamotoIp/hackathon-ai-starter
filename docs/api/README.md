@@ -64,7 +64,6 @@ interface AIFeatureResponse {
 | `POST /api/analysis` | 分析レポート | ADK Analysis Agent | `src/app/api/analysis/route.ts` |
 | `POST /api/ui-generation` | UI生成 | ADK UI Generation Agent | `src/app/api/ui-generation/route.ts` |
 | `POST /api/images/upload` | 画像アップロード | Cloud Storage | `src/app/api/images/upload/route.ts` |
-| `POST /api/agent` | ADK Orchestrator | ADK Multi-Agent | `src/app/api/agent/route.ts` |
 | `GET /api/debug` | システムデバッグ | - | `src/app/api/debug/route.ts` |
 
 ## 📖 詳細実装ガイド

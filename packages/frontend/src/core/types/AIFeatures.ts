@@ -9,7 +9,6 @@
 
 /** AI機能の種類 */
 export type AIFeatureType = 
-  // 全機能でADK利用（統一オーケストレーター）
   | "basic_chat"
   | "analysis_report"
   | "ui_generation";
@@ -35,16 +34,17 @@ export interface AIFeatureConfig {
 
 /** 機能設定マップ */
 export const AI_FEATURE_CONFIGS: Record<AIFeatureType, AIFeatureConfig> = {
-  // 機能別専用Agent Engine設計
+  // Vertex AI直接呼び出し
   basic_chat: {
     type: "basic_chat",
-    name: "基本チャット",
-    description: "日常会話や質問回答",
+    name: "シンプルチャット",
+    description: "軽量で高速なチャット機能",
     processingMode: "vertex_direct",
-    maxInputLength: 2000,
-    expectedProcessingTime: 5
+    maxInputLength: 1000,
+    expectedProcessingTime: 3
   },
   
+  // 機能別専用Agent Engine設計
   analysis_report: {
     type: "analysis_report",
     name: "分析レポート",
@@ -75,15 +75,6 @@ export interface AIFeatureRequest {
   feature: AIFeatureType;
   input: string;
   options?: {
-    // 翻訳用
-    sourceLanguage?: string;
-    targetLanguage?: string;
-    // 要約用
-    summaryLength?: "short" | "medium" | "long";
-    // 分析用
-    analysisDepth?: "basic" | "detailed" | "comprehensive";
-    // 比較用
-    comparisonCriteria?: string[];
     // UI生成用
     uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
     framework?: "html" | "react";
@@ -116,19 +107,9 @@ export interface AIFeatureResponse {
   timestamp: string;
   sessionId?: string;
   metadata?: {
-    // 翻訳用
-    detectedLanguage?: string;
-    confidence?: number;
     // 分析用
     analysisPoints?: string[];
     recommendations?: string[];
-    // UI生成用
-    uiType?: string;
-    framework?: string;
-    components?: string[];
-    responsive?: boolean;
-    accessibility?: boolean;
-    javascript_required?: boolean;
   };
 }
 

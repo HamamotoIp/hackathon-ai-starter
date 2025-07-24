@@ -279,7 +279,7 @@ export class AIProcessor {
 
   private async sendADKMessage(sessionId: string, userId: string, message: string, request?: AIFeatureRequest, serviceUrl?: string): Promise<string> {
     // メッセージ送信用エンドポイント（:streamQuery?alt=sseを使用）
-    const messageUrl = serviceUrl ?? this.getADKServiceUrl(request?.feature ?? 'basic_chat') ?? '';
+    const messageUrl = serviceUrl ?? this.getADKServiceUrl(request?.feature ?? 'analysis_report') ?? '';
     
     // メッセージの構造化（UI生成対応）
     let finalMessage = message;
@@ -396,7 +396,7 @@ export class AIProcessor {
     }
 
     // UI生成機能の場合は構造化データ解析を試行
-    const parsedResponse = this.parseADKResponse(responseText, request?.feature ?? 'basic_chat');
+    const parsedResponse = this.parseADKResponse(responseText, request?.feature ?? 'analysis_report');
     
     // 構造化データの場合はJSON文字列として返す（フロントエンドで再解析）
     if (typeof parsedResponse === 'object') {

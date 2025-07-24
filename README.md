@@ -69,7 +69,7 @@ cp config.example.sh config.sh
 ## 🏗️ アーキテクチャ
 
 ```
-📱 Frontend (@kokorone/frontend)
+📱 Frontend (hackathon-ai-starter)
 ├── Next.js 15.3.1 + React 19.0.0
 ├── TypeScript 5.x + Tailwind CSS 4.0
 ├── API Routes:

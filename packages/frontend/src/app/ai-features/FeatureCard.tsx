@@ -29,12 +29,12 @@ export default function FeatureCard({ config }: FeatureCardProps) {
       let body: Record<string, unknown>;
 
       switch (config.type) {
-        case 'basic_chat':
-          apiUrl = '/api/chat/basic';
-          body = { message: input };
-          break;
         case 'analysis_report':
           apiUrl = '/api/analysis';
+          body = { content: input };
+          break;
+        case 'ui_generation':
+          apiUrl = '/api/ui-generation';
           body = { content: input };
           break;
         default:
@@ -74,7 +74,7 @@ export default function FeatureCard({ config }: FeatureCardProps) {
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={config.type === 'basic_chat' ? 'メッセージを入力...' : '分析内容を入力...'}
+          placeholder={config.type === 'analysis_report' ? '分析内容を入力...' : 'UI生成要求を入力...'}
           className="w-full p-2 border rounded"
           rows={3}
           maxLength={config.maxInputLength}

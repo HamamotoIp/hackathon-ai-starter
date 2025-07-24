@@ -40,7 +40,7 @@ open http://localhost:3000
 
 ## 🔧 開発コマンド
 
-### フロントエンド (@kokorone/frontend)
+### フロントエンド (hackathon-ai-starter)
 ```bash
 cd packages/frontend
 npm run dev        # 開発サーバー（Turbopack）
@@ -57,8 +57,7 @@ python -m venv venv
 source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 
-# ローカルテスト（デプロイ後に利用可能）
-python test-agents.py
+# ローカルテストはフロントエンドの/api/debugで実行
 ```
 
 ## ⚠️ ローカル制限事項
