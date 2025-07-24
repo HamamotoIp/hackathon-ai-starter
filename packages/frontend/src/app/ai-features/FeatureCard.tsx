@@ -1,6 +1,6 @@
 'use client';
 
-import { AIFeatureConfig } from '@/core/types/AIFeatures';
+import { AIFeatureConfig } from '@/core/types/aiTypes';
 import { useState } from 'react';
 
 interface FeatureCardProps {
@@ -31,11 +31,11 @@ export default function FeatureCard({ config }: FeatureCardProps) {
       switch (config.type) {
         case 'analysis_report':
           apiUrl = '/api/analysis';
-          body = { content: input };
+          body = { message: input };
           break;
         case 'ui_generation':
           apiUrl = '/api/ui-generation';
-          body = { content: input };
+          body = { message: input };
           break;
         default:
           throw new Error(`Unknown feature type: ${config.type}`);

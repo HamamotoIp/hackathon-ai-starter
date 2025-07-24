@@ -7,7 +7,8 @@ import {
   UIGenerationResult,
   getFeatureConfig,
   isUIGenerationFeature
-} from '@/core/types/AIFeatures';
+} from '@/core/types/aiTypes';
+import { getADKServiceUrl } from './aiProcessorConfig';
 
 export interface AIProcessorConfig {
   vertexAI?: {
@@ -203,16 +204,7 @@ export class AIProcessor {
    * 機能に応じたADKサービスURLを取得
    */
   private getADKServiceUrl(feature: AIFeatureType): string | null {
-    if (!this.adkServiceUrls) return null;
-    
-    switch (feature) {
-      case 'analysis_report':
-        return this.adkServiceUrls.analysis;
-      case 'ui_generation':
-        return this.adkServiceUrls.uiGeneration;
-      default:
-        return null;
-    }
+    return getADKServiceUrl(feature);
   }
 
   private async createADKSession(userId: string, serviceUrl: string): Promise<string> {

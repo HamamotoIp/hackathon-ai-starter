@@ -3,7 +3,7 @@
  * 🔴 人間が管理：フロントエンド用ドメインレイヤーの統一エクスポート
  */
 
-// AI Features Types (main export)
-export * from "./types/AIFeatures";
+// AI Types (main export)
+export * from "./types/aiTypes";
 
 

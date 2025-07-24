@@ -1,6 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { UIGenerationRequest } from "@/core/types/AIFeatures";
+import { UIGenerationRequest } from "@/core/types/aiTypes";
+import { 
+  parseRequestBody, 
+  validateCommonInput, 
+  createSuccessResponse, 
+  createErrorResponse,
+  getOrCreateSessionId
+} from '@/server/lib/apiHelpers';
 
 export const runtime = "nodejs";
 
@@ -8,65 +15,38 @@ export const runtime = "nodejs";
  * UI生成 API
  * ADK Agentを使用してHTML/Reactコンポーネントを動的生成
  */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { 
-      input, 
-      options = {} 
-    } = body;
-
-    // 入力検証
-    if (!input || typeof input !== 'string') {
-      return NextResponse.json(
-        { error: "UI生成の指示が必要です" },
-        { status: 400 }
-      );
-    }
-
-    if (input.length > 3000) {
-      return NextResponse.json(
-        { error: "入力は3000文字以内にしてください" },
-        { status: 400 }
-      );
-    }
+    const body = await parseRequestBody(req);
+    validateCommonInput(body);
 
     // UI生成機能リクエスト
     const featureRequest: UIGenerationRequest = {
       feature: "ui_generation",
-      input,
+      input: body.message,
       options: {
-        uiType: options.uiType ?? "auto",
-        framework: options.framework ?? "html",
-        responsive: options.responsive !== false,
-        colorScheme: options.colorScheme ?? "light"
+        uiType: body.options?.uiType ?? "auto",
+        framework: body.options?.framework ?? "html",
+        responsive: body.options?.responsive !== false,
+        colorScheme: body.options?.colorScheme ?? "light"
       },
-      sessionId: 'demo-session' // 固定セッションID
+      sessionId: getOrCreateSessionId(body)
     };
 
     // AI処理実行
     const aiProcessor = getAIProcessor();
     const response = await aiProcessor.processFeature(featureRequest);
 
-    // デバッグログ（一時的に本番でも有効）
-    // eslint-disable-next-line no-console
-    console.log('UI Generation Response:', JSON.stringify(response, null, 2));
-    // eslint-disable-next-line no-console
-    console.log('UI Generation Success:', response.success);
-    // eslint-disable-next-line no-console
-    console.log('UI Generation Result Type:', typeof response.result);
-
-    return NextResponse.json(response);
-
-  } catch (error) {
-    // エラーログ出力（本番環境では削除予定）
+    // 開発環境でのデバッグログ
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('UI Generation error:', error);
+      console.log('UI Generation Response:', JSON.stringify(response, null, 2));
     }
-    return NextResponse.json(
-      { error: "内部エラーが発生しました" },
-      { status: 500 }
-    );
+
+    return createSuccessResponse(response);
+
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "内部エラーが発生しました";
+    return createErrorResponse(message, 500);
   }
 }

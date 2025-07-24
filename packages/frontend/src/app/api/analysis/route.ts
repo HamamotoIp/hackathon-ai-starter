@@ -1,6 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { AnalysisReportRequest } from "@/core/types/AIFeatures";
+import { AnalysisReportRequest } from "@/core/types/aiTypes";
+import { 
+  parseRequestBody, 
+  validateCommonInput, 
+  createSuccessResponse, 
+  createErrorResponse,
+  getOrCreateSessionId
+} from '@/server/lib/apiHelpers';
 
 export const runtime = "nodejs";
 
@@ -8,36 +15,26 @@ export const runtime = "nodejs";
  * 分析レポート API
  * ADK Agentを使用
  */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { content } = body;
-
-    // 入力検証
-    if (!content || typeof content !== 'string') {
-      return NextResponse.json(
-        { error: "分析する内容が必要です" },
-        { status: 400 }
-      );
-    }
+    const body = await parseRequestBody(req);
+    validateCommonInput(body);
 
     // 分析レポート機能リクエスト
     const featureRequest: AnalysisReportRequest = {
       feature: "analysis_report",
-      input: content,
-      sessionId: 'demo-session' // 固定セッションID
+      input: body.message,
+      sessionId: getOrCreateSessionId(body)
     };
 
     // AI処理実行
     const aiProcessor = getAIProcessor();
     const response = await aiProcessor.processFeature(featureRequest);
 
-    return NextResponse.json(response);
+    return createSuccessResponse(response);
 
-  } catch {
-    return NextResponse.json(
-      { error: "内部エラーが発生しました" },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "内部エラーが発生しました";
+    return createErrorResponse(message, 500);
   }
 }

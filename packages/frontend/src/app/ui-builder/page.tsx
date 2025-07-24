@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AIFeatureResponse, isUIGenerationResponse } from "@/core/types/AIFeatures";
+import { AIFeatureResponse, isUIGenerationResponse } from "@/core/types/aiTypes";
 
 export default function UIBuilderPage() {
   const [prompt, setPrompt] = useState("");
@@ -21,7 +21,7 @@ export default function UIBuilderPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          input: prompt,
+          message: prompt,
           options: { uiType: "auto", framework: "html" },
           sessionId: 'demo-session', // 固定セッションID
         }),

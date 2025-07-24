@@ -1,4 +1,4 @@
-import { AI_FEATURE_CONFIGS } from '@/core/types/AIFeatures';
+import { AI_FEATURE_CONFIGS } from '@/core/types/aiTypes';
 import FeatureCard from './FeatureCard';
 
 /**
