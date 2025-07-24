@@ -70,19 +70,43 @@ export const AI_FEATURE_CONFIGS: Record<AIFeatureType, AIFeatureConfig> = {
 // リクエスト・レスポンス型
 // =============================================================================
 
-/** AI機能リクエスト */
-export interface AIFeatureRequest {
-  feature: AIFeatureType;
-  input: string;
-  options?: {
-    // UI生成用
-    uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
-    framework?: "html" | "react";
-    responsive?: boolean;
-    colorScheme?: "light" | "dark" | "auto";
-  };
+/** 基本リクエストインターフェース */
+interface BaseAIRequest {
   sessionId?: string;
 }
+
+/** シンプルチャットリクエスト */
+export interface BasicChatRequest extends BaseAIRequest {
+  feature: "basic_chat";
+  input: string;
+}
+
+/** 分析レポートリクエスト */
+export interface AnalysisReportRequest extends BaseAIRequest {
+  feature: "analysis_report";
+  input: string;
+}
+
+/** UI生成オプション */
+export interface UIGenerationOptions {
+  uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
+  framework?: "html" | "react";
+  responsive?: boolean;
+  colorScheme?: "light" | "dark" | "auto";
+}
+
+/** UI生成リクエスト */
+export interface UIGenerationRequest extends BaseAIRequest {
+  feature: "ui_generation";
+  input: string;
+  options: UIGenerationOptions;
+}
+
+/** 統合AI機能リクエスト型 */
+export type AIFeatureRequest = 
+  | BasicChatRequest
+  | AnalysisReportRequest
+  | UIGenerationRequest;
 
 /** UI生成専用レスポンス */
 export interface UIGenerationResult {
@@ -97,21 +121,42 @@ export interface UIGenerationResult {
   };
 }
 
-/** AI機能レスポンス */
-export interface AIFeatureResponse {
+/** 基本レスポンスインターフェース */
+interface BaseAIResponse {
   success: boolean;
-  feature: AIFeatureType;
-  result: string | UIGenerationResult; // UI生成の場合は構造化データ
   processingMode: AIProcessingMode;
   processingTimeMs: number;
   timestamp: string;
   sessionId?: string;
+}
+
+/** シンプルチャットレスポンス */
+export interface BasicChatResponse extends BaseAIResponse {
+  feature: "basic_chat";
+  result: string;
+}
+
+/** 分析レポートレスポンス */
+export interface AnalysisReportResponse extends BaseAIResponse {
+  feature: "analysis_report";
+  result: string;
   metadata?: {
-    // 分析用
     analysisPoints?: string[];
     recommendations?: string[];
   };
 }
+
+/** UI生成レスポンス */
+export interface UIGenerationResponse extends BaseAIResponse {
+  feature: "ui_generation";
+  result: UIGenerationResult;
+}
+
+/** 統合AI機能レスポンス型 */
+export type AIFeatureResponse = 
+  | BasicChatResponse
+  | AnalysisReportResponse
+  | UIGenerationResponse;
 
 // =============================================================================
 // ユーティリティ関数
@@ -155,7 +200,7 @@ export function getIntelligentFeatures(): AIFeatureType[] {
 // =============================================================================
 
 /** UI生成結果かチェック */
-export function isUIGenerationResult(result: string | UIGenerationResult): result is UIGenerationResult {
+export function isUIGenerationResult(result: unknown): result is UIGenerationResult {
   return typeof result === 'object' && result !== null && 'html' in result;
 }
 
@@ -164,7 +209,32 @@ export function isUIGenerationFeature(feature: AIFeatureType): feature is "ui_ge
   return feature === "ui_generation";
 }
 
+/** シンプルチャットリクエストかチェック */
+export function isBasicChatRequest(request: AIFeatureRequest): request is BasicChatRequest {
+  return request.feature === "basic_chat";
+}
+
+/** 分析レポートリクエストかチェック */
+export function isAnalysisReportRequest(request: AIFeatureRequest): request is AnalysisReportRequest {
+  return request.feature === "analysis_report";
+}
+
+/** UI生成リクエストかチェック */
+export function isUIGenerationRequest(request: AIFeatureRequest): request is UIGenerationRequest {
+  return request.feature === "ui_generation";
+}
+
+/** シンプルチャットレスポンスかチェック */
+export function isBasicChatResponse(response: AIFeatureResponse): response is BasicChatResponse {
+  return response.feature === "basic_chat";
+}
+
+/** 分析レポートレスポンスかチェック */
+export function isAnalysisReportResponse(response: AIFeatureResponse): response is AnalysisReportResponse {
+  return response.feature === "analysis_report";
+}
+
 /** UI生成レスポンスかチェック */
-export function isUIGenerationResponse(response: AIFeatureResponse): response is AIFeatureResponse & { result: UIGenerationResult } {
-  return isUIGenerationFeature(response.feature) && isUIGenerationResult(response.result);
+export function isUIGenerationResponse(response: AIFeatureResponse): response is UIGenerationResponse {
+  return response.feature === "ui_generation";
 }

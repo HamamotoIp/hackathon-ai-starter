@@ -6,7 +6,8 @@ import {
   AIFeatureType,
   UIGenerationResult,
   getFeatureConfig,
-  isUIGenerationFeature
+  isUIGenerationFeature,
+  isUIGenerationRequest
 } from '@/core/types/AIFeatures';
 
 export interface AIProcessorConfig {
@@ -106,7 +107,7 @@ export class AIProcessor {
         processingTimeMs: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         sessionId: request.sessionId,
-      };
+      } as AIFeatureResponse;
     } catch (error: unknown) {
       // Vertex AI固有のエラーハンドリング
       if (error instanceof Error && (error.message?.includes('403') || error.message?.includes('PERMISSION_DENIED'))) {
@@ -193,7 +194,7 @@ export class AIProcessor {
         processingTimeMs: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         sessionId: request.sessionId,
-      };
+      } as AIFeatureResponse;
       
     } catch (error: unknown) {
       throw error;
@@ -284,15 +285,16 @@ export class AIProcessor {
     // メッセージの構造化（UI生成対応）
     let finalMessage = message;
     
-    if (request?.feature === 'ui_generation') {
+    if (request && isUIGenerationRequest(request)) {
       // UI生成リクエストをJSON構造化メッセージとして送信
+      const uiRequest = request;
       const structuredMessage = {
         type: "ui_generation",
         user_prompt: message,
-        ui_type: request.options?.uiType ?? "auto",
-        framework: request.options?.framework ?? "html",
-        responsive: request.options?.responsive !== false,
-        color_scheme: request.options?.colorScheme ?? "light"
+        ui_type: uiRequest.options?.uiType ?? "auto",
+        framework: uiRequest.options?.framework ?? "html",
+        responsive: uiRequest.options?.responsive !== false,
+        color_scheme: uiRequest.options?.colorScheme ?? "light"
       };
       finalMessage = JSON.stringify(structuredMessage);
       
@@ -486,29 +488,6 @@ export class AIProcessor {
     return responseText;
   }
 
-  private extractMetadata(data: unknown): { analysisPoints?: string[]; recommendations?: string[] } | undefined {
-    if (typeof data !== 'object' || data === null || !('metadata' in data)) {
-      return undefined;
-    }
-
-    const obj = data as Record<string, unknown>;
-    const metadata = obj.metadata;
-    
-    if (typeof metadata !== 'object' || metadata === null) {
-      return undefined;
-    }
-
-    const metadataObj = metadata as Record<string, unknown>;
-    
-    return {
-      analysisPoints: Array.isArray(metadataObj.analysisPoints) 
-        ? metadataObj.analysisPoints.filter((item): item is string => typeof item === 'string')
-        : undefined,
-      recommendations: Array.isArray(metadataObj.recommendations)
-        ? metadataObj.recommendations.filter((item): item is string => typeof item === 'string')
-        : undefined
-    };
-  }
 
   private createPromptForFeature(request: AIFeatureRequest): string {
     switch (request.feature) {
@@ -519,7 +498,8 @@ export class AIProcessor {
       case 'ui_generation':
         return `以下の要求に基づいてHTML/Reactコンポーネントを生成してください：\n\n${request.input}`;
       default:
-        return request.input;
+        // TypeScriptのexhaustive checkを満たすため
+        return (request as AIFeatureRequest).input;
     }
   }
 
@@ -536,7 +516,7 @@ export class AIProcessor {
       processingTimeMs: Date.now() - startTime,
       timestamp: new Date().toISOString(),
       sessionId: request.sessionId,
-    };
+    } as AIFeatureResponse;
   }
 }
 

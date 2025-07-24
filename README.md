@@ -31,8 +31,8 @@ npm install && npm run dev
 
 | 機能 | API エンドポイント | 特徴 |
 |------|--------|------|
-| **💬 基本チャット** | `/api/chat/basic` | Vertex AI Direct、高速レスポンス |
-| **📊 分析レポート** | `/api/analysis` | ADK Analysis Agent、構造化出力 |
+| **💬 シンプルチャット** | `/api/chat/basic` | Vertex AI Direct、高速レスポンス（3秒以内） |
+| **📊 分析レポート** | `/api/analysis` | ADK Analysis Agent、詳細な分析・構造化出力 |
 | **🎨 UI生成** | `/api/ui-generation` | ADK UI Generation Agent、HTML/Tailwind生成 |
 | **🖼️ 画像アップロード** | `/api/images/upload` | Cloud Storage連携 |
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAIProcessor } from '@/server/lib/aiProcessor';
-import { AIFeatureRequest } from '@/core/types/AIFeatures';
+import { BasicChatRequest } from '@/core/types/AIFeatures';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // AI処理リクエストを構築
-    const aiRequest: AIFeatureRequest = {
+    const aiRequest: BasicChatRequest = {
       feature: 'basic_chat',
       input: body.message,
       sessionId: body.sessionId,

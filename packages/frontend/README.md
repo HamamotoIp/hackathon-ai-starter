@@ -15,7 +15,8 @@
 packages/frontend/src/
 ├── app/                      # Next.js App Router
 │   ├── page.tsx             # ランディングページ
-│   ├── ai-features/         # AI機能統合ページ（メイン）
+│   ├── simple-chat/         # シンプルチャット（Vertex AI Direct）
+│   ├── ai-features/         # AI機能統合ページ（ADK Agent）
 │   ├── ui-builder/          # UI生成専用ツール
 │   ├── ui-preview/          # UI生成結果プレビュー
 │   ├── dashboard/           # ダッシュボード・統計
