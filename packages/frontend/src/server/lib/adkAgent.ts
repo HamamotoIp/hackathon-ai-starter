@@ -95,7 +95,7 @@ async function sendADKMessage(
       'Accept': 'text/event-stream'
     },
     data: {
-      class_method: 'run',
+      class_method: 'stream_query',
       input: {
         message,
         session_id: sessionId,
