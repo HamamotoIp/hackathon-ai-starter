@@ -1,0 +1,75 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# === Dependencies ===
+**/node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# === Testing ===
+coverage/
+
+# === Next.js ===
+**/.next/
+**/out/
+
+# === Production Builds ===
+build/
+
+# === Miscellaneous ===
+.DS_Store
+*.pem
+
+# === Debug logs ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === Environment Variables ===
+.env*
+**/.env
+
+# === Configuration Files ===
+config.sh
+lifecycle.json
+
+# === Agent URLs and Debug Scripts ===
+packages/ai-agents/*_url.txt
+debug-agent-api.sh
+
+# === Development Environment ===
+.devcontainer/
+.claude/
+
+# === Vercel ===
+.vercel/
+
+# === TypeScript ===
+*.tsbuildinfo
+next-env.d.ts
+
+# === Python / ADK ===
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.venv/
+**/venv/
+**/test-env/
+**/test-adk-env/
+*.egg-info/
+.pytest_cache/
+agents/.env
+**/.Python
+**/pip-log.txt
+**/pip-delete-this-directory.txt
+**/.coverage
+**/htmlcov/
+
+# === VSCode / Codespaces (optional, safe) ===
+.vscode/
+.history/

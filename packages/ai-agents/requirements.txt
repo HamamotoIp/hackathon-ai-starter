@@ -1,0 +1,12 @@
+flask==3.0.0
+flask-cors==4.0.0
+gunicorn==21.2.0
+google-cloud-aiplatform[adk,agent_engines]==1.93.0
+google-cloud-storage
+google-adk>=1.0.0
+pydantic>=2.11.1
+cloudpickle==3.1.1
+python-dotenv==1.0.1
+fire==0.7.0
+deprecated>=1.2.18
+requests>=2.31.0
