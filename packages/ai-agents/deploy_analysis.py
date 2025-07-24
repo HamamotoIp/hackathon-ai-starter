@@ -11,8 +11,8 @@ from vertexai import init, agent_engines
 # 分析専用エージェントをインポート
 from agents.analysis_agent import create_agent as create_analysis_agent
 
-# ログ設定
-logging.basicConfig(level=logging.INFO)
+# ログ設定（警告以上のみ表示）
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +25,7 @@ def deploy_analysis_agent():
     if not project_id:
         raise ValueError("VERTEX_AI_PROJECT_ID environment variable required")
     
-    print(f"🚀 Deploying Analysis Agent: {project_id} ({location})")
+    print(f"🚀 Analysis Agent デプロイ中...")
     
     # Vertex AI初期化
     init(project=project_id, location=location, 
@@ -33,7 +33,6 @@ def deploy_analysis_agent():
     
     # 分析専用エージェント作成
     analysis_agent = create_analysis_agent()
-    logger.info("Analysis Agent created")
     
     # Agent Engineにデプロイ
     remote_app = agent_engines.create(
@@ -47,14 +46,12 @@ def deploy_analysis_agent():
         description="データ分析とレポート作成専用エージェント"
     )
     
-    # LRO (Long Running Operation) 完了まで待機
-    logger.info("Waiting for Agent Engine LRO completion...")
+    # デプロイ完了まで待機
+    print("  処理中... (数分かかる場合があります)")
     try:
-        remote_app.wait()  # LRO完了まで待機
-        logger.info("Agent Engine LRO completed successfully")
+        remote_app.wait()
     except Exception as e:
-        logger.error(f"Agent Engine LRO failed: {e}")
-        raise
+        raise Exception(f"デプロイ失敗: {e}")
     
     # URLを保存
     agent_url = f"https://{location}-aiplatform.googleapis.com/v1/{remote_app.resource_name}:streamQuery?alt=sse"
@@ -62,9 +59,8 @@ def deploy_analysis_agent():
     with open("analysis_agent_url.txt", "w") as f:
         f.write(agent_url)
     
-    print(f"✅ Analysis Agent Deployment completed!")
-    print(f"Agent URL: {agent_url}")
-    print(f"Timestamp: {datetime.now().isoformat()}")
+    print(f"✅ Analysis Agent デプロイ完了")
+    print(f"URL: {agent_url}")
     
     return remote_app
 
@@ -73,5 +69,5 @@ if __name__ == "__main__":
     try:
         deploy_analysis_agent()
     except Exception as e:
-        print(f"❌ Analysis Agent deployment failed: {e}")
+        print(f"❌ デプロイ失敗: {e}")
         raise

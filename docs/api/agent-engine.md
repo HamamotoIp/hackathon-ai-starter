@@ -96,9 +96,9 @@ https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/L
 {
   "class_method": "stream_query",
   "input": {
+    "message": "参議院選挙の投票率を分析してください",  // 公式ドキュメント通り
     "session_id": "7295218418607718400",  // Step1で取得したID
-    "user_id": "user-12345",              // 同じuser_id
-    "message": "参議院選挙の投票率を分析してください"
+    "user_id": "user-12345"               // 同じuser_id
   }
 }
 ```
@@ -109,9 +109,9 @@ async function sendQuery(sessionId: string, userId: string, message: string, ser
   const requestBody = {
     class_method: "stream_query",
     input: {
+      message: message,       // 公式ドキュメント通り
       session_id: sessionId,  // Step1で取得したセッションID
-      user_id: userId,
-      message: message
+      user_id: userId
     }
   };
 
@@ -214,7 +214,7 @@ async function sendADKMessage(
       'Accept': 'text/event-stream'
     },
     data: {
-      class_method: 'run',
+      class_method: 'stream_query',
       input: {
         message,
         session_id: sessionId,

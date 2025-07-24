@@ -15,21 +15,20 @@ from deploy_ui_generation import deploy_ui_generation_agent
 def deploy_all_agents():
     """全ての専用エージェントをデプロイ"""
     
-    print("🚀 複数Agent Engineデプロイ開始")
-    print(f"開始時刻: {datetime.now().isoformat()}")
-    print("=" * 60)
+    print("🚀 AIエージェントデプロイ開始")
+    print("=" * 40)
     
     deployment_results = {}
     
     try:
         # 1. Analysis Agent デプロイ
-        print("\n📊 1/2: Analysis Agent デプロイ中...")
+        print("\n[1/2] Analysis Agent")
         analysis_app = deploy_analysis_agent()
         deployment_results['analysis'] = {
             'status': 'success',
             'resource_name': analysis_app.resource_name
         }
-        print("✅ Analysis Agent デプロイ完了")
+        # 完了メッセージは個別スクリプトが出力
         
     except Exception as e:
         print(f"❌ Analysis Agent デプロイ失敗: {e}")
@@ -40,13 +39,13 @@ def deploy_all_agents():
     
     try:
         # 2. UI Generation Agent デプロイ
-        print("\n🎨 2/2: UI Generation Agent デプロイ中...")
+        print("\n[2/2] UI Generation Agent")
         ui_generation_app = deploy_ui_generation_agent()
         deployment_results['ui_generation'] = {
             'status': 'success',
             'resource_name': ui_generation_app.resource_name
         }
-        print("✅ UI Generation Agent デプロイ完了")
+        # 完了メッセージは個別スクリプトが出力
         
     except Exception as e:
         print(f"❌ UI Generation Agent デプロイ失敗: {e}")
@@ -56,9 +55,8 @@ def deploy_all_agents():
         }
     
     # 結果サマリー
-    print("\n" + "=" * 60)
-    print("📋 デプロイ結果サマリー")
-    print("=" * 60)
+    print("\n" + "=" * 40)
+    print("📋 デプロイ結果")
     
     successful_deployments = 0
     failed_deployments = 0
@@ -73,15 +71,12 @@ def deploy_all_agents():
             failed_deployments += 1
             print(f"   エラー: {result.get('error', 'Unknown error')}")
     
-    print(f"\n📊 成功: {successful_deployments}/2")
-    print(f"❌ 失敗: {failed_deployments}/2")
-    print(f"完了時刻: {datetime.now().isoformat()}")
+    print(f"\n成功: {successful_deployments}/2 | 失敗: {failed_deployments}/2")
     
     # 環境変数設定ガイド
     if successful_deployments > 0:
-        print("\n🔧 次のステップ: 環境変数設定")
-        print("以下の環境変数をフロントエンドに設定してください:")
-        print("=" * 50)
+        print("\n🔧 環境変数設定")
+        print("-" * 40)
         
         if 'analysis' in deployment_results and deployment_results['analysis']['status'] == 'success':
             try:
