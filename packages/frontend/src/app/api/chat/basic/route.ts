@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAIProcessor } from '@/server/lib/aiProcessor';
-import { BasicChatRequest } from '@/core/types/aiTypes';
+import { generateText } from '@/server/lib/vertexAI';
 import { 
   parseRequestBody, 
   validateCommonInput, 
@@ -10,25 +9,20 @@ import {
 } from '@/server/lib/apiHelpers';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
   try {
     const body = await parseRequestBody(request);
     validateCommonInput(body);
 
-    // AI処理リクエストを構築
-    const aiRequest: BasicChatRequest = {
-      feature: 'basic_chat',
-      input: body.message,
-      sessionId: getOrCreateSessionId(body),
-    };
-
-    // AI処理を実行
-    const aiProcessor = getAIProcessor();
-    const response = await aiProcessor.processFeature(aiRequest);
+    // Vertex AIで直接処理
+    const result = await generateText(body.message);
+    const processingTime = Date.now() - startTime;
 
     return createSuccessResponse({
-      message: response.result,
-      processingTimeMs: response.processingTimeMs,
-      sessionId: response.sessionId,
+      message: result,
+      processingTimeMs: processingTime,
+      sessionId: getOrCreateSessionId(body),
     });
     
   } catch (error) {

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { AnalysisReportRequest } from "@/core/types/aiTypes";
+import { processAnalysis } from "@/server/lib/adkAgent";
 import { 
   parseRequestBody, 
   validateCommonInput, 
@@ -16,22 +15,29 @@ export const runtime = "nodejs";
  * ADK Agentを使用
  */
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  
   try {
     const body = await parseRequestBody(req);
     validateCommonInput(body);
 
-    // 分析レポート機能リクエスト
-    const featureRequest: AnalysisReportRequest = {
-      feature: "analysis_report",
-      input: body.message,
-      sessionId: getOrCreateSessionId(body)
-    };
+    // ADK Agentで直接処理
+    const serviceUrl = process.env.ANALYSIS_AGENT_URL;
+    if (!serviceUrl) {
+      throw new Error('ANALYSIS_AGENT_URL環境変数が設定されていません');
+    }
 
-    // AI処理実行
-    const aiProcessor = getAIProcessor();
-    const response = await aiProcessor.processFeature(featureRequest);
+    const result = await processAnalysis(serviceUrl, body.message);
+    const processingTime = Date.now() - startTime;
 
-    return createSuccessResponse(response);
+    return createSuccessResponse({
+      success: true,
+      result,
+      processingMode: "adk_agent",
+      processingTimeMs: processingTime,
+      sessionId: getOrCreateSessionId(body),
+      timestamp: new Date().toISOString()
+    });
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "内部エラーが発生しました";

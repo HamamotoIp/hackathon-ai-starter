@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { UIGenerationRequest } from "@/core/types/aiTypes";
+import { processUIGeneration } from "@/server/lib/adkAgent";
 import { 
   parseRequestBody, 
   validateCommonInput, 
@@ -16,34 +15,59 @@ export const runtime = "nodejs";
  * ADK Agentを使用してHTML/Reactコンポーネントを動的生成
  */
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  
   try {
     const body = await parseRequestBody(req);
     validateCommonInput(body);
 
-    // UI生成機能リクエスト
-    const featureRequest: UIGenerationRequest = {
-      feature: "ui_generation",
-      input: body.message,
-      options: {
-        uiType: body.options?.uiType ?? "auto",
-        framework: body.options?.framework ?? "html",
-        responsive: body.options?.responsive !== false,
-        colorScheme: body.options?.colorScheme ?? "light"
-      },
-      sessionId: getOrCreateSessionId(body)
-    };
-
-    // AI処理実行
-    const aiProcessor = getAIProcessor();
-    const response = await aiProcessor.processFeature(featureRequest);
-
-    // 開発環境でのデバッグログ
-    if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.log('UI Generation Response:', JSON.stringify(response, null, 2));
+    // ADK Agentで直接処理（UI生成モード）
+    const serviceUrl = process.env.UI_GENERATION_AGENT_URL;
+    if (!serviceUrl) {
+      throw new Error('UI_GENERATION_AGENT_URL環境変数が設定されていません');
     }
 
-    return createSuccessResponse(response);
+    const result = await processUIGeneration(serviceUrl, body.message);
+    const processingTime = Date.now() - startTime;
+
+    // UI生成結果の解析
+    let uiResult;
+    try {
+      const parsedResult = JSON.parse(result);
+      uiResult = {
+        html: parsedResult.html ?? result,
+        metadata: {
+          uiType: body.options?.uiType ?? "auto",
+          framework: body.options?.framework ?? "html",
+          components: [],
+          responsive: body.options?.responsive !== false,
+          accessibility: true,
+          javascript_required: false
+        }
+      };
+    } catch {
+      // JSON解析失敗時は生のHTMLとして扱う
+      uiResult = {
+        html: result,
+        metadata: {
+          uiType: "auto",
+          framework: "html",
+          components: [],
+          responsive: true,
+          accessibility: true,
+          javascript_required: false
+        }
+      };
+    }
+
+    return createSuccessResponse({
+      success: true,
+      result: uiResult,
+      processingMode: "adk_agent",
+      processingTimeMs: processingTime,
+      sessionId: getOrCreateSessionId(body),
+      timestamp: new Date().toISOString()
+    });
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "内部エラーが発生しました";
