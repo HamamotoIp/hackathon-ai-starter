@@ -24,7 +24,6 @@ packages/frontend/src/
 │   │   ├── chat/basic/      # Vertex AI Direct API
 │   │   ├── analysis/        # ADK Analysis Agent API
 │   │   ├── ui-generation/   # ADK UI Generation Agent API
-│   │   ├── agent/           # ADK Orchestrator API
 │   │   ├── images/upload/   # Cloud Storage画像API
 │   │   └── debug/           # デバッグ・環境確認API
 │   ├── layout.tsx           # 共通レイアウト
