@@ -34,9 +34,8 @@ open http://localhost:3000
 | ページ | URL | 機能 | ローカル対応 |
 |--------|-----|------|-------------|
 | **ホーム** | `/` | 機能一覧とナビゲーション | ✅ |
-| **AI機能デモ** | `/ai-features` | AI機能体験（推奨） | ⚠️ 一部制限 |
-| **シンプルチャット** | `/simple-chat` | Vertex AI Direct チャット | ✅ |
-| **UIビルダー** | `/ui-builder` | UI生成ツール | ❌ ADK必要 |
+| **AI機能デモ** | `/ai-features` | **全AI機能統合体験（メイン）** | ⚠️ 一部制限 |
+| **UIビルダー** | `/ui-builder` | UI生成専用ツール | ❌ ADK必要 |
 | **画像管理** | `/content-management` | 画像アップロード | ❌ Cloud Storage必要 |
 
 ## 🔧 開発コマンド

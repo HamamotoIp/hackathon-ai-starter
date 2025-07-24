@@ -5,7 +5,7 @@
 ## 🎯 機能概要
 
 - **分析レポート**: データ分析・詳細レポート生成 (20-30秒)
-- **比較研究**: 多角的比較・意思決定支援 (25-45秒)
+- **UI生成**: HTML/Tailwind CSS生成・プロトタイプ作成 (25-45秒)
 - **マルチエージェント**: 専門特化エージェントの協調処理
 - **構造化出力**: JSON Schema対応・一貫したレスポンス形式
 
@@ -13,15 +13,28 @@
 
 ```
 packages/ai-agents/
-├── app.py                 # 🔴 Flaskアプリケーションメイン
-├── agents/                # 🔴 人間管理：エージェント定義
-│   ├── chat/              # 基本チャットエージェント
-│   ├── analysis/          # 分析レポートエージェント
-│   └── comparison/        # 比較研究エージェント
-├── schemas/               # 🔴 人間管理：出力スキーマ定義
-├── requirements.txt       # Python依存関係（定期更新）
-├── Dockerfile             # Cloud Runデプロイ用
-├── venv/                  # 仮想環境（Git管理対象外）
+├── agents/                # エージェント実装
+│   ├── __init__.py
+│   ├── adk_orchestrator.py        # ADK オーケストレーター
+│   ├── analysis_agent.py          # 分析レポートエージェント
+│   ├── ui_generation_agent.py     # UI生成エージェント
+│   └── chat/
+│       ├── __init__.py
+│       └── basic_chat_agent.py    # 基本チャットエージェント
+├── schemas/               # データスキーマ定義
+│   ├── __init__.py
+│   ├── analysis_schema.py         # 分析用スキーマ
+│   ├── ui_generation_schema.py    # UI生成用スキーマ
+│   ├── chat_schema.py            # チャット用スキーマ
+│   └── orchestrator_schema.py    # オーケストレーター用
+├── deploy.py              # メインデプロイスクリプト
+├── deploy_all_agents.py   # 全エージェント一括デプロイ
+├── deploy_analysis.py     # 分析エージェントデプロイ
+├── deploy_ui_generation.py # UI生成エージェントデプロイ
+├── test-agents.py         # エージェントテストスクリプト
+├── requirements.txt       # Python依存関係
+├── ADK_ENDPOINTS.md       # ADKエンドポイント仕様
+├── ADK_MULTI_AGENT_RULES.md # マルチエージェントルール
 └── README.md              # このファイル
 ```
 
@@ -39,24 +52,30 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. ローカルサーバー起動
-```bash
-# Flaskアプリケーション起動
-python app.py
-# → http://localhost:8080 でサーバー起動
-
-# 動作確認
-curl http://localhost:8080/health
-```
-
-### 3. 本番デプロイメント
+### 2. 本番デプロイメント（ADK Agent Engine）
 ```bash
 # ルートディレクトリから統合デプロイ
-cd /workspaces/kokorone-app
+cd /workspaces/hackathon-ai-starter
 ./setup.sh
 
-# エージェントエンジンのみデプロイ
-./setup.sh --agent-only
+# エージェントのみデプロイ
+./deploy-agents.sh
+
+# 個別エージェントデプロイ
+python deploy_analysis.py
+python deploy_ui_generation.py
+python deploy_all_agents.py
+```
+
+### 3. エージェント動作確認
+```bash
+# デプロイ後のテスト
+python test-agents.py
+
+# 個別エンドポイントテスト（デプロイ後）
+curl -X POST https://YOUR_DEPLOYED_URL/analysis \
+  -H "Content-Type: application/json" \
+  -d '{"input": "テストデータ"}'
 ```
 
 ## 🔧 環境設定
@@ -89,17 +108,16 @@ MAX_INSTANCES="1"  # 3, 5, 10に増量可能
 
 ### 主要エンドポイント
 
-| エンドポイント | 機能 | レスポンス時間 | 用途 |
-|------------|------|---------------|------|
-| `POST /chat` | 基本チャット | 5-10秒 | 簡単な対話 |
-| `POST /analysis` | 分析レポート | 20-30秒 | データ分析・詳細レポート |
-| `POST /comparison` | 比較研究 | 25-45秒 | 多角的比較・評価 |
-| `GET /health` | ヘルスチェック | < 1秒 | サービス状態確認 |
+| ADK Agent | 機能 | レスポンス時間 | 用途 |
+|-----------|------|---------------|------|
+| `Analysis Agent` | 分析レポート | 20-30秒 | データ分析・詳細レポート |
+| `UI Generation Agent` | UI生成 | 25-45秒 | HTML/Tailwind生成 |
+| `ADK Orchestrator` | マルチエージェント協調 | 30-60秒 | 複合タスク処理 |
 
 ### 専門特化エージェント
-- **AnalysisAgent**: データ分析・トレンド抽出・洞察生成
-- **ComparisonAgent**: 多角的比較・評価マトリックス作成
-- **ChatAgent**: シンプルな対話・バックアップ用途
+- **AnalysisAgent** (`analysis_agent.py`): データ分析・トレンド抽出・洞察生成
+- **UIGenerationAgent** (`ui_generation_agent.py`): HTML/Tailwind CSS生成・プロトタイプ作成
+- **ADK Orchestrator** (`adk_orchestrator.py`): マルチエージェント協調・ルーティング
 
 ## 🔄 開発フロー（人間-AI協働）
 

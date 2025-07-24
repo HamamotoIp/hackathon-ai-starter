@@ -15,14 +15,16 @@
 packages/frontend/src/
 ├── app/                      # Next.js App Router
 │   ├── page.tsx             # ランディングページ
-│   ├── ai-features/         # AI機能選択ページ（推奨メイン）
-│   ├── simple-chat/         # 基本チャット（Server Component）
+│   ├── ai-features/         # AI機能統合ページ（メイン）
+│   ├── ui-builder/          # UI生成専用ツール
+│   ├── ui-preview/          # UI生成結果プレビュー
 │   ├── dashboard/           # ダッシュボード・統計
 │   ├── content-management/  # 画像アップロード・管理
 │   ├── api/                 # API Routes
 │   │   ├── chat/basic/      # Vertex AI Direct API
-│   │   ├── analysis/        # ADK Agent分析API
-│   │   ├── comparison/      # ADK Agent比較API
+│   │   ├── analysis/        # ADK Analysis Agent API
+│   │   ├── ui-generation/   # ADK UI Generation Agent API
+│   │   ├── agent/           # ADK Orchestrator API
 │   │   ├── images/upload/   # Cloud Storage画像API
 │   │   └── debug/           # デバッグ・環境確認API
 │   ├── layout.tsx           # 共通レイアウト
@@ -93,11 +95,11 @@ curl http://localhost:3000/api/debug
 # AI機能テスト
 curl -X POST http://localhost:3000/api/analysis \
   -H "Content-Type: application/json" \
-  -d '{"content": "テスト分析", "sessionId": "demo"}'
+  -d '{"feature": "analysis", "input": "テスト分析", "sessionId": "demo"}'
 
-curl -X POST http://localhost:3000/api/comparison \
+curl -X POST http://localhost:3000/api/ui-generation \
   -H "Content-Type: application/json" \
-  -d '{"content": "AとBを比較", "sessionId": "demo"}'
+  -d '{"feature": "ui_generation", "input": "ボタンとフォームを作って", "sessionId": "demo"}'
 ```
 
 ### ビルド・品質確認
@@ -116,30 +118,31 @@ npm run build && npm run start
 | URL | 機能 | 説明 | 推奨用途 |
 |-----|------|------|----------|
 | `/` | ランディング | プロジェクト概要・紹介 | 初回訪問者向け |
-| `/ai-features` | **AI機能選択** | 3つのAI機能を選択・体験 | **推奨メインページ** |
-| `/simple-chat` | 基本チャット | Vertex AI直接連携チャット | Server Component例 |
+| `/ai-features` | **AI機能統合** | 全AI機能を統合体験 | **推奨メインページ** |
+| `/ui-builder` | UI生成ツール | HTML/Tailwind生成専用 | UI作成・プロトタイプ |
+| `/ui-preview` | UIプレビュー | 生成されたUIの確認 | UI確認・テスト |
 | `/dashboard` | ダッシュボード | システム状態・使用統計 | 管理・監視用 |
 | `/content-management` | 画像管理 | ドラッグ&ドロップアップロード | ファイル管理 |
 
 ### AI機能詳細
 
-#### 1. 基本チャット (`/simple-chat`)
+#### 1. 基本チャット (`/ai-features`)
 - **AI**: Vertex AI Direct (Gemini 2.0 Flash)
 - **レスポンス**: < 5秒
 - **用途**: 日常会話、質問回答、簡単な情報収集
 - **API**: `/api/chat/basic`
 
-#### 2. 分析レポート (`/ai-features` → 分析)
-- **AI**: ADK Agent Engine
+#### 2. 分析レポート (`/ai-features`)
+- **AI**: ADK Analysis Agent (ADK 1.93.0)
 - **レスポンス**: 20-30秒
 - **用途**: データ分析、詳細レポート作成、深い洞察
 - **API**: `/api/analysis`
 
-#### 3. 比較研究 (`/ai-features` → 比較)
-- **AI**: ADK Agent Engine
+#### 3. UI生成 (`/ai-features`, `/ui-builder`)
+- **AI**: ADK UI Generation Agent (ADK 1.93.0)
 - **レスポンス**: 25-45秒
-- **用途**: 複数オプション比較、意思決定サポート
-- **API**: `/api/comparison`
+- **用途**: HTML/Tailwind生成、UIコンポーネント作成
+- **API**: `/api/ui-generation`
 
 ## 🧩 技術アーキテクチャ
 

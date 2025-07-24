@@ -21,9 +21,9 @@ npm run test       # テスト実行
 ```
 
 **利用可能なページ**:
-- `/ai-features` - 3つのAI機能体験（推奨メイン）
-- `/simple-chat` - 基本的なVertex AIチャット
-- `/ui-builder` - 自然言語からUI生成
+- `/ai-features` - **全AI機能統合体験（推奨メイン）**
+- `/ui-builder` - UI生成専用ツール
+- `/content-management` - 画像アップロード管理
 
 ### 2. AI Agents開発 (本格機能)
 ```bash
