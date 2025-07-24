@@ -6,7 +6,6 @@
 
 - **分析レポート**: データ分析・詳細レポート生成 (20-30秒)
 - **UI生成**: HTML/Tailwind CSS生成・プロトタイプ作成 (25-45秒)
-- **マルチエージェント**: 専門特化エージェントの協調処理
 - **構造化出力**: JSON Schema対応・一貫したレスポンス形式
 
 ## 📝 プロジェクト構造
@@ -25,13 +24,13 @@ packages/ai-agents/
 │   ├── analysis_schema.py         # 分析用スキーマ
 │   ├── ui_generation_schema.py    # UI生成用スキーマ
 │   └── chat_schema.py            # チャット用スキーマ
-├── deploy.py              # メインデプロイスクリプト
 ├── deploy_all_agents.py   # 全エージェント一括デプロイ
 ├── deploy_analysis.py     # 分析エージェントデプロイ
 ├── deploy_ui_generation.py # UI生成エージェントデプロイ
 ├── requirements.txt       # Python依存関係
 ├── ADK_ENDPOINTS.md       # ADKエンドポイント仕様
-├── ADK_MULTI_AGENT_RULES.md # マルチエージェントルール
+├── analysis_agent_url.txt # 分析エージェントURL
+├── ui_generation_agent_url.txt # UI生成エージェントURL
 └── README.md              # このファイル
 ```
 
@@ -51,14 +50,12 @@ pip install -r requirements.txt
 
 ### 2. 本番デプロイメント（ADK Agent Engine）
 ```bash
-# ルートディレクトリから統合デプロイ
+# ルートディレクトリからエージェントデプロイ
 cd /workspaces/hackathon-ai-starter
-./setup.sh
-
-# エージェントのみデプロイ
 ./deploy-agents.sh
 
 # 個別エージェントデプロイ
+cd packages/ai-agents
 python deploy_analysis.py
 python deploy_ui_generation.py
 python deploy_all_agents.py
@@ -86,16 +83,14 @@ AUTO_DEPLOY_AGENTS=true
 ### 本番環境設定（config.sh）
 ```bash
 # ルートディレクトリのconfig.shで管理
-PROJECT_ID="your-gcp-project-id"
-REGION="us-central1"
-ENVIRONMENT="dev"  # dev/staging/prod
+export PROJECT_ID="your-gcp-project-id"
+export REGION="us-central1"
+export ENVIRONMENT="dev"
 
-# エージェントエンジン設定
-AGENT_SERVICE_NAME="ai-chat-agent-engine-${ENVIRONMENT}"
-AUTO_DEPLOY_AGENTS=true
-MEMORY="512Mi"      # 1Gi, 2Giに増量可能
-CPU="1"            # 2, 4に増量可能
-MAX_INSTANCES="1"  # 3, 5, 10に増量可能
+# エージェント設定
+export MEMORY="512Mi"
+export CPU="1"
+export MAX_INSTANCES="1"
 ```
 
 ## 🤖 実装済みAIエージェント
@@ -171,7 +166,7 @@ GET /health
   "status": "healthy",
   "timestamp": "2024-01-01T00:00:00Z",
   "version": "1.0.0",
-  "agents": ["chat", "analysis", "comparison"]
+  "agents": ["analysis", "ui_generation"]
 }
 ```
 
@@ -194,22 +189,22 @@ Content-Type: application/json
 }
 ```
 
-### 比較研究
+### UI生成
 ```bash
-# 比較分析リクエスト
-POST /comparison
+# UI生成リクエスト
+POST /ui_generation
 Content-Type: application/json
 
 {
-  "content": "AとBを性能、価格、使いやすさで比較"
+  "content": "ログインフォームのUIを作成"
 }
 
 # レスポンス例
 {
   "success": true,
-  "result": "多角的な比較結果...",
-  "processing_time_ms": 35000,
-  "agent": "comparison"
+  "result": {"html": "<div>...</div>", "css": "..."},
+  "processing_time_ms": 30000,
+  "agent": "ui_generation"
 }
 ```
 
@@ -273,9 +268,8 @@ gcloud run revisions list --service ai-chat-agent-engine-dev --region us-central
 
 | 機能 | レスポンス時間 | メモリ使用量 | 同時処理数 |
 |------|---------------|-------------|-------------|
-| 基本チャット | 5-10秒 | ~200MB | 10-20 |
 | 分析レポート | 20-30秒 | ~300MB | 5-10 |
-| 比較研究 | 25-45秒 | ~350MB | 5-10 |
+| UI生成 | 25-45秒 | ~350MB | 5-10 |
 
 ### スケーリング設定
 ```bash

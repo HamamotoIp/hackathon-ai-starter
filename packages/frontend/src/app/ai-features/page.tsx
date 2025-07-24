@@ -5,14 +5,14 @@ import FeatureCard from './FeatureCard';
  * AI機能テストページ - 動作確認用
  */
 export default function AIFeaturesPage() {
-  // UI生成機能を除外
+  // basic_chatとui_generation機能を除外
   const testFeatures = Object.values(AI_FEATURE_CONFIGS).filter(
-    config => config.type !== 'ui_generation'
+    config => config.type !== 'ui_generation' && config.type !== 'basic_chat'
   );
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">AI機能テスト</h1>
+      <h1 className="text-3xl font-bold mb-8">AI機能統合</h1>
       
       <div className="space-y-6">
         {testFeatures.map((config) => (

@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Basic chat error:', error);
     return NextResponse.json(
       { 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { AIFeatureRequest } from "@/core/types/AIFeatures";
+import { AnalysisReportRequest } from "@/core/types/AIFeatures";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { content, analysisDepth = "basic" } = body;
+    const { content } = body;
 
     // 入力検証
     if (!content || typeof content !== 'string') {
@@ -22,12 +22,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // 分析レポート機能リクエスト
-    const featureRequest: AIFeatureRequest = {
+    const featureRequest: AnalysisReportRequest = {
       feature: "analysis_report",
       input: content,
-      options: {
-        analysisDepth
-      },
       sessionId: 'demo-session' // 固定セッションID
     };
 

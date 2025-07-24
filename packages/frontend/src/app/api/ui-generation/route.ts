@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAIProcessor } from "@/server/lib/aiProcessor";
-import { AIFeatureRequest } from "@/core/types/AIFeatures";
+import { UIGenerationRequest } from "@/core/types/AIFeatures";
 
 export const runtime = "nodejs";
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // UI生成機能リクエスト
-    const featureRequest: AIFeatureRequest = {
+    const featureRequest: UIGenerationRequest = {
       feature: "ui_generation",
       input,
       options: {

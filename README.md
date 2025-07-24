@@ -78,15 +78,16 @@ cp config.example.sh config.sh
 │   ├── /api/ui-generation → ADK UI Generation Agent
 │   └── /api/images/upload → Cloud Storage
 └── Pages:
-    ├── /ai-features → AI機能デモ
-    ├── /simple-chat → シンプルチャット
-    └── /ui-builder → UI生成ツール
+    ├── / → トップページ・各機能への導線
+    ├── /simple-chat → シンプルチャット（Vertex AI Direct）
+    ├── /ai-features → AI機能統合（分析レポート）
+    ├── /ui-builder → UI生成ツール
+    └── /content-management → 画像管理・Cloud Storage
 
 🤖 AI Agents (packages/ai-agents)
 ├── ADK 1.93.0 + Flask 3.0.0
 ├── Analysis Agent (analysis_agent.py)
-├── UI Generation Agent (ui_generation_agent.py)
-└── Basic Chat Agent (basic_chat_agent.py)
+└── UI Generation Agent (ui_generation_agent.py)
 
 ☁️ GCP Infrastructure
 ├── Cloud Run (Frontend + Agent Engine)

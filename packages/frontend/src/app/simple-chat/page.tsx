@@ -1,10 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/components/ui/card';
-import { Button } from '@/ui/components/ui/button';
-import { Textarea } from '@/ui/components/ui/textarea';
-import { Alert, AlertDescription } from '@/ui/components/ui/alert';
 import { Loader2, Send, Sparkles } from 'lucide-react';
 
 interface ChatMessage {
@@ -48,7 +44,7 @@ export default function SimpleChatPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'チャットエラーが発生しました');
+        throw new Error(errorData.error ?? 'チャットエラーが発生しました');
       }
 
       const data = await response.json();
@@ -69,25 +65,26 @@ export default function SimpleChatPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <div className="bg-white rounded-lg shadow-md border">
+        <div className="p-6 border-b">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-blue-600" />
             シンプルチャット（Vertex AI Direct）
-          </CardTitle>
-          <CardDescription>
+          </h1>
+          <p className="text-gray-600 mt-2">
             Vertex AI Geminiモデルを直接呼び出す軽量で高速なチャット機能
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="p-6">
           <div className="space-y-4">
             {/* チャット履歴 */}
             <div className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-lg p-4 space-y-4 bg-gray-50">
-              {messages.length === 0 ? (
+              {messages.length === 0 && (
                 <p className="text-center text-gray-500">
                   メッセージを入力して会話を始めましょう
                 </p>
-              ) : (
+              )}
+              {messages.length > 0 && (
                 messages.map((message, index) => (
                   <div
                     key={index}
@@ -112,7 +109,7 @@ export default function SimpleChatPage() {
                   </div>
                 ))
               )}
-              {isLoading && (
+              {Boolean(isLoading) && (
                 <div className="flex justify-start">
                   <div className="bg-white border rounded-lg p-3">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -122,27 +119,27 @@ export default function SimpleChatPage() {
             </div>
 
             {/* エラー表示 */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+            {Boolean(error) && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <div className="text-red-800">{error}</div>
+              </div>
             )}
 
             {/* 入力フォーム */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Textarea
+              <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="メッセージを入力してください..."
                 rows={3}
                 disabled={isLoading}
-                className="resize-none"
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
               />
               <div className="flex justify-end">
-                <Button
+                <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -155,12 +152,12 @@ export default function SimpleChatPage() {
                       送信
                     </>
                   )}
-                </Button>
+                </button>
               </div>
             </form>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
