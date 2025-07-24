@@ -41,7 +41,7 @@
 │   ├── /api/chat/basic, /api/analysis
 │   ├── /api/ui-generation
 │   └── /api/images/upload
-└── Pages: /ai-features, /ui-builder, /simple-chat
+└── Pages: /ai-features, /ui-builder, /simple-chat, /content-management
 
 🤖 Agent Engine (ADK 1.93.0)
 ├── AnalysisAgent - データ分析専門
@@ -122,7 +122,7 @@ python deploy_all_agents.py
 │   ├── ai-features/       # AI機能選択ページ（推奨）
 │   ├── simple-chat/       # シンプルチャット
 │   ├── ui-builder/        # UI生成ツール
-│   ├── ui-preview/        # 安全プレビュー
+│   ├── content-management/ # 画像管理
 │   └── api/               # API Routes
 ├── core/                  # 🔴 ビジネスロジック（人間管理）
 │   ├── types/             # AI機能定義、データ型
@@ -212,13 +212,11 @@ interface AIFeatureResponse {
 - **`/ai-features`** - AI機能選択ページ（推奨メインページ）
 - **`/simple-chat`** - シンプルチャット
 - **`/ui-builder`** - UI生成ツール（リアルタイムプレビュー）
-- **`/ui-preview`** - 安全プレビュー表示（iframe分離）
-- **`/dashboard`** - ダッシュボード
 - **`/content-management`** - コンテンツ管理・画像アップロード
 
 ### 推奨ユーザーフロー
 1. **ランディングページ** (`/`) - プロジェクト紹介確認
-2. **AI機能ページ** (`/ai-features`) - 4つのAI機能体験
+2. **AI機能ページ** (`/ai-features`) - 3つのAI機能体験
 3. **UI Builder** (`/ui-builder`) - 自然言語からUI生成体験
 4. **シンプルチャット** (`/simple-chat`) - Server Component例
 
@@ -247,11 +245,11 @@ interface AIFeatureResponse {
 ### 🔥 **Agent Engine開発時の必須資料**
 **Agent Engine関連の実装・デバッグ時は必ずこれを確認してください：**
 
-- **[docs/AGENT_ENGINE_API_PATTERNS.md](./docs/AGENT_ENGINE_API_PATTERNS.md)** - Agent Engine API実装パターン完全ガイド（必須参照）
+- **[docs/api/agent-engine.md](../api/agent-engine.md)** - Agent Engine API実装パターン完全ガイド（必須参照）
 
 ### 📋 **その他の重要資料**
-- **[docs/AI_INTERFACE_DOCUMENTATION.md](./docs/AI_INTERFACE_DOCUMENTATION.md)** - AI技術仕様・動作確認済みクエリ形式
-- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - システム全体アーキテクチャ  
-- **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** - 本格デプロイ手順
+- **[docs/api/examples.md](../api/examples.md)** - AI技術仕様・動作確認済みクエリ形式
+- **[docs/development/architecture.md](../development/architecture.md)** - システム全体アーキテクチャ  
+- **[docs/quickstart/deployment.md](../quickstart/deployment.md)** - 本格デプロイ手順
 
 🚀 **AI協働開発で効率的にプロトタイプを作成しましょう！**

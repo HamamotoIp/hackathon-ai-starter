@@ -5,7 +5,6 @@ AI Chat Starter Kitの高度なカスタマイズと運用のための上級者�
 ## 📋 目次
 
 1. **[Claude協働開発](./claude-collaboration.md)** - 人間-AI効率協働のガイドライン
-2. **[カスタマイズ](./customization.md)** - 高度なカスタマイズ方法
 
 ## 🚀 上級者向け機能
 
@@ -45,3 +44,44 @@ const result = await processor.process({
 - **[Claude協働ガイド](./claude-collaboration.md)** - 効率的な人間-AI開発手法
 - **[開発ガイド](../development/)** - 基本的なカスタマイズ
 - **[API仕様](../api/)** - 技術的な実装詳細
+
+## 🔧 高度なカスタマイズ
+
+### 新AI機能の追加手順
+
+1. **機能定義** (`packages/frontend/src/core/types/AIFeatures.ts`)
+```typescript
+export type AIFeatureType = 
+  | "basic_chat"
+  | "analysis_report" 
+  | "ui_generation"
+  | "your_new_feature";  // 新機能追加
+```
+
+2. **APIエンドポイント実装** (`packages/frontend/src/app/api/your-feature/route.ts`)
+3. **Agent実装** (必要に応じて `packages/ai-agents/agents/`)
+
+### カスタムAgent開発
+
+```python
+# packages/ai-agents/agents/custom_agent.py
+from google.cloud.aiplatform.agents import Agent
+
+def create_custom_agent():
+    return Agent(
+        name="custom_specialist",
+        model="gemini-2.0-flash-exp",
+        description="カスタム機能の専門エージェント",
+        instruction="詳細な処理指示..."
+    )
+```
+
+### プロダクション最適化
+
+```bash
+# config.sh でのパフォーマンス調整
+MEMORY="2Gi"         # メモリ増量
+CPU="2"              # CPU増強
+MAX_INSTANCES="10"   # スケーリング上限
+CONCURRENCY="2000"   # 同時接続数
+```

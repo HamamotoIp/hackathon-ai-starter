@@ -45,7 +45,6 @@
 |-----|------------|--------------|------|
 | **基本チャット** | Vertex AI Direct | `/api/chat/basic` | ✅ 実装済み |
 | **分析レポート** | AnalysisAgent (ADK) | `/api/analysis` | ✅ 実装済み |
-| **比較研究** | ComparisonAgent (ADK) | `/api/comparison` | ✅ 実装済み |
 | **UI生成** | UIGenerationAgent (ADK) | `/api/ui-generation` | ✅ 実装済み |
 | **画像管理** | Cloud Storage | `/api/images/upload` | ✅ 実装済み |
 
@@ -102,56 +101,6 @@ class AnalysisResponse(BaseModel):
 ```
 
 ---
-
-### 🔍 **Comparison Agent (比較研究専用)**
-
-#### **入力インターフェース**
-```python
-# 期待する入力例
-"iPhoneとAndroidを性能、価格、エコシステムの3つの観点で比較評価してください"
-```
-
-#### **出力インターフェース**
-```markdown
-## 比較サマリー
-iPhoneは統合性とセキュリティ、Androidは多様性とコストパフォーマンスで優位
-
-## 評価基準
-| 項目 | iPhone | Android | 備考 |
-|------|--------|---------|------|
-| 性能 | 9/10 | 8/10 | A17 Proチップ優位 |
-| 価格 | 6/10 | 9/10 | Android多価格帯 |
-| エコシステム | 10/10 | 7/10 | Apple統合環境 |
-
-## 推奨度ランキング
-1. iPhone (8.3/10) - 統合体験重視なら
-2. Android (8.0/10) - コストパフォーマンス重視なら
-
-## 意思決定ガイド
-### iPhone推奨の場合
-- セキュリティを最重視する
-- Apple製品との連携が重要
-- 予算に余裕がある
-
-### Android推奨の場合
-- コストパフォーマンスを重視
-- カスタマイズ性が重要
-- 多様な選択肢から選びたい
-```
-
-#### **スキーマ定義 (改善案)**
-```python
-class ComparisonItem(BaseModel):
-    name: str = Field(..., description="比較対象の名前")
-    scores: Dict[str, float] = Field(..., description="基準別スコア")
-    summary: str = Field(..., description="項目の要約")
-
-class ComparisonResponse(BaseModel):
-    comparison_result: str = Field(..., description="比較結果のMarkdown形式レポート")
-    items: List[ComparisonItem] = Field(default=[], description="比較項目一覧")
-    recommendation: str = Field(..., description="推奨事項")
-    confidence: float = Field(default=0.8, description="比較信頼度")
-```
 
 ---
 
@@ -213,10 +162,7 @@ https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations
 # 1. Analysis Agent (分析レポート専用)
 ANALYSIS_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/analysis-engine-id:query"
 
-# 2. Comparison Agent (比較研究専用)  
-COMPARISON_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/comparison-engine-id:query"
-
-# 3. UI Generation Agent (UI生成専用)
+# 2. UI Generation Agent (UI生成専用)
 UI_GENERATION_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/ui-generation-engine-id:query"
 ```
 
@@ -457,7 +403,6 @@ gcloud projects add-iam-policy-binding YOUR-PROJECT-ID \
 export VERTEX_AI_PROJECT_ID="your-project-id"
 export VERTEX_AI_LOCATION="us-central1"
 export ANALYSIS_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/analysis-id:query"
-export COMPARISON_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/comparison-id:query"
 export UI_GENERATION_AGENT_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/your-project/locations/us-central1/reasoningEngines/ui-gen-id:query"
 ```
 
@@ -477,7 +422,6 @@ export PROJECT_ID="your-gcp-project-id"
 
 # Agent Engine URLを設定（実際のEngine IDに置き換え）
 export ANALYSIS_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/$PROJECT_ID/locations/us-central1/reasoningEngines/ANALYSIS-ENGINE-ID:query"
-export COMPARISON_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/$PROJECT_ID/locations/us-central1/reasoningEngines/COMPARISON-ENGINE-ID:query"
 export UI_GEN_URL="https://us-central1-aiplatform.googleapis.com/v1/projects/$PROJECT_ID/locations/us-central1/reasoningEngines/UI-GEN-ENGINE-ID:query"
 ```
 
@@ -511,23 +455,7 @@ curl -X POST "$ANALYSIS_URL" \
   }' | jq .
 ```
 
-#### **2. Comparison Agent 呼び出し**
-```bash
-# 比較分析実行
-curl -X POST "$COMPARISON_URL" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "class_method": "query",
-    "input": {
-      "input": "MacBook AirとMacBook Proを性能、価格、バッテリー持続時間、携帯性の4つの観点で詳細に比較評価してください。",
-      "user_id": "test-user-comparison",
-      "session_id": "comparison-session-001"
-    }
-  }' | jq .
-```
-
-#### **3. UI Generation Agent 呼び出し**
+#### **2. UI Generation Agent 呼び出し**
 ```bash
 # 基本UI生成
 curl -X POST "$UI_GEN_URL" \
@@ -567,15 +495,6 @@ curl -X POST "http://localhost:3000/api/analysis" \
     "content": "ECサイトの売上データを分析してください。今月の売上は1200万円で前月比18%増加、新規顧客数は3500人で25%増加、平均購入単価は15,000円で5%減少しています。",
     "sessionId": "frontend-analysis-001",
     "analysisDepth": "comprehensive"
-  }' | jq .
-
-# 比較API
-curl -X POST "http://localhost:3000/api/comparison" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "React、Vue.js、Angularを学習難易度、開発速度、コミュニティサポート、求人需要の4つの観点で比較してください。",
-    "sessionId": "frontend-comparison-001",
-    "comparisonCriteria": ["学習難易度", "開発速度", "コミュニティサポート", "求人需要"]
   }' | jq .
 
 # UI生成API
@@ -756,7 +675,6 @@ tail -f packages/frontend/.next/server.log
 | 項目 | 現在の状態 | 改善案 | 優先度 |
 |------|-----------|--------|--------|
 | **Analysis Agent出力** | Markdownテキストのみ | JSON構造化出力 | 🔴 高 |
-| **Comparison Agent出力** | Markdownテキストのみ | JSON構造化出力 | 🔴 高 |
 | **フィールド名統一** | `ui_type` vs `uiType` | 全体で`uiType`統一 | 🟡 中 |
 | **FeatureCard対応** | UI生成未対応 | 全機能対応 | 🟡 中 |
 | **エンドポイント最適化** | `:streamQuery` 使用 | `:query` 検討 | 🟢 低 |
@@ -856,7 +774,6 @@ curl -X POST "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PRO
 | Agent | Engine ID | セッション作成URL | クエリ実行URL | 動作状況 |
 |-------|-----------|------------------|---------------|----------|
 | **Analysis** | `6360657174498115584` | `:query` | `:streamQuery?alt=sse` | ✅ 動作確認済み |
-| **Comparison** | `5727901426852560896` | `:query` | `:streamQuery?alt=sse` | ✅ 動作確認済み |
 | **UI Generation** | `6909533379083894784` | `:query` | `:streamQuery?alt=sse` | ✅ 動作確認済み |
 
 ### 📊 **レスポンス例**

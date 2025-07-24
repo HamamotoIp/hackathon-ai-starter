@@ -18,9 +18,9 @@ AI Chat Starter Kitは、機能ベースでAIを使い分けるハッカソン�
 │  ├── /simple-chat (シンプルチャット) │  🎨 UI Components          │  │
 │  ├── /ai-features (AI機能統合)    │  ├── ai-features/          │  │
 │  ├── /ui-builder (UI生成ツール)    │  │   └── FeatureCard.tsx    │  │
-│  ├── /ui-preview (UIプレビュー)    │  ├── ui/components/        │  │
-│  ├── /content-management (画像)   │  │   ├── common/            │  │
-│  └── /dashboard (管理画面)        │  │   │   ├── ErrorMessage   │  │
+│  └── /content-management (画像)   │  ├── ui/components/        │  │
+│                                   │  │   ├── common/            │  │
+│                                   │  │   │   ├── ErrorMessage   │  │
 │                                   │  │   │   ├── ErrorMessage   │  │
 │                                   │  │   │   ├── LoadingSpinner │  │
 │                                   │  │   │   └── Navigation     │  │
@@ -32,7 +32,6 @@ AI Chat Starter Kitは、機能ベースでAIを使い分けるハッカソン�
 │  ├── /api/analysis       # ✅ ADK Analysis Agent         │
 │  ├── /api/ui-generation  # ✅ ADK UI Generation Agent    │
 │  ├── /api/images/upload  # ✅ Cloud Storage統合          │
-│  ├── /api/agent          # ✅ ADK Orchestrator          │
 │  └── /api/debug          # ✅ システムデバッグ            │
 └──────────────────────────────────────────────────────────────────┘
                                     ║
@@ -233,16 +232,16 @@ export const AI_FEATURE_CONFIGS: Record<AIFeatureType, AIFeatureConfig> = {
     costTier: "medium",              // コスト分類
     useCases: ["データ分析", "市場調査", "詳細レポート作成"]
   },
-  comparison_study: {
-    type: "comparison_study",
-    name: "比較研究",
-    description: "複数項目の比較・評価",
+  ui_generation: {
+    type: "ui_generation",
+    name: "UI生成",
+    description: "HTML/CSS生成とプレビュー",
     processingMode: "adk_agent",      // 🔴 人間：AI選択
-    maxInputLength: 4000,
-    expectedProcessingTime: 45,      // 実測値に基づく更新
-    adkEndpoint: "/comparison",
+    maxInputLength: 3000,
+    expectedProcessingTime: 25,
+    adkEndpoint: "/ui-generation",
     costTier: "medium",
-    useCases: ["商品比較", "技術選択支援", "意思決定サポート"]
+    useCases: ["UIコンポーネント生成", "ランディングページ", "フォーム作成"]
   }
 };
 ```
@@ -389,8 +388,8 @@ MAX_INSTANCES="5"    # 最大インスタンス数増加（1 → 5 → 10）
   • 同時接続：10-20
   • 成功率：98%+
 
-🔹 比較研究（ADK Agent）
-  • 応答時間：25-45秒
+🔹 UI生成（ADK Agent）
+  • 応答時間：20-25秒
   • 同時接続：10-20
   • 成功率：98%+
 ```
@@ -411,7 +410,7 @@ curl http://localhost:3000/api/debug          # ローカル環境確認
 ```
 
 ### 運用監視項目
-- **処理時間**: AI機能別レスポンス時間（basic: <5s, analysis: <30s, comparison: <45s）
+- **処理時間**: AI機能別レスポンス時間（basic: <5s, analysis: <30s, ui_generation: <25s）
 - **エラー率**: HTTP 4xx/5xx・AI API失敗率
 - **使用量統計**: 機能別使用頻度・ユーザー行動分析
 - **コスト監視**: 日次・月次コスト推移・予算アラート
@@ -437,7 +436,7 @@ gcloud run revisions list --service ai-chat-frontend-dev --region us-central1
 export type AIFeatureType = 
   | "basic_chat"
   | "analysis_report" 
-  | "comparison_study"
+  | "ui_generation"
   | "translation";  // 新機能追加
 
 translation: {

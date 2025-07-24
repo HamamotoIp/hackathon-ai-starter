@@ -21,6 +21,7 @@ npm run test       # テスト実行
 ```
 
 **利用可能なページ**:
+- `/simple-chat` - Vertex AI直接呼び出しの高速チャット
 - `/ai-features` - **全AI機能統合体験（推奨メイン）**
 - `/ui-builder` - UI生成専用ツール
 - `/content-management` - 画像アップロード管理

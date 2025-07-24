@@ -99,18 +99,23 @@ Content-Type: application/json
 }
 ```
 
-#### `POST /api/comparison`
-比較研究（ADK Agent Engine）
+#### `POST /api/ui-generation`
+UI生成（ADK Agent Engine）
 
 **リクエスト:**
 ```http
-POST /api/comparison
+POST /api/ui-generation
 Content-Type: application/json
 
 {
-  "content": "ReactとVueを学習コスト、パフォーマンス、エコシステムで比較評価してください",
-  "sessionId": "user-session-123",
-  "comparisonCriteria": ["学習コスト", "パフォーマンス", "エコシステム"]
+  "input": "レストランの予約フォームを作成してください",
+  "options": {
+    "uiType": "form",
+    "framework": "html",
+    "responsive": true,
+    "colorScheme": "light"
+  },
+  "sessionId": "user-session-123"
 }
 ```
 
@@ -118,10 +123,20 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "feature": "comparison_study",
-  "result": "## React vs Vue 比較分析\n\n| 項目 | React | Vue | 評価 |\n|------|-------|-----|------|\n| 学習コスト | 中 | 低 | Vue優位 |\n...",
+  "feature": "ui_generation",
+  "result": {
+    "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>...</head>\n<body>...</body>\n</html>",
+    "metadata": {
+      "uiType": "form",
+      "framework": "html",
+      "components": ["form", "input", "button"],
+      "responsive": true,
+      "accessibility": true,
+      "javascript_required": false
+    }
+  },
   "processingMode": "adk_agent",
-  "processingTimeMs": 35234,
+  "processingTimeMs": 25000,
   "timestamp": "2025-01-20T12:00:00.000Z",
   "sessionId": "user-session-123"
 }
@@ -164,10 +179,20 @@ interface AIFeatureRequest {
   // 基本チャット用
   message?: string;            // チャットメッセージ
   
-  // 分析・比較用
-  content?: string;            // 分析・比較対象のコンテンツ
+  // 分析用
+  content?: string;            // 分析対象のコンテンツ
   analysisDepth?: "basic" | "detailed" | "comprehensive";
-  comparisonCriteria?: string[];
+  
+  // UI生成用
+  input?: string;              // UI生成の入力
+  options?: UIGenerationOptions;
+}
+
+interface UIGenerationOptions {
+  uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
+  framework?: "html" | "react";
+  responsive?: boolean;
+  colorScheme?: "light" | "dark" | "auto";
 }
 ```
 
@@ -175,12 +200,24 @@ interface AIFeatureRequest {
 ```typescript
 interface AIFeatureResponse {
   success: boolean;
-  feature: "basic_chat" | "analysis_report" | "comparison_study";
-  result: string;              // AI処理結果
+  feature: "basic_chat" | "analysis_report" | "ui_generation";
+  result: string | UIGenerationResult;  // AI処理結果
   processingMode: "vertex_direct" | "adk_agent";
   processingTimeMs: number;    // 処理時間（ミリ秒）
   timestamp: string;           // ISO 8601形式
   sessionId?: string;          // セッションID
+}
+
+interface UIGenerationResult {
+  html: string;
+  metadata?: {
+    uiType: string;
+    framework: string;
+    components: string[];
+    responsive: boolean;
+    accessibility: boolean;
+    javascript_required: boolean;
+  };
 }
 ```
 
@@ -225,9 +262,9 @@ interface ErrorResponse {
 
 | 機能 | 最大文字数 | タイムアウト |
 |------|------------|-------------|
-| 基本チャット | 2,000文字 | 30秒 |
+| 基本チャット | 1,000文字 | 30秒 |
 | 分析レポート | 5,000文字 | 60秒 |
-| 比較研究 | 4,000文字 | 90秒 |
+| UI生成 | 3,000文字 | 60秒 |
 
 ### ファイル制限
 
@@ -270,12 +307,12 @@ async function analysisReport(content: string, sessionId?: string) {
   return await response.json();
 }
 
-// 比較研究
-async function comparisonStudy(content: string, sessionId?: string) {
-  const response = await fetch('/api/comparison', {
+// UI生成
+async function generateUI(input: string, options: UIGenerationOptions, sessionId?: string) {
+  const response = await fetch('/api/ui-generation', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, sessionId })
+    body: JSON.stringify({ input, options, sessionId })
   });
   return await response.json();
 }
@@ -306,10 +343,10 @@ curl -X POST http://localhost:3000/api/analysis \
   -H "Content-Type: application/json" \
   -d '{"content": "データ分析をお願いします", "sessionId": "demo"}'
 
-# 比較研究
-curl -X POST http://localhost:3000/api/comparison \
+# UI生成
+curl -X POST http://localhost:3000/api/ui-generation \
   -H "Content-Type: application/json" \
-  -d '{"content": "AとBを比較", "sessionId": "demo"}'
+  -d '{"input": "ログインフォーム", "options": {"uiType": "form", "framework": "html"}, "sessionId": "demo"}'
 
 # 画像アップロード
 curl -X POST http://localhost:3000/api/images/upload \
@@ -343,10 +380,10 @@ class AIClient:
         )
         return response.json()
     
-    def comparison_study(self, content, session_id=None):
+    def generate_ui(self, input_text, options, session_id=None):
         response = requests.post(
-            f"{self.base_url}/api/comparison",
-            json={"content": content, "sessionId": session_id}
+            f"{self.base_url}/api/ui-generation",
+            json={"input": input_text, "options": options, "sessionId": session_id}
         )
         return response.json()
     

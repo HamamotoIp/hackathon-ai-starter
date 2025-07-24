@@ -47,14 +47,14 @@ export default function Navigation() {
               画像アップロード
             </Link>
             <Link 
-              href="/dashboard" 
+              href="/ui-builder" 
               className={`${
-                isActive('/dashboard') 
+                isActive('/ui-builder') 
                   ? 'text-blue-600 font-medium' 
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              ダッシュボード
+              UI生成
             </Link>
           </div>
         </div>
