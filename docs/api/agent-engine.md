@@ -190,8 +190,12 @@ async function createADKSession(serviceUrl: string): Promise<string> {
     }
   });
 
-  const sessionData = response.data as any;
-  return sessionData.session_id ?? `session-${Date.now()}`;
+  const sessionData = response.data as { output?: { id?: string } };
+  
+  if (!sessionData?.output?.id) {
+    throw new Error('セッションIDの取得に失敗しました');
+  }
+  return sessionData.output.id;
 }
 
 async function sendADKMessage(
@@ -220,7 +224,8 @@ async function sendADKMessage(
         session_id: sessionId,
         user_id: 'demo-user'
       }
-    }
+    },
+    responseType: 'text'
   });
 
   return parseADKResponse(response.data as string);

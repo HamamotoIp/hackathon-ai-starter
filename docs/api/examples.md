@@ -504,8 +504,7 @@ curl -X POST "http://localhost:3000/api/ui-generation" \
     "options": {
       "uiType": "form",
       "framework": "html",
-      "responsive": true,
-      "colorScheme": "light"
+      "responsive": true
     },
     "sessionId": "frontend-ui-001"
   }' | jq .

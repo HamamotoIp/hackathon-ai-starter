@@ -61,12 +61,8 @@ Content-Type: application/json
 **レスポンス:**
 ```json
 {
-  "success": true,
-  "feature": "basic_chat",
-  "result": "iPhoneとAndroidの主な違いは...",
-  "processingMode": "vertex_direct",
+  "message": "iPhoneとAndroidの主な違いは...",
   "processingTimeMs": 3245,
-  "timestamp": "2025-01-20T12:00:00.000Z",
   "sessionId": "user-session-123"
 }
 ```
@@ -80,9 +76,8 @@ POST /api/analysis
 Content-Type: application/json
 
 {
-  "content": "2024年の売上データを分析してトレンドを抽出してください",
-  "sessionId": "user-session-123",
-  "analysisDepth": "detailed"
+  "message": "2024年の売上データを分析してトレンドを抽出してください",
+  "sessionId": "user-session-123"
 }
 ```
 
@@ -90,7 +85,6 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "feature": "analysis_report",
   "result": "## 売上データ分析レポート\n\n### 主要トレンド\n1. Q4に30%の成長\n2. モバイル売上が40%増加\n...",
   "processingMode": "adk_agent",
   "processingTimeMs": 24567,
@@ -108,12 +102,11 @@ POST /api/ui-generation
 Content-Type: application/json
 
 {
-  "input": "レストランの予約フォームを作成してください",
+  "message": "レストランの予約フォームを作成してください",
   "options": {
     "uiType": "form",
     "framework": "html",
-    "responsive": true,
-    "colorScheme": "light"
+    "responsive": true
   },
   "sessionId": "user-session-123"
 }
@@ -123,7 +116,6 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "feature": "ui_generation",
   "result": {
     "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>...</head>\n<body>...</body>\n</html>",
     "metadata": {
@@ -174,17 +166,10 @@ form-data:
 ### AIFeatureRequest
 ```typescript
 interface AIFeatureRequest {
+  message: string;             // メッセージ（全機能共通）
   sessionId?: string;          // セッションID（任意）
   
-  // 基本チャット用
-  message?: string;            // チャットメッセージ
-  
-  // 分析用
-  content?: string;            // 分析対象のコンテンツ
-  analysisDepth?: "basic" | "detailed" | "comprehensive";
-  
-  // UI生成用
-  input?: string;              // UI生成の入力
+  // UI生成用オプション
   options?: UIGenerationOptions;
 }
 
@@ -192,17 +177,23 @@ interface UIGenerationOptions {
   uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
   framework?: "html" | "react";
   responsive?: boolean;
-  colorScheme?: "light" | "dark" | "auto";
 }
 ```
 
 ### AIFeatureResponse
 ```typescript
+// 基本チャット用レスポンス
+interface BasicChatResponse {
+  message: string;             // AI応答メッセージ
+  processingTimeMs: number;    // 処理時間（ミリ秒）
+  sessionId?: string;          // セッションID
+}
+
+// 分析・UI生成用レスポンス
 interface AIFeatureResponse {
   success: boolean;
-  feature: "basic_chat" | "analysis_report" | "ui_generation";
   result: string | UIGenerationResult;  // AI処理結果
-  processingMode: "vertex_direct" | "adk_agent";
+  processingMode: "adk_agent";
   processingTimeMs: number;    // 処理時間（ミリ秒）
   timestamp: string;           // ISO 8601形式
   sessionId?: string;          // セッションID
@@ -298,21 +289,21 @@ async function basicChat(message: string, sessionId?: string) {
 }
 
 // 分析レポート
-async function analysisReport(content: string, sessionId?: string) {
+async function analysisReport(message: string, sessionId?: string) {
   const response = await fetch('/api/analysis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, sessionId })
+    body: JSON.stringify({ message, sessionId })
   });
   return await response.json();
 }
 
 // UI生成
-async function generateUI(input: string, options: UIGenerationOptions, sessionId?: string) {
+async function generateUI(message: string, options: UIGenerationOptions, sessionId?: string) {
   const response = await fetch('/api/ui-generation', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input, options, sessionId })
+    body: JSON.stringify({ message, options, sessionId })
   });
   return await response.json();
 }
@@ -341,12 +332,12 @@ curl -X POST http://localhost:3000/api/chat/basic \
 # 分析レポート
 curl -X POST http://localhost:3000/api/analysis \
   -H "Content-Type: application/json" \
-  -d '{"content": "データ分析をお願いします", "sessionId": "demo"}'
+  -d '{"message": "データ分析をお願いします", "sessionId": "demo"}'
 
 # UI生成
 curl -X POST http://localhost:3000/api/ui-generation \
   -H "Content-Type: application/json" \
-  -d '{"input": "ログインフォーム", "options": {"uiType": "form", "framework": "html"}, "sessionId": "demo"}'
+  -d '{"message": "ログインフォーム", "options": {"uiType": "form", "framework": "html"}, "sessionId": "demo"}'
 
 # 画像アップロード
 curl -X POST http://localhost:3000/api/images/upload \
@@ -373,17 +364,17 @@ class AIClient:
         )
         return response.json()
     
-    def analysis_report(self, content, session_id=None):
+    def analysis_report(self, message, session_id=None):
         response = requests.post(
             f"{self.base_url}/api/analysis",
-            json={"content": content, "sessionId": session_id}
+            json={"message": message, "sessionId": session_id}
         )
         return response.json()
     
-    def generate_ui(self, input_text, options, session_id=None):
+    def generate_ui(self, message, options, session_id=None):
         response = requests.post(
             f"{self.base_url}/api/ui-generation",
-            json={"input": input_text, "options": options, "sessionId": session_id}
+            json={"message": message, "options": options, "sessionId": session_id}
         )
         return response.json()
     
