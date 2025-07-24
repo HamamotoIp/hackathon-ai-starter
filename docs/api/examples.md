@@ -492,16 +492,15 @@ curl -X POST "$UI_GEN_URL" \
 curl -X POST "http://localhost:3000/api/analysis" \
   -H "Content-Type: application/json" \
   -d '{
-    "content": "ECサイトの売上データを分析してください。今月の売上は1200万円で前月比18%増加、新規顧客数は3500人で25%増加、平均購入単価は15,000円で5%減少しています。",
-    "sessionId": "frontend-analysis-001",
-    "analysisDepth": "comprehensive"
+    "message": "ECサイトの売上データを分析してください。今月の売上は1200万円で前月比18%増加、新規顧客数は3500人で25%増加、平均購入単価は15,000円で5%減少しています。",
+    "sessionId": "frontend-analysis-001"
   }' | jq .
 
 # UI生成API
 curl -X POST "http://localhost:3000/api/ui-generation" \
   -H "Content-Type: application/json" \
   -d '{
-    "input": "ユーザー登録フォームを作成してください。ユーザー名、メールアドレス、パスワード、パスワード確認、利用規約の同意チェックボックスを含めてください。",
+    "message": "ユーザー登録フォームを作成してください。ユーザー名、メールアドレス、パスワード、パスワード確認、利用規約の同意チェックボックスを含めてください。",
     "options": {
       "uiType": "form",
       "framework": "html",

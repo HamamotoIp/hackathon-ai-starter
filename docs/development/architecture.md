@@ -38,12 +38,12 @@ AI Chat Starter Kitは、機能ベースでAIを使い分けるハッカソン�
                                     ║ HTTP/JSON
                                     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                    🧠 AIProcessor (統合処理層)                     │
+│                    📚 Server Libraries (専用ヘルパー)                │
 ├──────────────────────────────────────────────────────────────────┤
-│  🔀 機能ベース振り分け                                              │
-│  ├── basic_chat → Vertex AI Direct (高速・軽量)               │
-│  ├── analysis_report → ADK Agent (詳細分析)                   │
-│  └── ui_generation → ADK Agent (HTML/React生成)              │
+│  🔀 API Routes直接呼び出し                                         │
+│  ├── vertexAI.ts → Vertex AI Direct (基本チャット)            │
+│  ├── adkAgent.ts → processAnalysis() (分析レポート)           │
+│  └── adkAgent.ts → processUIGeneration() (UI生成)            │
 └──────────────────────────────────────────────────────────────────┘
                     ║                           ║
                     ║ gRPC/REST                ║ HTTP/JSON
@@ -80,18 +80,18 @@ AI Chat Starter Kitは、機能ベースでAIを使い分けるハッカソン�
 
 ```
 ユーザー入力例:
-• "こんにちは" → basic_chat → Vertex AI Direct (高速・3秒以内)
-• "市場データを分析してレポート作成" → analysis → ADK Analysis Agent (詳細・構造化)
-• "ボタンとフォームのUIを作って" → ui_generation → ADK UI Generation Agent (HTML/Tailwind CSS)
+• "こんにちは" → /api/chat/basic → vertexAI.ts → Vertex AI Direct (高速・3秒以内)
+• "市場データを分析してレポート作成" → /api/analysis → adkAgent.ts → ADK Analysis Agent (詳細・構造化)
+• "ボタンとフォームのUIを作って" → /api/ui-generation → adkAgent.ts → ADK UI Generation Agent (HTML/Tailwind CSS)
     │
     ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     🔀 AIProcessor (機能判定・ルーティング)                   │
+│                     📚 API Routes (直接AI呼び出し)                        │
 │                                                                 │
-│  1. ユーザー入力分析（自然言語処理）                             │
-│  2. AI機能自動判定（basic_chat/analysis/ui_generation）        │
-│  3. 最適AIサービス選択（Vertex AI/ADK Agent Engine）             │
-│  4. リクエスト転送・レスポンス標準化                             │
+│  1. リクエスト解析・バリデーション（apiHelpers.ts）              │
+│  2. 専用ヘルパー関数呼び出し（vertexAI.ts/adkAgent.ts）         │
+│  3. AI処理実行（Vertex AI/ADK Agent Engine）                   │
+│  4. レスポンス標準化・返却（apiHelpers.ts）                     │
 └─────────────────────────────────────────────────────────────────┘
            │                                  │
            ▼ (シンプル処理)                     ▼ (複雑処理)
@@ -169,77 +169,71 @@ AI Chat Starter Kitは、機能ベースでAIを使い分けるハッカソン�
 
 ## 🧩 コンポーネント詳細
 
-### 1. AIProcessor (核心統合層)
+### 1. Server Libraries (専用ヘルパー)
 
 ```typescript
-// packages/frontend/src/server/lib/aiProcessor.ts
-export class AIProcessor {
-  // 機能ベースでAI処理を実行
-  async processFeature(request: AIFeatureRequest): Promise<AIFeatureResponse> {
-    const config = getFeatureConfig(request.feature);
-    
-    // 処理時間計測開始
-    const startTime = Date.now();
-    
-    try {
-      if (config.processingMode === "vertex_direct") {
-        return await this.processWithVertexAI(request);
-      } else if (config.processingMode === "adk_agent") {
-        return await this.processWithADK(request, config.adkEndpoint!);
-      }
-    } catch (error) {
-      // 統一エラーハンドリング
-      return this.handleError(error, request.feature);
-    } finally {
-      // 処理時間ログ
-      const processingTime = Date.now() - startTime;
-      console.log(`AI処理完了: ${request.feature} (${processingTime}ms)`);
-    }
-  }
+// packages/frontend/src/server/lib/vertexAI.ts
+export async function generateText(message: string): Promise<string> {
+  const vertexAI = new VertexAI({
+    project: process.env.VERTEX_AI_PROJECT_ID,
+    location: process.env.VERTEX_AI_LOCATION ?? 'us-central1',
+  });
+  const model = vertexAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+  const result = await model.generateContent(message);
+  return result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+}
+
+// packages/frontend/src/server/lib/adkAgent.ts
+export async function processAnalysis(serviceUrl: string, message: string): Promise<string> {
+  const sessionId = await createADKSession(serviceUrl);
+  return await sendADKMessage(serviceUrl, sessionId, message);
+}
+
+export async function processUIGeneration(serviceUrl: string, message: string): Promise<string> {
+  const sessionId = await createADKSession(serviceUrl);
+  const structuredMessage = createUIGenerationMessage(message);
+  return await sendADKMessage(serviceUrl, sessionId, structuredMessage);
 }
 ```
 
 **責務:**
-- 機能判定とルーティング
-- AI処理の統合管理
-- レスポンスの標準化
-- エラーハンドリング・タイムアウト対応
-- 処理時間監視・ログ管理
+- 各AI専用の処理ロジック
+- セッション管理（ADK Agent用）
+- エラーハンドリング
+- レスポンス解析
 
-### 2. AI機能設定 (Human-Controlled)
+### 2. AI機能設定 (各API Route独立)
 
 ```typescript
-// packages/frontend/src/core/types/AIFeatures.ts
+// packages/frontend/src/core/types/aiTypes.ts
 export const AI_FEATURE_CONFIGS: Record<AIFeatureType, AIFeatureConfig> = {
   basic_chat: {
     type: "basic_chat",
     name: "基本チャット",
     description: "日常的な会話や質問回答",
-    processingMode: "vertex_direct",  // 🔴 人間：AI選択
+    processingMode: "vertex_direct",  // vertexAI.ts使用
     maxInputLength: 2000,
     expectedProcessingTime: 5,
-    costTier: "low",                 // コスト分類
+    costTier: "low",
     useCases: ["日常会話", "質問回答", "簡単な情報収集"]
   },
-  analysis_report: {
-    type: "analysis_report",
+  analysis: {
+    type: "analysis",
     name: "分析レポート",
     description: "データ分析や詳細レポート作成",
-    processingMode: "adk_agent",      // 🔴 人間：AI選択
+    processingMode: "adk_agent",      // processAnalysis()使用
     maxInputLength: 5000,
     expectedProcessingTime: 30,
-    adkEndpoint: "/analysis",
-    costTier: "medium",              // コスト分類
+    costTier: "medium",
     useCases: ["データ分析", "市場調査", "詳細レポート作成"]
   },
   ui_generation: {
     type: "ui_generation",
     name: "UI生成",
     description: "HTML/CSS生成とプレビュー",
-    processingMode: "adk_agent",      // 🔴 人間：AI選択
+    processingMode: "adk_agent",      // processUIGeneration()使用
     maxInputLength: 3000,
     expectedProcessingTime: 25,
-    adkEndpoint: "/ui-generation",
     costTier: "medium",
     useCases: ["UIコンポーネント生成", "ランディングページ", "フォーム作成"]
   }
@@ -271,7 +265,9 @@ packages/frontend/src/
 │       └── ImageUpload/
 │           └── ImageUpload.tsx
 └── server/lib/              # サーバーサイドロジック
-    └── aiProcessor.ts       # AI処理統合層
+    ├── vertexAI.ts          # Vertex AI Direct呼び出し
+    ├── adkAgent.ts          # ADK Agent呼び出し
+    └── apiHelpers.ts        # 共通API処理
 ```
 
 ## 🔄 AIエンジン比較

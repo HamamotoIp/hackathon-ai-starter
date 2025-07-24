@@ -133,67 +133,97 @@ async function sendQuery(sessionId: string, userId: string, message: string, ser
 ## 🔄 **完全な実装フローパターン**
 
 ```typescript
-export class ADKAgentProcessor {
-  async processMessage(message: string, userId: string, serviceUrl: string): Promise<string> {
-    try {
-      // Step 1: セッション作成
-      console.log('Creating session for user:', userId);
-      const sessionId = await this.createSession(userId, serviceUrl);
-      console.log('Session created:', sessionId);
-      
-      // Step 2: メッセージ送信
-      console.log('Sending message to session:', sessionId);
-      const response = await this.sendMessage(sessionId, userId, message, serviceUrl);
-      
-      return response;
-    } catch (error) {
-      console.error('ADK processing failed:', error);
-      throw error;
-    }
-  }
+// 実装例: packages/frontend/src/server/lib/adkAgent.ts
 
-  private async createSession(userId: string, serviceUrl: string): Promise<string> {
-    const sessionUrl = serviceUrl.replace(':streamQuery?alt=sse', ':query');
+// Analysis専用関数
+export async function processAnalysis(
+  serviceUrl: string,
+  message: string
+): Promise<string> {
+  try {
+    // Step 1: セッション作成
+    const sessionId = await createADKSession(serviceUrl);
     
-    const response = await fetch(sessionUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await this.getAccessToken()}`
-      },
-      body: JSON.stringify({
-        class_method: "create_session",
-        input: { user_id: userId }  // user_idのみ！
-      })
-    });
+    // Step 2: メッセージ送信（直接）
+    const response = await sendADKMessage(serviceUrl, sessionId, message);
+    return response;
+  } catch (error) {
+    throw new Error(`Analysis処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
 
-    if (!response.ok) {
-      throw new Error(`Session creation failed: ${response.status}`);
+// UI Generation専用関数
+export async function processUIGeneration(
+  serviceUrl: string,
+  message: string
+): Promise<string> {
+  try {
+    // Step 1: セッション作成
+    const sessionId = await createADKSession(serviceUrl);
+    
+    // Step 2: UI生成用の構造化メッセージ作成・送信
+    const structuredMessage = createUIGenerationMessage(message);
+    const response = await sendADKMessage(serviceUrl, sessionId, structuredMessage);
+    return response;
+  } catch (error) {
+    throw new Error(`UI Generation処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// 共通ヘルパー関数
+async function createADKSession(serviceUrl: string): Promise<string> {
+  const sessionUrl = serviceUrl.replace(':streamQuery?alt=sse', ':query');
+  const userId = 'demo-user';
+
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+
+  const client = await auth.getClient();
+  const response = await client.request({
+    url: sessionUrl,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: {
+      class_method: 'create_session',
+      input: { user_id: userId }  // user_idのみ！
     }
+  });
 
-    const data = await response.json();
-    return data.output.id;  // Agent Engineが返すIDを使用
-  }
+  const sessionData = response.data as any;
+  return sessionData.session_id ?? `session-${Date.now()}`;
+}
 
-  private async sendMessage(sessionId: string, userId: string, message: string, serviceUrl: string): Promise<string> {
-    const response = await fetch(serviceUrl, {  // :streamQuery?alt=sse
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await this.getAccessToken()}`
-      },
-      body: JSON.stringify({
-        class_method: "stream_query",
-        input: {
-          session_id: sessionId,
-          user_id: userId,
-          message: message
-        }
-      })
-    });
+async function sendADKMessage(
+  serviceUrl: string,
+  sessionId: string,
+  message: string
+): Promise<string> {
+  const messageUrl = serviceUrl;
 
-    return await response.text();
-  }
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+
+  const client = await auth.getClient();
+  const response = await client.request({
+    url: messageUrl,
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream'
+    },
+    data: {
+      class_method: 'run',
+      input: {
+        message,
+        session_id: sessionId,
+        user_id: 'demo-user'
+      }
+    }
+  });
+
+  return parseADKResponse(response.data as string);
 }
 ```
 

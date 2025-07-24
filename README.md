@@ -72,11 +72,15 @@ cp config.example.sh config.sh
 📱 Frontend (hackathon-ai-starter)
 ├── Next.js 15.3.1 + React 19.0.0
 ├── TypeScript 5.x + Tailwind CSS 4.0
-├── API Routes:
-│   ├── /api/chat/basic → Vertex AI Direct
-│   ├── /api/analysis → ADK Analysis Agent
-│   ├── /api/ui-generation → ADK UI Generation Agent
+├── API Routes (直接AI呼び出し):
+│   ├── /api/chat/basic → vertexAI.ts → Vertex AI Direct
+│   ├── /api/analysis → adkAgent.ts → ADK Analysis Agent
+│   ├── /api/ui-generation → adkAgent.ts → ADK UI Generation Agent
 │   └── /api/images/upload → Cloud Storage
+├── Server Libraries:
+│   ├── server/lib/vertexAI.ts → 基本チャット用
+│   ├── server/lib/adkAgent.ts → 分析・UI生成用
+│   └── server/lib/apiHelpers.ts → 共通ヘルパー
 └── Pages:
     ├── / → トップページ・各機能への導線
     ├── /simple-chat → シンプルチャット（Vertex AI Direct）

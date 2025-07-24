@@ -20,7 +20,7 @@ interface BasicChatRequest {
 // 分析・UI生成用（ADK Agent Engine）
 interface AIFeatureRequest {
   feature: 'analysis' | 'ui_generation';
-  input: string;
+  message: string;  // 統一フィールド名
   sessionId?: string;
 }
 
@@ -58,13 +58,12 @@ interface AIFeatureResponse {
 
 ## 🔗 実装済みエンドポイント
 
-| エンドポイント | 機能 | 使用AI | 実装ファイル |
-|--------------|------|--------|-------------|
-| `POST /api/chat/basic` | 基本チャット | Vertex AI Direct | `src/app/api/chat/basic/route.ts` |
-| `POST /api/analysis` | 分析レポート | ADK Analysis Agent | `src/app/api/analysis/route.ts` |
-| `POST /api/ui-generation` | UI生成 | ADK UI Generation Agent | `src/app/api/ui-generation/route.ts` |
-| `POST /api/images/upload` | 画像アップロード | Cloud Storage | `src/app/api/images/upload/route.ts` |
-| `GET /api/debug` | システムデバッグ | - | `src/app/api/debug/route.ts` |
+| エンドポイント | 機能 | 使用AI | 実装ファイル | ヘルパー関数 |
+|--------------|------|--------|-------------|-------------|
+| `POST /api/chat/basic` | 基本チャット | Vertex AI Direct | `src/app/api/chat/basic/route.ts` | `generateText()` |
+| `POST /api/analysis` | 分析レポート | ADK Analysis Agent | `src/app/api/analysis/route.ts` | `processAnalysis()` |
+| `POST /api/ui-generation` | UI生成 | ADK UI Generation Agent | `src/app/api/ui-generation/route.ts` | `processUIGeneration()` |
+| `POST /api/images/upload` | 画像アップロード | Cloud Storage | `src/app/api/images/upload/route.ts` | - |
 
 ## 📖 詳細実装ガイド
 
