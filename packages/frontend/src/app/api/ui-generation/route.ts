@@ -59,7 +59,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(response);
 
   } catch (error) {
-    // console.error("UI Generation API error:", error);
     // エラーログ出力（本番環境では削除予定）
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console

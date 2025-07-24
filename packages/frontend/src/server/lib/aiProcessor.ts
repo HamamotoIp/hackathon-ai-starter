@@ -6,8 +6,7 @@ import {
   AIFeatureType,
   UIGenerationResult,
   getFeatureConfig,
-  isUIGenerationFeature,
-  isUIGenerationRequest
+  isUIGenerationFeature
 } from '@/core/types/AIFeatures';
 
 export interface AIProcessorConfig {
@@ -75,7 +74,6 @@ export class AIProcessor {
         return await this.processWithADK(request, startTime);
       }
     } catch (error) {
-      // console.error('AI処理エラー:', error);
       return this.createErrorResponse(request, startTime, error);
     }
   }
@@ -285,16 +283,15 @@ export class AIProcessor {
     // メッセージの構造化（UI生成対応）
     let finalMessage = message;
     
-    if (request && isUIGenerationRequest(request)) {
+    if (request && request.feature === "ui_generation") {
       // UI生成リクエストをJSON構造化メッセージとして送信
-      const uiRequest = request;
       const structuredMessage = {
         type: "ui_generation",
         user_prompt: message,
-        ui_type: uiRequest.options?.uiType ?? "auto",
-        framework: uiRequest.options?.framework ?? "html",
-        responsive: uiRequest.options?.responsive !== false,
-        color_scheme: uiRequest.options?.colorScheme ?? "light"
+        ui_type: "auto",
+        framework: "html", 
+        responsive: true,
+        color_scheme: "light"
       };
       finalMessage = JSON.stringify(structuredMessage);
       

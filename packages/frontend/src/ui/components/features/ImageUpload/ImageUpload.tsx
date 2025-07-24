@@ -75,7 +75,6 @@ export default function ImageUpload({
         throw new Error(result.error ?? "アップロードに失敗しました");
       }
     } catch (error) {
-      // console.error("Upload error:", error);
       onError?.(error instanceof Error ? error.message : "アップロードに失敗しました");
     } finally {
       setUploading(false);

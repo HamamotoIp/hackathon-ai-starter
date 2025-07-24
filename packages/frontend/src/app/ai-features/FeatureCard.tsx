@@ -50,7 +50,6 @@ export default function FeatureCard({ config }: FeatureCardProps) {
       const data = await res.json();
       setResponse(data);
     } catch {
-      // console.error('AI処理エラー:', error);
       setResponse({ error: 'エラーが発生しました' });
     } finally {
       setLoading(false);

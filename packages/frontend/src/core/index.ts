@@ -3,46 +3,7 @@
  * 🔴 人間が管理：フロントエンド用ドメインレイヤーの統一エクスポート
  */
 
-// Types
-export type {
-  DomainEvent,
-} from "./types";
+// AI Features Types (main export)
+export * from "./types/AIFeatures";
 
-export {
-  DomainError,
-  ValidationError,
-  AuthorizationError,
-  BusinessRuleError,
-} from "./types";
 
-// Constants
-export {
-  BUSINESS_RULES,
-} from "./constants/businessRules";
-
-// AI機能の開発ガイドライン
-export const AI_DEVELOPMENT_GUIDELINES = {
-  humanResponsibility: [
-    "AI機能の設計（core/types/AIFeatures.ts）",
-    "AI処理ロジック（server/lib/aiProcessor.ts）",
-    "ビジネスルールの定義（core/constants/）",
-    "データ整合性の保証",
-  ],
-  aiResponsibility: [
-    "UIコンポーネントの実装（ui/components/）",
-    "API Routes実装（app/api/）",
-    "スタイリングの適用",
-    "フォーム処理の実装",
-  ],
-  architecture: [
-    "core/は人間が管理するビジネスロジック",
-    "ui/はAIが管理するプレゼンテーション層",
-    "server/はサーバーサイド処理",
-    "app/api/はAPI Routes",
-    "shared/は共通コード",
-  ],
-  aiFeatures: [
-    "analysis_report: ADK Agent（複雑処理）",
-    "ui_generation: ADK Agent（UI生成）",
-  ],
-} as const;

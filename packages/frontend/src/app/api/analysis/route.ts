@@ -35,7 +35,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(response);
 
   } catch {
-    // console.error("Analysis Report API error:", error);
     return NextResponse.json(
       { error: "内部エラーが発生しました" },
       { status: 500 }

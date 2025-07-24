@@ -182,18 +182,6 @@ export function isIntelligentFeature(feature: AIFeatureType): boolean {
   return getProcessingMode(feature) === "adk_agent";
 }
 
-/** 機能リストを取得 */
-export function getSimpleFeatures(): AIFeatureType[] {
-  return Object.keys(AI_FEATURE_CONFIGS).filter(key => 
-    isSimpleFeature(key as AIFeatureType)
-  ) as AIFeatureType[];
-}
-
-export function getIntelligentFeatures(): AIFeatureType[] {
-  return Object.keys(AI_FEATURE_CONFIGS).filter(key => 
-    isIntelligentFeature(key as AIFeatureType)
-  ) as AIFeatureType[];
-}
 
 // =============================================================================
 // 型ガード関数
@@ -209,30 +197,6 @@ export function isUIGenerationFeature(feature: AIFeatureType): feature is "ui_ge
   return feature === "ui_generation";
 }
 
-/** シンプルチャットリクエストかチェック */
-export function isBasicChatRequest(request: AIFeatureRequest): request is BasicChatRequest {
-  return request.feature === "basic_chat";
-}
-
-/** 分析レポートリクエストかチェック */
-export function isAnalysisReportRequest(request: AIFeatureRequest): request is AnalysisReportRequest {
-  return request.feature === "analysis_report";
-}
-
-/** UI生成リクエストかチェック */
-export function isUIGenerationRequest(request: AIFeatureRequest): request is UIGenerationRequest {
-  return request.feature === "ui_generation";
-}
-
-/** シンプルチャットレスポンスかチェック */
-export function isBasicChatResponse(response: AIFeatureResponse): response is BasicChatResponse {
-  return response.feature === "basic_chat";
-}
-
-/** 分析レポートレスポンスかチェック */
-export function isAnalysisReportResponse(response: AIFeatureResponse): response is AnalysisReportResponse {
-  return response.feature === "analysis_report";
-}
 
 /** UI生成レスポンスかチェック */
 export function isUIGenerationResponse(response: AIFeatureResponse): response is UIGenerationResponse {
