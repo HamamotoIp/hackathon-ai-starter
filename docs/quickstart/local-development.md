@@ -78,9 +78,10 @@ VERTEX_AI_LOCATION=us-central1
 3. `/ui-builder` でUI生成体験
 
 ### 新機能追加時
-1. `src/core/types/AIFeatures.ts` で機能定義
-2. `src/server/lib/aiProcessor.ts` で処理追加
-3. UIコンポーネントをAIが自動生成
+1. `src/core/types/aiTypes.ts` で機能定義
+2. `src/app/api/new-feature/route.ts` でAPIエンドポイント追加
+3. `src/server/lib/adkAgent.ts` または `src/server/lib/vertexAI.ts` で処理実装
+4. UIコンポーネントをAIが自動生成
 
 ## 📚 次のステップ
 

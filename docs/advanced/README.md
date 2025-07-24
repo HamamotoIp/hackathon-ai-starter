@@ -49,7 +49,7 @@ const result = await processor.process({
 
 ### 新AI機能の追加手順
 
-1. **機能定義** (`packages/frontend/src/core/types/AIFeatures.ts`)
+1. **機能定義** (`packages/frontend/src/core/types/aiTypes.ts`)
 ```typescript
 export type AIFeatureType = 
   | "basic_chat"
@@ -64,11 +64,11 @@ export type AIFeatureType =
 ### カスタムAgent開発
 
 ```python
-# packages/ai-agents/agents/custom_agent.py
-from google.cloud.aiplatform.agents import Agent
+# packages/ai-agents/custom_agent.py
+from google.adk.agents import LlmAgent
 
 def create_custom_agent():
-    return Agent(
+    return LlmAgent(
         name="custom_specialist",
         model="gemini-2.0-flash-exp",
         description="カスタム機能の専門エージェント",

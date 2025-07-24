@@ -812,8 +812,8 @@ curl -X POST "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PRO
 5. **レスポンス時間**: 4-14秒程度（クエリ複雑度による）
 
 ### 🎯 **関連ドキュメント**
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - システム全体アーキテクチャ
-- [CLAUDE.md](../CLAUDE.md) - 開発者向けガイド
+- [アーキテクチャ](../development/architecture.md) - システム全体アーキテクチャ
+- [Claude協働ガイド](../advanced/claude-collaboration.md) - AI開発者向けガイド
 
 ---
 

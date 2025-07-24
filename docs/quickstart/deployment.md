@@ -117,7 +117,7 @@ curl http://localhost:8080/health
 # 統合テスト
 curl -X POST http://localhost:3000/api/analysis \
   -H "Content-Type: application/json" \
-  -d '{"content": "テスト分析"}'
+  -d '{"message": "テスト分析"}'
 ```
 
 ### Step 2: Google Cloud 認証・設定
@@ -333,7 +333,7 @@ curl https://your-app.run.app/api/debug | jq .
 - [ ] AI機能選択ページ動作
 - [ ] 基本チャット動作
 - [ ] 分析レポート生成
-- [ ] 比較研究実行
+- [ ] UI生成機能
 - [ ] 画像アップロード
 
 #### ✅ パフォーマンス確認
@@ -497,9 +497,9 @@ ENVIRONMENT="prod" ./setup.sh
 
 ## 📚 関連リソース
 
-- **[API.md](./API.md)** - API仕様書
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - アーキテクチャ詳細
-- **[CLAUDE.md](./CLAUDE.md)** - 開発者向けガイド
+- **[API仕様](../api/)** - API仕様書
+- **[アーキテクチャ](../development/architecture.md)** - アーキテクチャ詳細
+- **[Claude協働ガイド](../advanced/claude-collaboration.md)** - AI開発者向けガイド
 - **[Google Cloud Run ドキュメント](https://cloud.google.com/run/docs)**
 - **[Vertex AI ドキュメント](https://cloud.google.com/vertex-ai/docs)**
 

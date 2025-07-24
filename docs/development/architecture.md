@@ -428,7 +428,7 @@ gcloud run revisions list --service ai-chat-frontend-dev --region us-central1
 ### 新AI機能の追加（人間-AI協働）
 ```typescript
 // 1. 機能定義（人間が設計）
-// packages/frontend/src/core/types/AIFeatures.ts
+// packages/frontend/src/core/types/aiTypes.ts
 export type AIFeatureType = 
   | "basic_chat"
   | "analysis_report" 
@@ -461,10 +461,10 @@ export type ProcessingMode =
   | "adk_agent"
   | "openai_direct";  // 新AI追加
 
-// 2. AIProcessor拡張
-// server/lib/aiProcessor.ts
-else if (config.processingMode === "openai_direct") {
-  return await this.processWithOpenAI(request);
+// 2. ヘルパー関数拡張
+// server/lib/openaiClient.ts (新規作成)
+export async function processWithOpenAI(message: string): Promise<string> {
+  // OpenAPI実装
 }
 
 // 3. 設定の拡張
