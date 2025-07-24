@@ -68,8 +68,12 @@ async function createADKSession(serviceUrl: string): Promise<string> {
     }
   });
 
-  const sessionData = response.data as any;
-  return sessionData.session_id ?? `session-${Date.now()}`;
+  const sessionData = response.data as { output?: { id?: string } };
+
+  if (!sessionData?.output?.id) {
+    throw new Error('セッションIDの取得に失敗しました');
+  }
+  return sessionData.output.id;
 }
 
 /**
@@ -101,8 +105,10 @@ async function sendADKMessage(
         session_id: sessionId,
         user_id: 'demo-user'
       }
-    }
+    },
+    responseType: 'text'
   });
+
 
   return parseADKResponse(response.data as string);
 }
@@ -127,6 +133,7 @@ function createUIGenerationMessage(message: string): string {
  */
 function parseADKResponse(responseData: string): string {
   try {
+    
     // SSE形式のレスポンスを解析
     const lines = responseData.split('\n');
     const dataLines = lines.filter(line => line.startsWith('data: '));
@@ -135,28 +142,28 @@ function parseADKResponse(responseData: string): string {
       return responseData; // SSE形式でない場合はそのまま返す
     }
 
-    const lastDataLine = dataLines[dataLines.length - 1];
-    if (!lastDataLine) {
-      return responseData;
-    }
+    // すべてのデータラインから内容を結合
+    let fullMessage = '';
     
-    const jsonData = lastDataLine.replace('data: ', '');
-    
-    if (jsonData === '[DONE]') {
-      // 最後のデータ行の1つ前を使用
-      if (dataLines.length > 1) {
-        const secondLastLine = dataLines[dataLines.length - 2];
-        if (!secondLastLine) {
-          return responseData;
+    for (const line of dataLines) {
+      const jsonData = line.replace('data: ', '').trim();
+      
+      if (jsonData === '[DONE]') {
+        break;
+      }
+      
+      try {
+        const parsedData = JSON.parse(jsonData);
+        // message, response, content, text など様々なフィールド名の可能性
+        const content = parsedData.message ?? parsedData.response ?? parsedData.content ?? parsedData.text ?? parsedData.output;
+        if (content) {
+          fullMessage += content;
         }
-        const secondLastData = secondLastLine.replace('data: ', '');
-        const parsedData = JSON.parse(secondLastData);
-        return parsedData.message ?? parsedData.response ?? secondLastData;
+      } catch {
       }
     }
-
-    const parsedData = JSON.parse(jsonData);
-    return parsedData.message ?? parsedData.response ?? jsonData;
+    
+    return fullMessage || responseData;
 
   } catch {
     // JSON解析に失敗した場合は生のレスポンスを返す

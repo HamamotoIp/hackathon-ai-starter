@@ -27,12 +27,23 @@ export async function POST(req: NextRequest) {
       throw new Error('ANALYSIS_AGENT_URL環境変数が設定されていません');
     }
 
-    const result = await processAnalysis(serviceUrl, body.message);
+    const result = await processAnalysis(serviceUrl, body.message as string);
     const processingTime = Date.now() - startTime;
+
+    // ADKレスポンスがJSON文字列の場合、パースして実際のテキストを抽出
+    let finalResult = result;
+    try {
+      const parsed = JSON.parse(result);
+      if (parsed.content?.parts?.[0]?.text) {
+        finalResult = parsed.content.parts[0].text;
+      }
+    } catch {
+      // JSONパースに失敗した場合はそのまま使用
+    }
 
     return createSuccessResponse({
       success: true,
-      result,
+      result: finalResult,
       processingMode: "adk_agent",
       processingTimeMs: processingTime,
       sessionId: getOrCreateSessionId(body),

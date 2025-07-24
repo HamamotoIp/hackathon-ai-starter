@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { AIFeatureRequest } from '@/core/types/aiTypes';
 
 /**
  * 標準的な成功レスポンスを作成
@@ -26,10 +25,10 @@ export function createErrorResponse(message: string, status = 500) {
 /**
  * リクエストボディのJSONパースと基本バリデーション
  */
-export async function parseRequestBody(request: NextRequest): Promise<any> {
+export async function parseRequestBody(request: NextRequest): Promise<Record<string, unknown>> {
   try {
     const body = await request.json();
-    return body;
+    return body as Record<string, unknown>;
   } catch {
     throw new Error('不正なJSONフォーマットです');
   }
@@ -38,30 +37,17 @@ export async function parseRequestBody(request: NextRequest): Promise<any> {
 /**
  * 共通入力バリデーション
  */
-export function validateCommonInput(body: any): void {
+export function validateCommonInput(body: Record<string, unknown>): void {
   if (!body.message || typeof body.message !== 'string') {
     throw new Error('メッセージが必要です');
   }
 }
 
-/**
- * AIFeatureRequestオブジェクトを構築
- */
-export function createAIFeatureRequest(
-  feature: string,
-  input: string,
-  options?: any
-): AIFeatureRequest {
-  return {
-    feature: feature as any,
-    input,
-    options
-  };
-}
 
 /**
  * セッションIDを取得または生成
  */
-export function getOrCreateSessionId(body: any): string {
-  return body.session_id ?? body.sessionId ?? `session-${Date.now()}`;
+export function getOrCreateSessionId(body: Record<string, unknown>): string {
+  const sessionId = body.session_id ?? body.sessionId;
+  return typeof sessionId === 'string' ? sessionId : `session-${Date.now()}`;
 }

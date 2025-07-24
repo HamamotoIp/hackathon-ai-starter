@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     validateCommonInput(body);
 
     // Vertex AIで直接処理
-    const result = await generateText(body.message);
+    const result = await generateText(body.message as string);
     const processingTime = Date.now() - startTime;
 
     return createSuccessResponse({
