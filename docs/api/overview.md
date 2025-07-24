@@ -397,7 +397,7 @@ print(result)
 1. **機能設計（人間）**: `core/types/AIFeatures.ts` で新機能定義
 2. **API実装（AI）**: `app/api/new-feature/route.ts` でエンドポイント実装
 3. **テスト**: curl または SDK でAPIテスト
-4. **ドキュメント更新**: この API.md に仕様追加
+4. **ドキュメント更新**: このAPI仕様書に仕様追加
 
 ### デバッグ方法
 
