@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, Send, Sparkles } from 'lucide-react';
+import { useChat } from '@/components/hooks/use-chat';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -11,57 +12,35 @@ interface ChatMessage {
 
 export default function SimpleChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { message, setMessage, response, isLoading, error, sendMessage } = useChat();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!input.trim()) return;
+    if (!message.trim()) return;
 
     const userMessage: ChatMessage = {
       role: 'user',
-      content: input,
+      content: message,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    setError(null);
+    
+    await sendMessage();
+  };
 
-    try {
-      const response = await fetch('/api/chat/basic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error ?? 'チャットエラーが発生しました');
-      }
-
-      const data = await response.json();
-
+  // レスポンスが更新されたときにメッセージリストに追加
+  useEffect(() => {
+    if (response) {
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: data.message,
+        content: response.message,
         timestamp: new Date(),
       };
-
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [response]);
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -128,8 +107,8 @@ export default function SimpleChatPage() {
             {/* 入力フォーム */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="メッセージを入力してください..."
                 rows={3}
                 disabled={isLoading}
@@ -138,7 +117,7 @@ export default function SimpleChatPage() {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={isLoading || !input.trim()}
+                  disabled={isLoading || !message.trim()}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (

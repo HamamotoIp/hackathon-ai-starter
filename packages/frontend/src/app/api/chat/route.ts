@@ -1,32 +1,29 @@
 import { NextRequest } from 'next/server';
-import { generateText } from '@/server/lib/vertexAI';
+import { createVertexAIProvider } from '@/lib/vertex-ai';
 import { 
   parseRequestBody, 
-  validateCommonInput, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/server/lib/apiHelpers';
-import type { BaseAPIRequest, BasicChatAPIResponse } from '@/core/types';
+} from '@/lib/apiHelpers';
+import type { BaseAIRequest } from '@/lib/ai-features';
+import type { BasicChatAPIResponse } from '@/lib/api';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body = await parseRequestBody<BaseAPIRequest>(request);
-    validateCommonInput(body);
+    const body = await parseRequestBody<BaseAIRequest>(request);
 
     // Vertex AIで直接処理
-    const result = await generateText(body.message);
+    const provider = createVertexAIProvider();
+    const result = await provider.generateText(body.message);
     const processingTime = Date.now() - startTime;
 
     const response: BasicChatAPIResponse = {
-      success: true,
       message: result,
-      processingMode: 'vertex_direct',
       processingTimeMs: processingTime,
-      sessionId: getOrCreateSessionId(body),
-      timestamp: new Date().toISOString()
+      sessionId: getOrCreateSessionId(body)
     };
     
     return createSuccessResponse(response);

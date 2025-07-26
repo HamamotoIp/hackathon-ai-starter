@@ -1,19 +1,13 @@
 import { NextRequest } from "next/server";
-import { processUIGeneration } from "@/server/lib/adkAgent";
+import { processUIGeneration } from "@/lib/adk-agent";
 import { 
   parseRequestBody, 
-  validateCommonInput, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/server/lib/apiHelpers';
-import type {
-  UIGenerationAPIRequest,
-  UIGenerationAPIResponse,
-  UIGenerationResult as APIUIGenerationResult,
-  UIMetadata,
-  ADKStructuredResponse
-} from '@/core/types/apiTypes';
+} from '@/lib/apiHelpers';
+import type { UIGenerationResult, DeviceType } from '@/lib/ai-features';
+import type { UIGenerationAPIRequest, UIGenerationAPIResponse } from '@/lib/api';
 
 export const runtime = "nodejs";
 
@@ -26,7 +20,6 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await parseRequestBody<UIGenerationAPIRequest>(req);
-    validateCommonInput(body);
 
     // ADK Agentで直接処理（UI生成モード）
     const serviceUrl = process.env.UI_GENERATION_AGENT_URL;
@@ -38,57 +31,15 @@ export async function POST(req: NextRequest) {
     const processingTime = Date.now() - startTime;
 
     // UI生成結果の解析
-    let uiResult: APIUIGenerationResult;
-    try {
-      // ADKレスポンスを解析
-      const adkResponse = JSON.parse(result) as ADKStructuredResponse;
-      
-      // content.parts[0].textからコンテンツを取得
-      if (adkResponse.content?.parts?.[0]?.text) {
-        const contentText = adkResponse.content.parts[0].text;
-        
-        // コードブロック内のJSONを抽出
-        const jsonMatch = contentText.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch?.[1]) {
-          const parsedContent = JSON.parse(jsonMatch[1]) as { html: string; metadata?: Partial<UIMetadata> };
-          const defaultMetadata: UIMetadata = {
-            deviceType: "auto",
-            responsive: true
-          };
-          uiResult = {
-            html: parsedContent.html,
-            metadata: { ...defaultMetadata, ...parsedContent.metadata }
-          };
-        } else {
-          // JSONブロックが見つからない場合はテキスト全体をHTMLとして扱う
-          uiResult = {
-            html: contentText,
-            metadata: {
-              deviceType: "auto",
-              responsive: true
-            }
-          };
-        }
-      } else {
-        // 旧形式のレスポンスの場合
-        uiResult = {
-          html: (adkResponse as any).html ?? result,
-          metadata: {
-            deviceType: "auto",
-            responsive: true
-          }
-        };
+    // ADKエージェントからのレスポンスは既にparseADKResponseで処理済み
+    // resultには直接HTML/テキストコンテンツが入っている
+    const uiResult: UIGenerationResult = {
+      html: result,
+      metadata: {
+        deviceType: (body.options?.deviceType as DeviceType) ?? "auto",
+        responsive: true
       }
-    } catch {
-      // JSON解析失敗時は生のHTMLとして扱う
-      uiResult = {
-        html: result,
-        metadata: {
-          deviceType: "auto",
-          responsive: true
-        }
-      };
-    }
+    };
 
     const response: UIGenerationAPIResponse = {
       success: true,

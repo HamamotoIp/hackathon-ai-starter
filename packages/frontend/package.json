@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "generate:ai-feature": "node scripts/generate-ai-feature.js",
+    "validate:structure": "node scripts/validate-structure.js",
+    "clean:generated": "node scripts/clean-generated.js"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.13.0",

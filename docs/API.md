@@ -1,27 +1,22 @@
-# 📡 API 仕様書
+# 📡 AI Chat Starter Kit - API仕様
 
-## 概要
+機能ベースでAIを使い分ける統一API - 完全実装ガイド
+
+## 🎯 概要
 
 AI Chat Starter Kit のAPI仕様書です。機能ベースでAIを使い分ける統一APIを提供し、フロントエンドから簡単にアクセスできます。
 
-## 基本情報
-
+### 基本情報
 - **ベースURL**: `http://localhost:3000` (ローカル) / `https://your-app.run.app` (本番)
 - **認証**: なし（ハッカソン特化設計）
 - **レスポンス形式**: JSON
 - **リクエスト形式**: JSON (POST), Query Parameters (GET)
 
-## エンドポイント一覧
+## 🚀 エンドポイント一覧
 
 ### 🔍 システム・診断
-
 #### `GET /api/debug`
 システム状態確認・デバッグ情報取得
-
-**リクエスト:**
-```http
-GET /api/debug
-```
 
 **レスポンス:**
 ```json
@@ -30,28 +25,22 @@ GET /api/debug
   "timestamp": "2025-01-20T12:00:00.000Z",
   "environment": {
     "VERTEX_AI_PROJECT_ID": "SET",
-    "ADK_SERVICE_URL": "SET",
-    "BUCKET_NAME": "SET"
+    "ADK_SERVICE_URL": "SET"
   },
   "services": {
     "vertexAI": "CONNECTED",
-    "adkEngine": "CONNECTED", 
-    "cloudStorage": "CONNECTED"
-  },
-  "version": "1.0.0"
+    "adkEngine": "CONNECTED"
+  }
 }
 ```
 
 ### 🤖 AI機能
 
 #### `POST /api/chat`
-チャット（Vertex AI Direct）
+チャット（Vertex AI Direct）- 高速レスポンス
 
 **リクエスト:**
-```http
-POST /api/chat
-Content-Type: application/json
-
+```json
 {
   "message": "こんにちは、iPhoneとAndroidの違いを教えて",
   "sessionId": "user-session-123"
@@ -68,13 +57,10 @@ Content-Type: application/json
 ```
 
 #### `POST /api/analysis`
-分析レポート（ADK Agent Engine）
+分析レポート（ADK Agent Engine）- 詳細分析
 
 **リクエスト:**
-```http
-POST /api/analysis
-Content-Type: application/json
-
+```json
 {
   "message": "2024年の売上データを分析してトレンドを抽出してください",
   "sessionId": "user-session-123"
@@ -85,7 +71,7 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "result": "## 売上データ分析レポート\n\n### 主要トレンド\n1. Q4に30%の成長\n2. モバイル売上が40%増加\n...",
+  "result": "## 売上データ分析レポート\\n\\n### 主要トレンド\\n1. Q4に30%の成長\\n2. モバイル売上が40%増加\\n...",
   "processingMode": "adk_agent",
   "processingTimeMs": 24567,
   "timestamp": "2025-01-20T12:00:00.000Z",
@@ -94,13 +80,10 @@ Content-Type: application/json
 ```
 
 #### `POST /api/ui-generation`
-UI生成（ADK Agent Engine）
+UI生成（ADK Agent Engine）- デバイス最適化HTML生成
 
 **リクエスト:**
-```http
-POST /api/ui-generation
-Content-Type: application/json
-
+```json
 {
   "message": "レストランの予約フォームを作成してください",
   "options": {
@@ -115,9 +98,9 @@ Content-Type: application/json
 {
   "success": true,
   "result": {
-    "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>...</head>\n<body>...</body>\n</html>",
+    "html": "<!DOCTYPE html>\\n<html lang=\\\"ja\\\">\\n<head>...</head>\\n<body>...</body>\\n</html>",
     "metadata": {
-      "deviceType": "auto",
+      "deviceType": "mobile",
       "responsive": true
     }
   },
@@ -129,9 +112,9 @@ Content-Type: application/json
 ```
 
 
-## データ型定義
+## 📊 データ型定義
 
-### AIFeatureRequest
+### AIFeatureRequest（共通リクエスト）
 ```typescript
 interface AIFeatureRequest {
   message: string;             // メッセージ（全機能共通）
@@ -146,7 +129,7 @@ interface UIGenerationOptions {
 }
 ```
 
-### AIFeatureResponse
+### AIFeatureResponse（共通レスポンス）
 ```typescript
 // チャット用レスポンス
 interface ChatResponse {
@@ -187,10 +170,9 @@ interface ErrorResponse {
 }
 ```
 
-## エラーコード
+## 🚨 エラーコード
 
 ### HTTP ステータスコード
-
 | コード | 説明 | 対応 |
 |--------|------|------|
 | 200 | 成功 | 正常レスポンス |
@@ -200,7 +182,6 @@ interface ErrorResponse {
 | 503 | Service Unavailable | AI サービス利用不可 |
 
 ### アプリケーションエラーコード
-
 | コード | 説明 | 対応方法 |
 |--------|------|----------|
 | `INVALID_INPUT` | 入力データが不正 | リクエスト形式を確認 |
@@ -209,10 +190,9 @@ interface ErrorResponse {
 | `TIMEOUT_ERROR` | タイムアウト | 時間をおいて再試行 |
 | `UPLOAD_ERROR` | ファイルアップロードエラー | ファイル形式・サイズを確認 |
 
-## 制限事項
+## ⚡ 制限事項
 
 ### 入力制限
-
 | 機能 | 最大文字数 | タイムアウト |
 |------|------------|-------------|
 | チャット | 2,000文字 | 30秒 |
@@ -220,18 +200,9 @@ interface ErrorResponse {
 | UI生成 | 3,000文字 | 60秒 |
 
 
-### レート制限
-
-| 対象 | 制限 |
-|------|------|
-| API呼び出し | 1000回/時間/IP |
-| ファイルアップロード | 100回/時間/IP |
-| 同時接続 | 10接続/IP |
-
-## SDKサンプル
+## 💻 SDKサンプル
 
 ### JavaScript/TypeScript
-
 ```typescript
 // チャット
 async function chat(message: string, sessionId?: string) {
@@ -265,36 +236,7 @@ async function generateUI(message: string, options: UIGenerationOptions, session
 
 ```
 
-### curl
-
-```bash
-# チャット
-curl -X POST http://localhost:3000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello", "sessionId": "demo"}'
-
-# 分析レポート
-curl -X POST http://localhost:3000/api/analysis \
-  -H "Content-Type: application/json" \
-  -d '{"message": "データ分析をお願いします", "sessionId": "demo"}'
-
-# UI生成（デバイス最適化）
-curl -X POST http://localhost:3000/api/ui-generation \
-  -H "Content-Type: application/json" \
-  -d '{"message": "ログインフォーム", "options": {"deviceType": "auto"}, "sessionId": "demo"}'
-
-
-# システム状態確認
-curl http://localhost:3000/api/debug
-```
-
----
-
-**📅 最終更新:** 2025年7月26日  
-**📋 バージョン:** v1.1.0 (UIGenerationOptions deviceType対応)
-
 ### Python
-
 ```python
 import requests
 import json
@@ -331,17 +273,72 @@ result = client.chat("Hello AI!")
 print(result)
 ```
 
-## 開発者向け情報
+### curl
+```bash
+# チャット
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello", "sessionId": "demo"}'
+
+# 分析レポート
+curl -X POST http://localhost:3000/api/analysis \
+  -H "Content-Type: application/json" \
+  -d '{"message": "データ分析をお願いします", "sessionId": "demo"}'
+
+# UI生成（デバイス最適化）
+curl -X POST http://localhost:3000/api/ui-generation \
+  -H "Content-Type: application/json" \
+  -d '{"message": "ログインフォーム", "options": {"deviceType": "auto"}, "sessionId": "demo"}'
+
+
+# システム状態確認
+curl http://localhost:3000/api/debug
+```
+
+## 🎯 機能別使い分けガイド
+
+### チャット（Vertex AI Direct）
+**最適な用途:**
+- 日常会話・質問回答
+- 翻訳・要約
+- 簡単な情報検索
+
+**特徴:**
+- 高速レスポンス（3-5秒）
+- 低コスト
+- シンプルなテキスト出力
+
+### 分析レポート（ADK Agent）
+**最適な用途:**
+- データ分析・市場調査
+- 詳細レポート作成
+- 構造化された分析
+
+**特徴:**
+- 詳細分析（20-30秒）
+- 構造化されたレポート出力
+- 専門的な分析能力
+
+### UI生成（ADK Agent）
+**最適な用途:**
+- HTML/CSSコンポーネント生成
+- ランディングページ作成
+- フォーム・UIパーツ作成
+
+**特徴:**
+- デバイス最適化（desktop/tablet/mobile/auto）
+- Tailwind CSS使用
+- 即座にプレビュー可能なHTML
+
+## 🔧 開発者向け情報
 
 ### 機能追加の流れ
-
-1. **機能設計（人間）**: `lib/ai-features.ts` で新機能定義
+1. **機能設計（人間）**: `core/types/aiTypes.ts` で新機能定義
 2. **API実装（AI）**: `app/api/new-feature/route.ts` でエンドポイント実装
 3. **テスト**: curl または SDK でAPIテスト
 4. **ドキュメント更新**: このAPI仕様書に仕様追加
 
 ### デバッグ方法
-
 ```bash
 # ローカル環境確認
 curl http://localhost:3000/api/debug | jq .
@@ -349,18 +346,23 @@ curl http://localhost:3000/api/debug | jq .
 # 詳細デバッグ
 cd /workspaces/hackathon-ai-starter
 ./debug.sh
-
-# ログ確認（本番環境）
-gcloud run services logs read ai-chat-frontend-dev --region us-central1
 ```
 
 ### パフォーマンス最適化
-
 - **キャッシュ**: レスポンスのキャッシュ実装推奨
 - **ストリーミング**: 長時間処理の場合はServer-Sent Events検討
 - **並列処理**: 複数AIサービスの並列呼び出し
 - **エラーハンドリング**: タイムアウト・リトライ戦略
 
+## 📚 関連ドキュメント
+
+- **[開発ガイド](./DEVELOPMENT.md)** - 新機能追加・カスタマイズ
+- **[クイックスタート](./QUICKSTART.md)** - 基本セットアップ
+- **[上級者ガイド](./ADVANCED.md)** - 本格運用・最適化
+
 ---
+
+**📅 最終更新:** 2025年7月26日  
+**📋 バージョン:** v1.1.0 (UIGenerationOptions deviceType対応)
 
 このAPI仕様書により、開発者は効率的にAI Chat Starter KitのAPIを活用できます。

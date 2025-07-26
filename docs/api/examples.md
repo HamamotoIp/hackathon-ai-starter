@@ -43,10 +43,9 @@
 
 | 機能 | AI エンジン | エンドポイント | 状態 |
 |-----|------------|--------------|------|
-| **基本チャット** | Vertex AI Direct | `/api/chat/basic` | ✅ 実装済み |
+| **チャット** | Vertex AI Direct | `/api/chat` | ✅ 実装済み |
 | **分析レポート** | AnalysisAgent (ADK) | `/api/analysis` | ✅ 実装済み |
 | **UI生成** | UIGenerationAgent (ADK) | `/api/ui-generation` | ✅ 実装済み |
-| **画像管理** | Cloud Storage | `/api/images/upload` | ✅ 実装済み |
 
 ---
 
@@ -111,11 +110,11 @@ class AnalysisResponse(BaseModel):
 # 基本テキスト入力
 "レストランの予約フォームを作成してください"
 
-# 構造化入力（フロントエンドから）
+# 構造化入力（デバイス最適化）
 {
   "type": "ui_generation",
   "user_prompt": "レストランの予約フォーム",
-  "device_type": "auto"
+  "device_type": "desktop|tablet|mobile|auto"
 }
 ```
 
@@ -496,8 +495,8 @@ curl -X POST "http://localhost:3000/api/ui-generation" \
     "sessionId": "frontend-ui-001"
   }' | jq .
 
-# 基本チャットAPI（Vertex AI Direct）
-curl -X POST "http://localhost:3000/api/chat/basic" \
+# チャットAPI（Vertex AI Direct）
+curl -X POST "http://localhost:3000/api/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "message": "TypeScriptの型定義について教えてください。interfaceとtypeの違いについても説明してください。",
@@ -655,14 +654,14 @@ tail -f packages/frontend/.next/server.log
 6. **🛡️ セキュリティ対応** - DOMPurify XSS対策
 7. **📱 レスポンシブ対応** - 全UI生成でモバイル対応
 
-### 🔧 **改善推奨事項**
+### ✅ **最新の実装状況**
 
-| 項目 | 現在の状態 | 改善案 | 優先度 |
-|------|-----------|--------|--------|
-| **Analysis Agent出力** | Markdownテキストのみ | JSON構造化出力 | 🔴 高 |
-| **フィールド名統一** | `device_type` vs `deviceType` | 全体で`deviceType`統一 | 🟡 中 |
-| **FeatureCard対応** | UI生成未対応 | 全機能対応 | 🟡 中 |
-| **エンドポイント最適化** | `:streamQuery` 使用 | `:query` 検討 | 🟢 低 |
+| 機能 | 状態 | 説明 |
+|------|------|------|
+| **UI生成デバイス最適化** | ✅ 実装済み | `deviceType`による最適化対応 |
+| **メタデータ簡素化** | ✅ 実装済み | 必要最小限の情報のみ保持 |
+| **型安全性** | ✅ 実装済み | TypeScript型定義完備 |
+| **ビルド検証** | ✅ 完了 | 全エンドポイント正常動作確認 |
 
 ### 🚀 **実装後の期待効果**
 
@@ -804,8 +803,8 @@ curl -X POST "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PRO
 
 ---
 
-**📅 最終更新:** 2025年7月21日  
+**📅 最終更新:** 2025年7月26日  
 **✍️ 作成者:** AI Chat Starter Kit Development Team  
-**📋 バージョン:** v1.0.1 (動作確認済みクエリ形式追加)
+**📋 バージョン:** v1.1.0 (UIGenerationOptions deviceType対応)
 
 > 💡 **このドキュメントは生きたドキュメントです。** 実装の変更に合わせて継続的に更新してください。

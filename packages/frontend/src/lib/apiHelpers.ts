@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import type { BaseAPIRequest, ErrorAPIResponse } from '@/core/types';
+import type { BaseAIRequest, AIErrorResponse } from '@/lib/ai-features';
 
 /**
  * 標準的な成功レスポンスを作成
@@ -17,9 +17,13 @@ export function createSuccessResponse<T>(data: T): NextResponse {
  * 標準的なエラーレスポンスを作成
  */
 export function createErrorResponse(message: string, status = 500): NextResponse {
-  const errorResponse: ErrorAPIResponse = {
-    error: message,
-    status
+  const errorResponse: AIErrorResponse = {
+    success: false,
+    error: {
+      code: 'API_ERROR',
+      message
+    },
+    timestamp: new Date().toISOString()
   };
   return NextResponse.json(errorResponse, { status });
 }
@@ -27,7 +31,7 @@ export function createErrorResponse(message: string, status = 500): NextResponse
 /**
  * リクエストボディのJSONパースと基本バリデーション
  */
-export async function parseRequestBody<T = BaseAPIRequest>(request: NextRequest): Promise<T> {
+export async function parseRequestBody<T = BaseAIRequest>(request: NextRequest): Promise<T> {
   try {
     const body = await request.json();
     return body as T;
@@ -36,24 +40,12 @@ export async function parseRequestBody<T = BaseAPIRequest>(request: NextRequest)
   }
 }
 
-/**
- * 共通入力バリデーション
- */
-export function validateCommonInput(body: Partial<BaseAPIRequest>): asserts body is BaseAPIRequest {
-  if (!body.message || typeof body.message !== 'string') {
-    throw new Error('メッセージが必要です');
-  }
-  
-  if (body.message.length > 5000) {
-    throw new Error('メッセージが長すぎます（最大5000文字）');
-  }
-}
 
 
 /**
  * セッションIDを取得または生成
  */
-export function getOrCreateSessionId(body: Partial<BaseAPIRequest>): string {
+export function getOrCreateSessionId(body: Partial<BaseAIRequest>): string {
   const sessionId = body.sessionId;
   return typeof sessionId === 'string' ? sessionId : `session-${Date.now()}`;
 }

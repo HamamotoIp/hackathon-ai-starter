@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * AI Chat Starter Kit - 動作確認用シンプルページ
+ * AI Chat Starter Kit - トップページ
  */
 export default function HomePage() {
   return (
@@ -10,23 +10,23 @@ export default function HomePage() {
       
       <div className="space-y-4">
         <Link href="/simple-chat" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">シンプルチャット</h2>
+          <h2 className="text-xl font-semibold">💬 シンプルチャット</h2>
           <p className="text-gray-600">Vertex AI直接呼び出しの高速チャット</p>
         </Link>
         
         <Link href="/ai-features" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">AI機能統合</h2>
+          <h2 className="text-xl font-semibold">📊 AI機能統合</h2>
           <p className="text-gray-600">分析レポート生成のAgent Engine機能</p>
         </Link>
         
         <Link href="/ui-builder" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">UI生成ツール</h2>
+          <h2 className="text-xl font-semibold">🎨 UI生成ツール</h2>
           <p className="text-gray-600">HTML/CSS生成とプレビュー</p>
         </Link>
         
         <Link href="/content-management" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">画像管理</h2>
-          <p className="text-gray-600">ドラッグ&ドロップアップロード・Cloud Storage連携</p>
+          <h2 className="text-xl font-semibold">📁 コンテンツ管理</h2>
+          <p className="text-gray-600">テキストコンテンツの作成・編集・管理</p>
         </Link>
       </div>
     </div>
@@ -37,3 +37,4 @@ export const metadata = {
   title: 'AI Chat Starter Kit',
   description: '認証なしハッカソン特化のAIチャットスターターキット',
 };
+

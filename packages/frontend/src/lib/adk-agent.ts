@@ -1,5 +1,5 @@
 /**
- * ADK Agent処理ヘルパー
+ * ADK Agent処理ヘルパー - サーバーサイド専用
  * Analysis・UI Generation用のADK Agent呼び出し
  */
 
@@ -8,9 +8,9 @@ import type {
   ADKCreateSessionRequest,
   ADKCreateSessionResponse,
   ADKStreamQueryRequest,
-  ADKSSEEventData,
-  UIGenerationOptions
-} from '@/core/types/apiTypes';
+  ADKSSEEventData
+} from '@/lib/api';
+import type { UIGenerationOptions } from '@/lib/ai-features';
 
 /**
  * ADK Agent - Analysis処理
@@ -25,8 +25,7 @@ export async function processAnalysis(
 
   try {
     const sessionId = await createADKSession(serviceUrl);
-    const response = await sendADKMessage(serviceUrl, sessionId, message);
-    return response;
+    return await sendADKMessage(serviceUrl, sessionId, message);
   } catch (error) {
     throw new Error(`Analysis処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -47,8 +46,7 @@ export async function processUIGeneration(
   try {
     const sessionId = await createADKSession(serviceUrl);
     const structuredMessage = createUIGenerationMessage(message, options);
-    const response = await sendADKMessage(serviceUrl, sessionId, structuredMessage);
-    return response;
+    return await sendADKMessage(serviceUrl, sessionId, structuredMessage);
   } catch (error) {
     throw new Error(`UI Generation処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -123,7 +121,6 @@ async function sendADKMessage(
     responseType: 'text'
   });
 
-
   return parseADKResponse(response.data as string);
 }
 
@@ -144,13 +141,24 @@ function createUIGenerationMessage(message: string, options?: UIGenerationOption
  */
 function parseADKResponse(responseData: string): string {
   try {
-    
     // SSE形式のレスポンスを解析
     const lines = responseData.split('\n');
     const dataLines = lines.filter(line => line.startsWith('data: '));
     
     if (dataLines.length === 0) {
-      return responseData; // SSE形式でない場合はそのまま返す
+      // SSE形式でない場合、JSON全体をパースして内容を抽出
+      try {
+        const jsonResponse = JSON.parse(responseData);
+        // content.parts[0].text の形式を試す
+        if (jsonResponse?.content?.parts?.[0]?.text) {
+          return jsonResponse.content.parts[0].text;
+        }
+        // その他の可能なパスを試す
+        const content = jsonResponse.message ?? jsonResponse.response ?? jsonResponse.content ?? jsonResponse.text ?? jsonResponse.output;
+        return typeof content === 'string' ? content : responseData;
+      } catch {
+        return responseData;
+      }
     }
 
     // すべてのデータラインから内容を結合
@@ -165,12 +173,24 @@ function parseADKResponse(responseData: string): string {
       
       try {
         const parsedData = JSON.parse(jsonData) as ADKSSEEventData;
-        // message, response, content, text など様々なフィールド名の可能性
-        const content = parsedData.message ?? parsedData.response ?? parsedData.content ?? parsedData.text ?? parsedData.output;
-        if (content) {
+        
+        // 深くネストされた構造を確認
+        let content: string | undefined;
+        
+        // content.parts[0].text パターン
+        if (typeof parsedData.content === 'object' && parsedData.content?.parts?.[0]?.text) {
+          content = parsedData.content.parts[0].text;
+        } else {
+          // 従来のパターン
+          const contentValue = typeof parsedData.content === 'string' ? parsedData.content : undefined;
+          content = parsedData.message ?? parsedData.response ?? contentValue ?? parsedData.text ?? parsedData.output;
+        }
+        
+        if (content && typeof content === 'string') {
           fullMessage += content;
         }
       } catch {
+        // JSONパースエラーは無視
       }
     }
     
@@ -180,4 +200,12 @@ function parseADKResponse(responseData: string): string {
     // JSON解析に失敗した場合は生のレスポンスを返す
     return responseData;
   }
+}
+
+// 🚨 型安全性：クライアントサイドでの使用を防ぐ
+if (typeof window !== 'undefined') {
+  throw new Error(
+    '🚨 ADK Agentはサーバーサイド専用です。' +
+    'クライアントサイドではclient/services/api-client.tsを使用してください。'
+  );
 }

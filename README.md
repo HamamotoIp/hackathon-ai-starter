@@ -31,10 +31,9 @@ npm install && npm run dev
 
 | 機能 | API エンドポイント | 特徴 |
 |------|--------|------|
-| **💬 シンプルチャット** | `/api/chat/basic` | Vertex AI Direct、高速レスポンス（3秒以内） |
+| **💬 チャット** | `/api/chat` | Vertex AI Direct、高速レスポンス（3秒以内） |
 | **📊 分析レポート** | `/api/analysis` | ADK Analysis Agent、詳細な分析・構造化出力 |
-| **🎨 UI生成** | `/api/ui-generation` | ADK UI Generation Agent、HTML/Tailwind生成 |
-| **🖼️ 画像アップロード** | `/api/images/upload` | Cloud Storage連携 |
+| **🎨 UI生成** | `/api/ui-generation` | ADK UI Generation Agent、デバイス最適化HTML生成 |
 
 ## 🚀 始め方
 
@@ -73,25 +72,22 @@ cp config.example.sh config.sh
 ├── Next.js 15.3.1 + React 19.0.0
 ├── TypeScript 5.x + Tailwind CSS 4.0
 ├── API Routes (直接AI呼び出し):
-│   ├── /api/chat/basic → vertexAI.ts → Vertex AI Direct
-│   ├── /api/analysis → adkAgent.ts → ADK Analysis Agent
-│   ├── /api/ui-generation → adkAgent.ts → ADK UI Generation Agent
-│   └── /api/images/upload → Cloud Storage
-├── Server Libraries:
-│   ├── server/lib/vertexAI.ts → 基本チャット用
-│   ├── server/lib/adkAgent.ts → 分析・UI生成用
-│   └── server/lib/apiHelpers.ts → 共通ヘルパー
-└── Pages:
-    ├── / → トップページ・各機能への導線
-    ├── /simple-chat → シンプルチャット（Vertex AI Direct）
-    ├── /ai-features → AI機能統合（分析レポート）
-    ├── /ui-builder → UI生成ツール
-    └── /content-management → 画像管理・Cloud Storage
+│   ├── /api/chat → vertex-ai.ts → Vertex AI Direct
+│   ├── /api/analysis → adk-agent.ts → ADK Analysis Agent
+│   └── /api/ui-generation → adk-agent.ts → ADK UI Generation Agent (デバイス最適化)
+├── Server Libraries (src/lib/):
+│   ├── vertex-ai.ts → 基本チャット用
+│   ├── adk-agent.ts → 分析・UI生成用
+│   ├── api-client.ts → HTTPクライアント
+│   └── ai-features.ts → AI機能定義
+└── Components (src/components/):
+    ├── FeatureCard.tsx → 機能カード表示
+    └── use-ai-feature.ts → AI機能利用フック
 
 🤖 AI Agents (packages/ai-agents)
 ├── ADK 1.93.0 + Flask 3.0.0
 ├── Analysis Agent (analysis_agent.py)
-└── UI Generation Agent (ui_generation_agent.py)
+└── UI Generation Agent (ui_generation_agent.py) - デバイス最適化対応
 
 ☁️ GCP Infrastructure
 ├── Cloud Run (Frontend + Agent Engine)

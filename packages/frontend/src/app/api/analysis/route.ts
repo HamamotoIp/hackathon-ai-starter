@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
-import { processAnalysis } from "@/server/lib/adkAgent";
+import { processAnalysis } from "@/lib/adk-agent";
 import { 
   parseRequestBody, 
-  validateCommonInput, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/server/lib/apiHelpers';
-import type { BaseAPIRequest, AnalysisAPIResponse, ADKStructuredResponse } from '@/core/types';
+} from '@/lib/apiHelpers';
+import type { BaseAIRequest } from '@/lib/ai-features';
+import type { AnalysisAPIResponse } from '@/lib/api';
 
 export const runtime = "nodejs";
 
@@ -19,8 +19,7 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body = await parseRequestBody<BaseAPIRequest>(req);
-    validateCommonInput(body);
+    const body = await parseRequestBody<BaseAIRequest>(req);
 
     // ADK Agentで直接処理
     const serviceUrl = process.env.ANALYSIS_AGENT_URL;
@@ -31,16 +30,8 @@ export async function POST(req: NextRequest) {
     const result = await processAnalysis(serviceUrl, body.message);
     const processingTime = Date.now() - startTime;
 
-    // ADKレスポンスがJSON文字列の場合、パースして実際のテキストを抽出
-    let finalResult = result;
-    try {
-      const parsed = JSON.parse(result) as ADKStructuredResponse;
-      if (parsed.content?.parts?.[0]?.text) {
-        finalResult = parsed.content.parts[0].text;
-      }
-    } catch {
-      // JSONパースに失敗した場合はそのまま使用
-    }
+    // ADKレスポンスをそのまま使用（解析は既にadk-agent.ts内で実行済み）
+    const finalResult = result;
 
     const response: AnalysisAPIResponse = {
       success: true,
