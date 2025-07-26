@@ -4,6 +4,13 @@
  */
 
 import { GoogleAuth } from 'google-auth-library';
+import type {
+  ADKCreateSessionRequest,
+  ADKCreateSessionResponse,
+  ADKStreamQueryRequest,
+  ADKSSEEventData,
+  UIGenerationOptions
+} from '@/core/types/apiTypes';
 
 /**
  * ADK Agent - Analysis処理
@@ -30,7 +37,8 @@ export async function processAnalysis(
  */
 export async function processUIGeneration(
   serviceUrl: string,
-  message: string
+  message: string,
+  options?: UIGenerationOptions
 ): Promise<string> {
   if (!serviceUrl) {
     throw new Error('ADK Agent URLが設定されていません');
@@ -38,7 +46,7 @@ export async function processUIGeneration(
 
   try {
     const sessionId = await createADKSession(serviceUrl);
-    const structuredMessage = createUIGenerationMessage(message);
+    const structuredMessage = createUIGenerationMessage(message, options);
     const response = await sendADKMessage(serviceUrl, sessionId, structuredMessage);
     return response;
   } catch (error) {
@@ -58,17 +66,20 @@ async function createADKSession(serviceUrl: string): Promise<string> {
   });
 
   const client = await auth.getClient();
+  
+  const requestData: ADKCreateSessionRequest = {
+    class_method: 'create_session',
+    input: { user_id: userId }
+  };
+  
   const response = await client.request({
     url: sessionUrl,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: {
-      class_method: 'create_session',
-      input: { user_id: userId }
-    }
+    data: requestData
   });
 
-  const sessionData = response.data as { output?: { id?: string } };
+  const sessionData = response.data as ADKCreateSessionResponse;
 
   if (!sessionData?.output?.id) {
     throw new Error('セッションIDの取得に失敗しました');
@@ -91,6 +102,16 @@ async function sendADKMessage(
   });
 
   const client = await auth.getClient();
+  
+  const requestData: ADKStreamQueryRequest = {
+    class_method: 'stream_query',
+    input: {
+      message,
+      session_id: sessionId,
+      user_id: 'demo-user'
+    }
+  };
+  
   const response = await client.request({
     url: messageUrl,
     method: 'POST',
@@ -98,14 +119,7 @@ async function sendADKMessage(
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream'
     },
-    data: {
-      class_method: 'stream_query',
-      input: {
-        message,
-        session_id: sessionId,
-        user_id: 'demo-user'
-      }
-    },
+    data: requestData,
     responseType: 'text'
   });
 
@@ -116,14 +130,11 @@ async function sendADKMessage(
 /**
  * UI生成用の構造化メッセージ作成
  */
-function createUIGenerationMessage(message: string): string {
+function createUIGenerationMessage(message: string, options?: UIGenerationOptions): string {
   const structuredMessage = {
     type: "ui_generation",
     user_prompt: message,
-    ui_type: "auto",
-    framework: "html", 
-    responsive: true,
-    color_scheme: "light"
+    device_type: options?.deviceType ?? "auto"
   };
   return JSON.stringify(structuredMessage);
 }
@@ -153,7 +164,7 @@ function parseADKResponse(responseData: string): string {
       }
       
       try {
-        const parsedData = JSON.parse(jsonData);
+        const parsedData = JSON.parse(jsonData) as ADKSSEEventData;
         // message, response, content, text など様々なフィールド名の可能性
         const content = parsedData.message ?? parsedData.response ?? parsedData.content ?? parsedData.text ?? parsedData.output;
         if (content) {

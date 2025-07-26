@@ -7,6 +7,13 @@ import {
   createErrorResponse,
   getOrCreateSessionId
 } from '@/server/lib/apiHelpers';
+import type {
+  UIGenerationAPIRequest,
+  UIGenerationAPIResponse,
+  UIGenerationResult as APIUIGenerationResult,
+  UIMetadata,
+  ADKStructuredResponse
+} from '@/core/types/apiTypes';
 
 export const runtime = "nodejs";
 
@@ -18,7 +25,7 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body = await parseRequestBody(req);
+    const body = await parseRequestBody<UIGenerationAPIRequest>(req);
     validateCommonInput(body);
 
     // ADK Agentで直接処理（UI生成モード）
@@ -27,14 +34,14 @@ export async function POST(req: NextRequest) {
       throw new Error('UI_GENERATION_AGENT_URL環境変数が設定されていません');
     }
 
-    const result = await processUIGeneration(serviceUrl, body.message as string);
+    const result = await processUIGeneration(serviceUrl, body.message, body.options);
     const processingTime = Date.now() - startTime;
 
     // UI生成結果の解析
-    let uiResult;
+    let uiResult: APIUIGenerationResult;
     try {
       // ADKレスポンスを解析
-      const adkResponse = JSON.parse(result);
+      const adkResponse = JSON.parse(result) as ADKStructuredResponse;
       
       // content.parts[0].textからコンテンツを取得
       if (adkResponse.content?.parts?.[0]?.text) {
@@ -43,46 +50,32 @@ export async function POST(req: NextRequest) {
         // コードブロック内のJSONを抽出
         const jsonMatch = contentText.match(/```json\n([\s\S]*?)\n```/);
         if (jsonMatch?.[1]) {
-          const parsedContent = JSON.parse(jsonMatch[1]);
-          const options = body.options as Record<string, unknown> | undefined;
+          const parsedContent = JSON.parse(jsonMatch[1]) as { html: string; metadata?: Partial<UIMetadata> };
+          const defaultMetadata: UIMetadata = {
+            deviceType: "auto",
+            responsive: true
+          };
           uiResult = {
             html: parsedContent.html,
-            metadata: parsedContent.metadata ?? {
-              uiType: (options?.uiType as string) ?? "auto",
-              framework: (options?.framework as string) ?? "html",
-              components: [],
-              responsive: (options?.responsive as boolean) !== false,
-              accessibility: true,
-              javascript_required: false
-            }
+            metadata: { ...defaultMetadata, ...parsedContent.metadata }
           };
         } else {
           // JSONブロックが見つからない場合はテキスト全体をHTMLとして扱う
-          const options = body.options as Record<string, unknown> | undefined;
           uiResult = {
             html: contentText,
             metadata: {
-              uiType: (options?.uiType as string) ?? "auto",
-              framework: (options?.framework as string) ?? "html",
-              components: [],
-              responsive: (options?.responsive as boolean) !== false,
-              accessibility: true,
-              javascript_required: false
+              deviceType: "auto",
+              responsive: true
             }
           };
         }
       } else {
         // 旧形式のレスポンスの場合
-        const options = body.options as Record<string, unknown> | undefined;
         uiResult = {
-          html: adkResponse.html ?? result,
+          html: (adkResponse as any).html ?? result,
           metadata: {
-            uiType: (options?.uiType as string) ?? "auto",
-            framework: (options?.framework as string) ?? "html",
-            components: [],
-            responsive: (options?.responsive as boolean) !== false,
-            accessibility: true,
-            javascript_required: false
+            deviceType: "auto",
+            responsive: true
           }
         };
       }
@@ -91,24 +84,22 @@ export async function POST(req: NextRequest) {
       uiResult = {
         html: result,
         metadata: {
-          uiType: "auto",
-          framework: "html",
-          components: [],
-          responsive: true,
-          accessibility: true,
-          javascript_required: false
+          deviceType: "auto",
+          responsive: true
         }
       };
     }
 
-    return createSuccessResponse({
+    const response: UIGenerationAPIResponse = {
       success: true,
       result: uiResult,
       processingMode: "adk_agent",
       processingTimeMs: processingTime,
       sessionId: getOrCreateSessionId(body),
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    return createSuccessResponse(response);
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "内部エラーが発生しました";

@@ -42,8 +42,11 @@ AI Chat Starter Kit/
 4. **UI実装** - AIが`app/`にページ・コンポーネント実装
 5. **統合** - FeatureCardやナビゲーションに機能追加
 
+詳細な手順については [新規AI機能追加ガイド](./adding-new-ai-features.md) を参照してください。
+
 ## 📚 詳細ドキュメント
 
 - **[アーキテクチャ](./architecture.md)** - システム全体の設計思想
+- **[新規AI機能追加ガイド](./adding-new-ai-features.md)** - 新しいAI機能を追加する詳細手順
 - **[API仕様](../api/)** - AI機能の詳細実装
 - **[上級者向け](../advanced/)** - Claude連携・カスタマイズ

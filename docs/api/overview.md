@@ -104,9 +104,7 @@ Content-Type: application/json
 {
   "message": "レストランの予約フォームを作成してください",
   "options": {
-    "uiType": "form",
-    "framework": "html",
-    "responsive": true
+    "deviceType": "mobile"
   },
   "sessionId": "user-session-123"
 }
@@ -174,9 +172,7 @@ interface AIFeatureRequest {
 }
 
 interface UIGenerationOptions {
-  uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
-  framework?: "html" | "react";
-  responsive?: boolean;
+  deviceType?: "desktop" | "tablet" | "mobile" | "auto";
 }
 ```
 
@@ -202,12 +198,8 @@ interface AIFeatureResponse {
 interface UIGenerationResult {
   html: string;
   metadata?: {
-    uiType: string;
-    framework: string;
-    components: string[];
+    deviceType: string;
     responsive: boolean;
-    accessibility: boolean;
-    javascript_required: boolean;
   };
 }
 ```

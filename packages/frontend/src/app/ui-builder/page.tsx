@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AIFeatureResponse, isUIGenerationResponse } from "@/core/types/aiTypes";
+import { UIGenerationAPIResponse } from "@/core/types/apiTypes";
 
 export default function UIBuilderPage() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedUI, setGeneratedUI] = useState<AIFeatureResponse | null>(null);
+  const [generatedUI, setGeneratedUI] = useState<UIGenerationAPIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
@@ -22,7 +22,7 @@ export default function UIBuilderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: prompt,
-          options: { uiType: "auto", framework: "html" },
+          options: { deviceType: "auto" },
           sessionId: 'demo-session', // 固定セッションID
         }),
       });
@@ -93,11 +93,7 @@ export default function UIBuilderPage() {
               <div className="p-4 bg-white">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: isUIGenerationResponse(generatedUI) 
-                      ? generatedUI.result.html 
-                      : typeof generatedUI.result === 'string' 
-                        ? generatedUI.result 
-                        : ""
+                    __html: generatedUI.result.html
                   }}
                 />
               </div>

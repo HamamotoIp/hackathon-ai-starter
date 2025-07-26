@@ -7,23 +7,29 @@ import {
   createErrorResponse,
   getOrCreateSessionId
 } from '@/server/lib/apiHelpers';
+import type { BaseAPIRequest, BasicChatAPIResponse } from '@/core/types';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body = await parseRequestBody(request);
+    const body = await parseRequestBody<BaseAPIRequest>(request);
     validateCommonInput(body);
 
     // Vertex AIで直接処理
-    const result = await generateText(body.message as string);
+    const result = await generateText(body.message);
     const processingTime = Date.now() - startTime;
 
-    return createSuccessResponse({
+    const response: BasicChatAPIResponse = {
+      success: true,
       message: result,
+      processingMode: 'vertex_direct',
       processingTimeMs: processingTime,
       sessionId: getOrCreateSessionId(body),
-    });
+      timestamp: new Date().toISOString()
+    };
+    
+    return createSuccessResponse(response);
     
   } catch (error) {
     const message = error instanceof Error ? error.message : 'チャット処理中にエラーが発生しました';

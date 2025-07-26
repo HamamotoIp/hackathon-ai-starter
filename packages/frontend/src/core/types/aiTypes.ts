@@ -87,19 +87,14 @@ export interface AnalysisReportRequest extends BaseAIRequest {
   input: string;
 }
 
-/** UI生成オプション */
-export interface UIGenerationOptions {
-  uiType?: "form" | "card" | "dashboard" | "landing" | "navigation" | "auto";
-  framework?: "html" | "react";
-  responsive?: boolean;
-  colorScheme?: "light" | "dark" | "auto";
-}
 
 /** UI生成リクエスト */
 export interface UIGenerationRequest extends BaseAIRequest {
   feature: "ui_generation";
   input: string;
-  options: UIGenerationOptions;
+  options: {
+    deviceType?: "desktop" | "tablet" | "mobile" | "auto";
+  };
 }
 
 /** 統合AI機能リクエスト型 */
@@ -108,18 +103,6 @@ export type AIFeatureRequest =
   | AnalysisReportRequest
   | UIGenerationRequest;
 
-/** UI生成専用レスポンス */
-export interface UIGenerationResult {
-  html: string;
-  metadata?: {
-    uiType: string;
-    framework: string;
-    components: string[];
-    responsive: boolean;
-    accessibility: boolean;
-    javascript_required: boolean;
-  };
-}
 
 /** 基本レスポンスインターフェース */
 interface BaseAIResponse {
@@ -149,7 +132,13 @@ export interface AnalysisReportResponse extends BaseAIResponse {
 /** UI生成レスポンス */
 export interface UIGenerationResponse extends BaseAIResponse {
   feature: "ui_generation";
-  result: UIGenerationResult;
+  result: {
+    html: string;
+    metadata?: {
+      deviceType: string;
+      responsive: boolean;
+    };
+  };
 }
 
 /** 統合AI機能レスポンス型 */
@@ -187,18 +176,9 @@ export function isIntelligentFeature(feature: AIFeatureType): boolean {
 // 型ガード関数
 // =============================================================================
 
-/** UI生成結果かチェック */
-export function isUIGenerationResult(result: unknown): result is UIGenerationResult {
-  return typeof result === 'object' && result !== null && 'html' in result;
-}
-
 /** UI生成機能かチェック */
 export function isUIGenerationFeature(feature: AIFeatureType): feature is "ui_generation" {
   return feature === "ui_generation";
 }
 
 
-/** UI生成レスポンスかチェック */
-export function isUIGenerationResponse(response: AIFeatureResponse): response is UIGenerationResponse {
-  return response.feature === "ui_generation";
-}

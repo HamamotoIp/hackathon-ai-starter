@@ -6,3 +6,6 @@
 // AI types
 export * from "./aiTypes";
 
+// API types
+export * from "./apiTypes";
+

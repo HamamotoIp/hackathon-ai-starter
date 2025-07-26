@@ -115,10 +115,7 @@ class AnalysisResponse(BaseModel):
 {
   "type": "ui_generation",
   "user_prompt": "レストランの予約フォーム",
-  "ui_type": "form",
-  "framework": "html",
-  "responsive": true,
-  "color_scheme": "light"
+  "device_type": "auto"
 }
 ```
 
@@ -127,12 +124,8 @@ class AnalysisResponse(BaseModel):
 {
   "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>レストラン予約フォーム</title>\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n</head>\n<body class=\"bg-gray-50\">\n    <div class=\"max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md\">\n        <h2 class=\"text-2xl font-bold text-gray-800 mb-6 text-center\">レストラン予約</h2>\n        <form class=\"space-y-4\">\n            <div>\n                <label class=\"block text-gray-700 font-medium mb-2\">お名前 *</label>\n                <input type=\"text\" class=\"w-full border border-gray-300 rounded-md px-3 py-2\" required>\n            </div>\n            <div>\n                <label class=\"block text-gray-700 font-medium mb-2\">電話番号 *</label>\n                <input type=\"tel\" class=\"w-full border border-gray-300 rounded-md px-3 py-2\" required>\n            </div>\n            <button type=\"submit\" class=\"w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600\">予約する</button>\n        </form>\n    </div>\n</body>\n</html>",
   "metadata": {
-    "uiType": "form",
-    "framework": "html",
-    "components": ["form", "input", "button", "label"],
-    "responsive": true,
-    "accessibility": true,
-    "javascript_required": false
+    "deviceType": "auto",
+    "responsive": true
   }
 }
 ```
@@ -141,8 +134,7 @@ class AnalysisResponse(BaseModel):
 ```python
 class UIGenerationResponse(BaseModel):
     html: str = Field(..., description="生成されたHTML（Tailwind CSS使用）")
-    ui_type: str = Field(..., description="判定されたUIタイプ")
-    components: List[str] = Field(default=[], description="含まれるコンポーネント")
+    device_type: str = Field(..., description="対象デバイスタイプ")
     responsive: bool = Field(default=True, description="レスポンシブ対応")
 ```
 
@@ -319,10 +311,7 @@ const { output } = await response.json();
 const structuredMessage = {
   type: "ui_generation",
   user_prompt: "レストランの予約フォーム",
-  ui_type: "form",
-  framework: "html",
-  responsive: true,
-  color_scheme: "light"
+  device_type: "auto"
 };
 
 const uiGenRequest = {
@@ -477,7 +466,7 @@ curl -X POST "$UI_GEN_URL" \
   -d '{
     "class_method": "query",
     "input": {
-      "input": "{\"type\":\"ui_generation\",\"user_prompt\":\"イベント申し込みフォームを作成してください。イベント名、参加者名、メールアドレス、電話番号、参加人数、特別な要望を入力できるフォームにしてください。\",\"ui_type\":\"form\",\"framework\":\"html\",\"responsive\":true,\"color_scheme\":\"light\"}",
+      "input": "{\"type\":\"ui_generation\",\"user_prompt\":\"イベント申し込みフォームを作成してください。イベント名、参加者名、メールアドレス、電話番号、参加人数、特別な要望を入力できるフォームにしてください。\",\"device_type\":\"auto\"}",
       "user_id": "test-user-ui-advanced",
       "session_id": "ui-advanced-session-001"
     }
@@ -502,9 +491,7 @@ curl -X POST "http://localhost:3000/api/ui-generation" \
   -d '{
     "message": "ユーザー登録フォームを作成してください。ユーザー名、メールアドレス、パスワード、パスワード確認、利用規約の同意チェックボックスを含めてください。",
     "options": {
-      "uiType": "form",
-      "framework": "html",
-      "responsive": true
+      "deviceType": "mobile"
     },
     "sessionId": "frontend-ui-001"
   }' | jq .
@@ -532,7 +519,7 @@ curl -X POST "http://localhost:3000/api/chat/basic" \
 ```json
 {
   "input": "お問い合わせフォーム...",
-  "output": "{\n  \"html\": \"<!DOCTYPE html>\\n<html lang=\\\"ja\\\">\\n<head>\\n    <meta charset=\\\"UTF-8\\\">\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1.0\\\">\\n    <title>お問い合わせフォーム</title>\\n    <script src=\\\"https://cdn.tailwindcss.com\\\"></script>\\n</head>\\n<body class=\\\"bg-gray-50 py-8\\\">\\n    <div class=\\\"max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md\\\">\\n        <h2 class=\\\"text-3xl font-bold text-gray-800 mb-6 text-center\\\">お問い合わせフォーム</h2>\\n        <form class=\\\"space-y-6\\\">\\n            <div class=\\\"grid grid-cols-1 md:grid-cols-2 gap-4\\\">\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">会社名 *</label>\\n                    <input type=\\\"text\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">担当者名 *</label>\\n                    <input type=\\\"text\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n            </div>\\n            <div class=\\\"grid grid-cols-1 md:grid-cols-2 gap-4\\\">\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">メールアドレス *</label>\\n                    <input type=\\\"email\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">電話番号</label>\\n                    <input type=\\\"tel\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\">\\n                </div>\\n            </div>\\n            <div>\\n                <label class=\\\"block text-gray-700 font-medium mb-2\\\">お問い合わせ内容 *</label>\\n                <textarea class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" rows=\\\"5\\\" placeholder=\\\"お問い合わせ内容をご記入ください...\\\" required></textarea>\\n            </div>\\n            <div class=\\\"text-center\\\">\\n                <button type=\\\"submit\\\" class=\\\"bg-blue-500 text-white font-medium py-3 px-8 rounded-md hover:bg-blue-600 transition duration-200 shadow-md\\\">送信する</button>\\n            </div>\\n        </form>\\n    </div>\\n</body>\\n</html>\",\n  \"metadata\": {\n    \"uiType\": \"form\",\n    \"framework\": \"html\",\n    \"components\": [\"form\", \"input\", \"textarea\", \"button\", \"label\", \"grid\"],\n    \"responsive\": true,\n    \"accessibility\": true,\n    \"javascript_required\": false\n  }\n}"
+  "output": "{\n  \"html\": \"<!DOCTYPE html>\\n<html lang=\\\"ja\\\">\\n<head>\\n    <meta charset=\\\"UTF-8\\\">\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1.0\\\">\\n    <title>お問い合わせフォーム</title>\\n    <script src=\\\"https://cdn.tailwindcss.com\\\"></script>\\n</head>\\n<body class=\\\"bg-gray-50 py-8\\\">\\n    <div class=\\\"max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md\\\">\\n        <h2 class=\\\"text-3xl font-bold text-gray-800 mb-6 text-center\\\">お問い合わせフォーム</h2>\\n        <form class=\\\"space-y-6\\\">\\n            <div class=\\\"grid grid-cols-1 md:grid-cols-2 gap-4\\\">\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">会社名 *</label>\\n                    <input type=\\\"text\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">担当者名 *</label>\\n                    <input type=\\\"text\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n            </div>\\n            <div class=\\\"grid grid-cols-1 md:grid-cols-2 gap-4\\\">\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">メールアドレス *</label>\\n                    <input type=\\\"email\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" required>\\n                </div>\\n                <div>\\n                    <label class=\\\"block text-gray-700 font-medium mb-2\\\">電話番号</label>\\n                    <input type=\\\"tel\\\" class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\">\\n                </div>\\n            </div>\\n            <div>\\n                <label class=\\\"block text-gray-700 font-medium mb-2\\\">お問い合わせ内容 *</label>\\n                <textarea class=\\\"w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\\\" rows=\\\"5\\\" placeholder=\\\"お問い合わせ内容をご記入ください...\\\" required></textarea>\\n            </div>\\n            <div class=\\\"text-center\\\">\\n                <button type=\\\"submit\\\" class=\\\"bg-blue-500 text-white font-medium py-3 px-8 rounded-md hover:bg-blue-600 transition duration-200 shadow-md\\\">送信する</button>\\n            </div>\\n        </form>\\n    </div>\\n</body>\\n</html>\",\n  \"metadata\": {\n    \"deviceType\": \"auto\",\n    \"responsive\": true\n  }\n}"
 }
 ```
 
@@ -673,7 +660,7 @@ tail -f packages/frontend/.next/server.log
 | 項目 | 現在の状態 | 改善案 | 優先度 |
 |------|-----------|--------|--------|
 | **Analysis Agent出力** | Markdownテキストのみ | JSON構造化出力 | 🔴 高 |
-| **フィールド名統一** | `ui_type` vs `uiType` | 全体で`uiType`統一 | 🟡 中 |
+| **フィールド名統一** | `device_type` vs `deviceType` | 全体で`deviceType`統一 | 🟡 中 |
 | **FeatureCard対応** | UI生成未対応 | 全機能対応 | 🟡 中 |
 | **エンドポイント最適化** | `:streamQuery` 使用 | `:query` 検討 | 🟢 低 |
 
@@ -798,7 +785,7 @@ curl -X POST "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PRO
 ```json
 {
   "content": {
-    "parts": [{"text": "```json\n{\n  \"html\": \"<!DOCTYPE html>\\n<html lang=\\\"ja\\\">\\n<head>\\n    <meta charset=\\\"UTF-8\\\">\\n    <title>ログインフォーム</title>\\n    <link href=\\\"https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css\\\" rel=\\\"stylesheet\\\">\\n</head>\\n<body class=\\\"bg-gray-100 h-screen flex items-center justify-center\\\">\\n    <div class=\\\"bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4\\\">...\",\n  \"metadata\": {\n    \"uiType\": \"form\",\n    \"framework\": \"html\",\n    \"components\": [\"header\", \"form\", \"button\", \"input\"],\n    \"responsive\": true,\n    \"accessibility\": true,\n    \"javascript_required\": false\n  }\n}\n```"}]
+    "parts": [{"text": "```json\n{\n  \"html\": \"<!DOCTYPE html>\\n<html lang=\\\"ja\\\">\\n<head>\\n    <meta charset=\\\"UTF-8\\\">\\n    <title>ログインフォーム</title>\\n    <link href=\\\"https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css\\\" rel=\\\"stylesheet\\\">\\n</head>\\n<body class=\\\"bg-gray-100 h-screen flex items-center justify-center\\\">\\n    <div class=\\\"bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4\\\">...\",\n  \"metadata\": {\n    \"deviceType\": \"auto\",\n    \"responsive\": true\n  }\n}\n```"}]
   }
 }
 ```
