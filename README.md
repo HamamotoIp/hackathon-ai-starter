@@ -29,11 +29,12 @@ npm install && npm run dev
 
 ### 🎨 AI機能デモ
 
-| 機能 | API エンドポイント | 特徴 |
-|------|--------|------|
-| **💬 チャット** | `/api/chat` | Vertex AI Direct、高速レスポンス（3秒以内） |
-| **📊 分析レポート** | `/api/analysis` | ADK Analysis Agent、詳細な分析・構造化出力 |
-| **🎨 UI生成** | `/api/ui-generation` | ADK UI Generation Agent、デバイス最適化HTML生成 |
+| 機能 | ページ | API エンドポイント | 特徴 |
+|------|--------|--------|------|
+| **💬 チャット** | `/simple-chat` | `/api/chat` | Vertex AI Direct、高速レスポンス（3秒以内） |
+| **📊 分析レポート** | `/ai-features` | `/api/analysis` | ADK Analysis Agent、詳細な分析・構造化出力 |
+| **🎨 UI生成** | `/ui-builder` | `/api/ui-generation` | ADK UI Generation Agent、デバイス最適化HTML生成 |
+| **📁 コンテンツ管理** | `/content-management` | - | テキストコンテンツの作成・編集・管理 |
 
 ## 🚀 始め方
 
@@ -71,6 +72,11 @@ cp config.example.sh config.sh
 📱 Frontend (hackathon-ai-starter)
 ├── Next.js 15.3.1 + React 19.0.0
 ├── TypeScript 5.x + Tailwind CSS 4.0
+├── Pages (機能別UI):
+│   ├── /simple-chat → シンプルチャット (Vertex AI Direct)
+│   ├── /ai-features → 分析レポート (ADK Analysis Agent)
+│   ├── /ui-builder → UI生成ツール (ADK UI Generation Agent)
+│   └── /content-management → テキストコンテンツ管理
 ├── API Routes (直接AI呼び出し):
 │   ├── /api/chat → vertex-ai.ts → Vertex AI Direct
 │   ├── /api/analysis → adk-agent.ts → ADK Analysis Agent
@@ -82,7 +88,10 @@ cp config.example.sh config.sh
 │   └── ai-features.ts → AI機能定義
 └── Components (src/components/):
     ├── FeatureCard.tsx → 機能カード表示
-    └── use-ai-feature.ts → AI機能利用フック
+    └── hooks/ → 機能別React Hook
+        ├── use-chat.ts → チャット機能Hook
+        ├── use-analysis.ts → 分析機能Hook
+        └── use-ui-generation.ts → UI生成機能Hook
 
 🤖 AI Agents (packages/ai-agents)
 ├── ADK 1.93.0 + Flask 3.0.0

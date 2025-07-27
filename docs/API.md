@@ -14,26 +14,6 @@ AI Chat Starter Kit のAPI仕様書です。機能ベースでAIを使い分け�
 
 ## 🚀 エンドポイント一覧
 
-### 🔍 システム・診断
-#### `GET /api/debug`
-システム状態確認・デバッグ情報取得
-
-**レスポンス:**
-```json
-{
-  "status": "healthy",
-  "timestamp": "2025-01-20T12:00:00.000Z",
-  "environment": {
-    "VERTEX_AI_PROJECT_ID": "SET",
-    "ADK_SERVICE_URL": "SET"
-  },
-  "services": {
-    "vertexAI": "CONNECTED",
-    "adkEngine": "CONNECTED"
-  }
-}
-```
-
 ### 🤖 AI機能
 
 #### `POST /api/chat`
@@ -289,10 +269,6 @@ curl -X POST http://localhost:3000/api/analysis \
 curl -X POST http://localhost:3000/api/ui-generation \
   -H "Content-Type: application/json" \
   -d '{"message": "ログインフォーム", "options": {"deviceType": "auto"}, "sessionId": "demo"}'
-
-
-# システム状態確認
-curl http://localhost:3000/api/debug
 ```
 
 ## 🎯 機能別使い分けガイド
@@ -340,8 +316,10 @@ curl http://localhost:3000/api/debug
 
 ### デバッグ方法
 ```bash
-# ローカル環境確認
-curl http://localhost:3000/api/debug | jq .
+# 基本的なAPI動作確認
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello"}'
 
 # 詳細デバッグ
 cd /workspaces/hackathon-ai-starter

@@ -24,12 +24,8 @@ export default function UIBuilderPage() {
   const renderHTML = () => {
     if (!html?.result) return null;
     
-    // HTMLの結果を取得（文字列またはオブジェクト）
-    const htmlContent = typeof html.result === 'string' 
-      ? html.result 
-      : html.result.html;
-
-    return htmlContent;
+    // UIGenerationResultからHTMLを取得
+    return html.result.html;
   };
 
   const examplePrompts = [
