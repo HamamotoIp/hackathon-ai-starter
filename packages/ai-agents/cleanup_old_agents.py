@@ -39,6 +39,14 @@ def get_current_agents() -> Dict[str, str]:
             if engine_id:
                 agents['ui_generation'] = engine_id
     
+    # Restaurant Search Agent
+    if os.path.exists('restaurant_search_agent_url.txt'):
+        with open('restaurant_search_agent_url.txt', 'r') as f:
+            url = f.read().strip()
+            engine_id = extract_engine_id(url)
+            if engine_id:
+                agents['restaurant_search'] = engine_id
+    
     return agents
 
 
@@ -53,10 +61,10 @@ def list_all_reasoning_engines() -> List[Tuple[str, str, str]]:
         from google.api_core import client_options
         
         project_id = os.getenv('VERTEX_AI_PROJECT_ID')
-        location = 'us-central1'  # 実際のリージョンを使用
+        location = os.getenv('VERTEX_AI_LOCATION', 'us-central1')
         
         if not project_id:
-            raise ValueError("VERTEX_AI_PROJECT_ID環境変数が設定されていません")
+            raise ValueError("PROJECT_ID not found in config.sh")
         
         # リージョナルエンドポイントを使用
         api_endpoint = f"{location}-aiplatform.googleapis.com"
@@ -161,14 +169,31 @@ def cleanup_old_agents(dry_run: bool = True) -> None:
 def main():
     """メイン関数"""
     
+    # config.shから環境変数を読み込み
+    config_path = os.path.join(os.path.dirname(__file__), "../../config.sh")
+    if os.path.exists(config_path):
+        # config.shからPROJECT_IDとREGIONを読み取り
+        with open(config_path, 'r') as f:
+            config_content = f.read()
+        
+        import re
+        project_match = re.search(r'PROJECT_ID="([^"]+)"', config_content)
+        region_match = re.search(r'REGION="([^"]+)"', config_content)
+        
+        if project_match:
+            os.environ['VERTEX_AI_PROJECT_ID'] = project_match.group(1)
+        if region_match:
+            os.environ['VERTEX_AI_LOCATION'] = region_match.group(1)
+    
     # Vertex AI初期化
     project_id = os.getenv('VERTEX_AI_PROJECT_ID')
     if not project_id:
-        print("❌ VERTEX_AI_PROJECT_ID環境変数が設定されていません")
+        print("❌ PROJECT_ID not found in config.sh. Please set PROJECT_ID in config.sh")
         sys.exit(1)
     
     try:
-        vertexai.init(project=project_id, location='us-central1')
+        location = os.getenv('VERTEX_AI_LOCATION', 'us-central1')
+        vertexai.init(project=project_id, location=location)
     except Exception as e:
         print(f"❌ Vertex AI初期化エラー: {e}")
         sys.exit(1)

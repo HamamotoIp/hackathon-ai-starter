@@ -22,6 +22,18 @@ npm run lint       # コード品質チェック
 npm run build      # ビルド確認
 ```
 
+### 2. AI Agentsローカル開発（ADK使用）
+```bash
+cd packages/ai-agents
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# ADK Web UIでエージェント開発
+adk web analysis_agent         # 分析エージェント
+adk web ui_generation_agent    # UI生成エージェント
+adk web restaurant_search_agent # レストラン検索エージェント
+```
+
 **利用可能な機能ページ**:
 
 ### 💬 シンプルチャット (`/simple-chat`)
@@ -39,15 +51,21 @@ npm run build      # ビルド確認
 - **特徴**: ADK UI Generation Agent、デバイス最適化対応
 - **API**: `/api/ui-generation`
 
+### 🍽️ レストラン検索 (`/restaurant-search`)
+- **用途**: レストラン推薦、HTML特集記事生成
+- **特徴**: ADK Restaurant Search Agent、美しい特集記事フォーマット
+- **API**: `/api/restaurant-search`
+
 ### 📁 コンテンツ管理 (`/content-management`)
 - **用途**: テキストコンテンツの作成・編集・管理
 - **特徴**: ローカルストレージ、リアルタイム編集・プレビュー
 
-### 2. AI機能テスト方法
+### 3. AI機能テスト方法
 各ページで直接機能を確認：
 - **チャット**: "こんにちは、今日の天気は？"
 - **分析レポート**: "2024年の売上データを分析してトレンドを教えて"
 - **UI生成**: "レストランの予約フォームを作成してください"
+- **レストラン検索**: "新宿でランチができるおしゃれなカフェを教えて"
 
 ## 🔧 本格運用セットアップ
 
@@ -66,8 +84,13 @@ gcloud auth application-default login
 gcloud config set project YOUR_PROJECT_ID
 ```
 
-### 2. 環境変数設定
+### 2. 設定ファイル作成
 ```bash
+# config.sh設定（本番運用用）
+cp config.example.sh config.sh
+# config.shを編集してPROJECT_IDを設定
+
+# または、開発のみの場合
 # packages/frontend/.env.local
 VERTEX_AI_PROJECT_ID=your-gcp-project-id
 VERTEX_AI_LOCATION=us-central1
@@ -110,22 +133,26 @@ cp config.example.sh config.sh
 | **基本チャット** | ✅ | ✅ | ✅ |
 | **分析レポート** | ❌ | ✅ | ✅ |
 | **UI生成** | ❌ | ✅ | ✅ |
+| **レストラン検索** | ❌ | ✅ | ✅ |
 | **画像管理** | ❌ | ❌ | ✅ |
 
 ## 🔧 設定ファイル（config.sh）
 
+既存のconfig.shには以下が設定済み：
 ```bash
-# 必須設定
-PROJECT_ID="your-gcp-project-id"        # GCPプロジェクトID
+# 必須設定（既に設定済み）
+PROJECT_ID="food-hack-466801"           # 現在のGCPプロジェクトID
 REGION="us-central1"                    # デプロイリージョン
-ENVIRONMENT="dev"                       # 環境名（dev/staging/prod）
+ENVIRONMENT="dev"                       # 環境名
 
-# コスト最適化設定
+# コスト最適化設定（既設定）
 MEMORY="512Mi"                          # メモリ設定
 MAX_INSTANCES="1"                       # 最大インスタンス数
 MIN_INSTANCES="0"                       # 最小インスタンス数（アイドル時無料）
 LIFECYCLE_DAYS="30"                     # 画像自動削除日数
 ```
+
+必要に応じてPROJECT_IDを変更してください。
 
 ## 🚨 よくある問題と解決
 

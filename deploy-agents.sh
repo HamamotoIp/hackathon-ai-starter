@@ -1,6 +1,6 @@
 #!/bin/bash
 # AI Chat Starter Kit - Agent Engine専用デプロイ
-# 2つのAgent Engine (Analysis, UI Generation) を順次デプロイ
+# 3つのAgent Engine (Analysis, UI Generation, Restaurant Search) を順次デプロイ
 
 set -e
 
@@ -56,7 +56,7 @@ if ! gsutil ls "gs://$STAGING_BUCKET" >/dev/null 2>&1; then
 fi
 
 # AI Agent Engine デプロイ
-echo -e "${BLUE}🤖 2つのAgent Engineを順次デプロイ中...${NC}"
+echo -e "${BLUE}🤖 3つのAgent Engineを順次デプロイ中...${NC}"
 cd packages/ai-agents
 
 # Python環境準備
@@ -70,10 +70,10 @@ pip install -r requirements.txt --quiet
 export VERTEX_AI_PROJECT_ID="$PROJECT_ID"
 export VERTEX_AI_LOCATION="$REGION"
 
-# 並列デプロイ関数定義
+# デプロイ関数定義
 deploy_analysis() {
     echo "  📊 Analysis Agent デプロイ開始..."
-    python deploy_analysis.py
+    python deploy/deploy_analysis.py
     if [ $? -eq 0 ]; then
         echo -e "  ${GREEN}✅ Analysis Agent デプロイ完了${NC}"
         return 0
@@ -86,12 +86,24 @@ deploy_analysis() {
 
 deploy_ui_generation() {
     echo "  🎨 UI Generation Agent デプロイ開始..."
-    python deploy_ui_generation.py
+    python deploy/deploy_ui_generation.py
     if [ $? -eq 0 ]; then
         echo -e "  ${GREEN}✅ UI Generation Agent デプロイ完了${NC}"
         return 0
     else
         echo -e "  ${RED}❌ UI Generation Agent デプロイ失敗${NC}"
+        return 1
+    fi
+}
+
+deploy_restaurant_search() {
+    echo "  🍽️ Restaurant Search Agent デプロイ開始..."
+    python deploy/deploy_restaurant_search.py
+    if [ $? -eq 0 ]; then
+        echo -e "  ${GREEN}✅ Restaurant Search Agent デプロイ完了${NC}"
+        return 0
+    else
+        echo -e "  ${RED}❌ Restaurant Search Agent デプロイ失敗${NC}"
         return 1
     fi
 }
@@ -105,9 +117,14 @@ echo "⏳ UI Generation Agentデプロイ中..."
 deploy_ui_generation
 UI_GENERATION_EXIT=$?
 
+echo "⏳ Restaurant Search Agentデプロイ中..."
+deploy_restaurant_search
+RESTAURANT_SEARCH_EXIT=$?
+
 # 結果確認とURL取得
 ANALYSIS_URL=""
 UI_GENERATION_URL=""
+RESTAURANT_SEARCH_URL=""
 
 if [ $ANALYSIS_EXIT -eq 0 ] && [ -f "analysis_agent_url.txt" ]; then
     ANALYSIS_URL=$(cat analysis_agent_url.txt)
@@ -121,6 +138,13 @@ if [ $UI_GENERATION_EXIT -eq 0 ] && [ -f "ui_generation_agent_url.txt" ]; then
     echo -e "${GREEN}✅ UI Generation Agent URL: ${UI_GENERATION_URL}${NC}"
 else
     echo -e "${RED}❌ UI Generation Agent デプロイまたはURL取得失敗${NC}"
+fi
+
+if [ $RESTAURANT_SEARCH_EXIT -eq 0 ] && [ -f "restaurant_search_agent_url.txt" ]; then
+    RESTAURANT_SEARCH_URL=$(cat restaurant_search_agent_url.txt)
+    echo -e "${GREEN}✅ Restaurant Search Agent URL: ${RESTAURANT_SEARCH_URL}${NC}"
+else
+    echo -e "${RED}❌ Restaurant Search Agent デプロイまたはURL取得失敗${NC}"
 fi
 
 # 両方のAgent Engineが成功していることを確認
@@ -163,8 +187,8 @@ echo ""
 echo -e "${BLUE}💡 ヒント:${NC}"
 echo "  - Agent Engineの完全起動には数分かかる場合があります"
 echo "  - エラーが発生した場合は個別デプロイを試してください:"
-echo "    cd packages/ai-agents && python deploy_analysis.py"
-echo "    cd packages/ai-agents && python deploy_ui_generation.py"
+echo "    cd packages/ai-agents && python deploy/deploy_analysis.py"
+echo "    cd packages/ai-agents && python deploy/deploy_ui_generation.py"
 echo ""
 echo -e "${BLUE}🚀 利用可能な機能:${NC}"
 echo "  💬 シンプルチャット: Vertex AI Direct（高速3秒以内）"

@@ -6,31 +6,37 @@
 
 - **分析レポート**: データ分析・詳細レポート生成 (20-30秒)
 - **UI生成**: HTML/Tailwind CSS生成・プロトタイプ作成 (25-45秒)
+- **レストラン検索**: 飲食店推薦・HTML特集記事生成 (15-25秒)
 - **構造化出力**: JSON Schema対応・一貫したレスポンス形式
 
 ## 📝 プロジェクト構造
 
 ```
 packages/ai-agents/
-├── agents/                # エージェント実装
-│   ├── __init__.py
-│   ├── analysis_agent.py          # 分析レポートエージェント
-│   ├── ui_generation_agent.py     # UI生成エージェント
-│   └── chat/
-│       ├── __init__.py
-│       └── basic_chat_agent.py    # 基本チャットエージェント
-├── schemas/               # データスキーマ定義
-│   ├── __init__.py
-│   ├── analysis_schema.py         # 分析用スキーマ
-│   ├── ui_generation_schema.py    # UI生成用スキーマ
-│   └── chat_schema.py            # チャット用スキーマ
-├── deploy_all_agents.py   # 全エージェント一括デプロイ
-├── deploy_analysis.py     # 分析エージェントデプロイ
-├── deploy_ui_generation.py # UI生成エージェントデプロイ
+├── analysis_agent/        # 分析エージェント（ADK標準構造）
+│   ├── agent.py
+│   └── __init__.py
+├── ui_generation_agent/   # UI生成エージェント（ADK標準構造）
+│   ├── agent.py
+│   └── __init__.py
+├── restaurant_search_agent/ # レストラン検索エージェント（ADK標準構造）
+│   ├── agent.py
+│   └── __init__.py
+├── deploy/                # デプロイスクリプト
+│   ├── deploy_all_agents.py       # 全エージェント一括デプロイ
+│   ├── deploy_analysis.py         # 分析エージェントデプロイ
+│   ├── deploy_ui_generation.py    # UI生成エージェントデプロイ
+│   └── deploy_restaurant_search.py # レストラン検索エージェントデプロイ
+├── debug/                 # ローカル開発・デバッグツール
+│   ├── README.md
+│   ├── debug_server.py
+│   ├── local_debug_helper.py
+│   └── test_agents.py
+├── .env.example           # 環境変数テンプレート
 ├── requirements.txt       # Python依存関係
-├── ADK_ENDPOINTS.md       # ADKエンドポイント仕様
 ├── analysis_agent_url.txt # 分析エージェントURL
 ├── ui_generation_agent_url.txt # UI生成エージェントURL
+├── restaurant_search_agent_url.txt # レストラン検索エージェントURL
 └── README.md              # このファイル
 ```
 
@@ -46,48 +52,63 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # 依存関係インストール
 pip install -r requirements.txt
+
+# config.shを使用（エージェントの.envファイルは不要）
+# プロジェクトルートのconfig.shを確認
+cat ../../config.sh
+# すべてのスクリプトがconfig.shから自動読み込み
 ```
 
-### 2. 本番デプロイメント（ADK Agent Engine）
+### 2. ローカル開発（ADK標準コマンド）
+```bash
+# 分析エージェントをローカルで起動
+adk web analysis_agent
+
+# UI生成エージェントをローカルで起動  
+adk web ui_generation_agent
+
+# レストラン検索エージェントをローカルで起動
+adk web restaurant_search_agent
+
+# ターミナルで対話的実行
+adk run analysis_agent
+```
+
+→ http://localhost:8000 でGUI操作可能！
+
+### 3. 本番デプロイメント
 ```bash
 # ルートディレクトリからエージェントデプロイ
 cd /workspaces/hackathon-ai-starter
-./deploy-agents.sh
+./setup.sh
 
 # 個別エージェントデプロイ
 cd packages/ai-agents
-python deploy_analysis.py
-python deploy_ui_generation.py
-python deploy_all_agents.py
-```
-
-### 3. エージェント動作確認
-```bash
-# 個別エンドポイントテスト（デプロイ後）
-curl -X POST https://YOUR_DEPLOYED_URL/analysis \
-  -H "Content-Type: application/json" \
-  -d '{"input": "テストデータ"}'
+python deploy/deploy_analysis.py
+python deploy/deploy_ui_generation.py
+python deploy/deploy_restaurant_search.py
+python deploy/deploy_all_agents.py
 ```
 
 ## 🔧 環境設定
 
-### ローカル開発用環境変数
+### 共通環境変数
+
 ```bash
-# .env ファイル作成（packages/ai-agents/）
-VERTEX_AI_PROJECT_ID=your-gcp-project-id
-VERTEX_AI_LOCATION=us-central1
-PORT=8080
-AUTO_DEPLOY_AGENTS=true
+# config.shから自動読み込み（PROJECT_ID: food-hack-466801）
+# エージェントごとの.envファイルは不要
+# すべてのデプロイスクリプトがconfig.shを参照
 ```
 
 ### 本番環境設定（config.sh）
+既存の`config.sh`に設定済み：
 ```bash
 # ルートディレクトリのconfig.shで管理
-export PROJECT_ID="your-gcp-project-id"
+export PROJECT_ID="food-hack-466801"     # 現在のプロジェクトID
 export REGION="us-central1"
 export ENVIRONMENT="dev"
 
-# エージェント設定
+# エージェント設定（既設定）
 export MEMORY="512Mi"
 export CPU="1"
 export MAX_INSTANCES="1"
@@ -101,111 +122,95 @@ export MAX_INSTANCES="1"
 |-----------|------|---------------|------|
 | `Analysis Agent` | 分析レポート | 20-30秒 | データ分析・詳細レポート |
 | `UI Generation Agent` | UI生成 | 25-45秒 | HTML/Tailwind生成 |
+| `Restaurant Search Agent` | レストラン検索 | 15-25秒 | 飲食店推薦・HTML特集記事 |
 
 ### 専門特化エージェント
-- **AnalysisAgent** (`analysis_agent.py`): データ分析・トレンド抽出・洞察生成
-- **UIGenerationAgent** (`ui_generation_agent.py`): HTML/Tailwind CSS生成・プロトタイプ作成
+- **Analysis Agent** (`analysis_agent/`): データ分析・トレンド抽出・洞察生成
+- **UI Generation Agent** (`ui_generation_agent/`): HTML/Tailwind CSS生成・プロトタイプ作成
+- **Restaurant Search Agent** (`restaurant_search_agent/`): 飲食店推薦・HTML特集記事生成
 
 ## 🔄 開発フロー（人間-AI協働）
 
 ### 新エージェント開発手順
 
-#### 1. 機能設計（🔴 人間が実装）
-```python
-# schemas/new_feature_schema.py
-from pydantic import BaseModel, Field
-
-class NewFeatureOutput(BaseModel):
-    result: str = Field(description="処理結果")
-    confidence: float = Field(description="信頼度スコア")
-    metadata: dict = Field(description="メタデータ")
+#### 1. ADK標準エージェント作成
+```bash
+# 新エージェント用ディレクトリ作成
+mkdir new_feature_agent
+cd new_feature_agent
 ```
 
 #### 2. エージェント実装（🔴 人間が実装）
 ```python
-# agents/new_feature/agent.py
-def create_new_feature_agent():
-    return {
-        "name": "new_feature_agent",
-        "description": "新機能のエージェント",
-        "handler": handle_new_feature,
-        "schema": NewFeatureOutput
-    }
+# new_feature_agent/agent.py
+from google.adk.agents import LlmAgent
 
-def handle_new_feature(content: str) -> dict:
-    # エージェントロジック実装
-    pass
+root_agent = LlmAgent(
+    name="new_feature_specialist",
+    model="gemini-2.0-flash-exp",
+    description="新機能の専門エージェント",
+    instruction="""新機能の処理を実行するエージェントです。
+    
+ユーザーの要求に応じて適切な処理を行い、
+構造化された結果を返してください。"""
+)
 ```
 
-#### 3. API統合（🤖 AIが実装）
+#### 3. 必要ファイル作成
 ```python
-# app.py にエンドポイント追加
-@app.route('/new-feature', methods=['POST'])
-def new_feature_endpoint():
-    # AIが自動実装
-    pass
+# new_feature_agent/__init__.py
+from . import agent
+
+# new_feature_agentは.env不要
+# config.shから自動読み込み
 ```
 
-#### 4. テスト作成（🤖 AIが実装）
+#### 4. ローカルテスト
 ```bash
-# ローカルテスト
-curl -X POST http://localhost:8080/new-feature \
-  -H "Content-Type: application/json" \
-  -d '{"content": "テストデータ"}'
+# ADK標準コマンドでテスト
+adk web new_feature_agent
+adk run new_feature_agent
 ```
 
-## 🌐 APIエンドポイント詳細
+## 🌐 ローカル開発での使用方法
 
-### ヘルスチェック
+### ADK Web UIの使用
 ```bash
-# サービス状態確認
-GET /health
+# Web UIでエージェントテスト
+adk web analysis_agent
 
-# レスポンス例
-{
-  "status": "healthy",
-  "timestamp": "2024-01-01T00:00:00Z",
-  "version": "1.0.0",
-  "agents": ["analysis", "ui_generation"]
-}
+# ブラウザで http://localhost:8000 にアクセス
+# - チャット形式でエージェントと対話
+# - セッション履歴の管理
+# - リアルタイムレスポンス表示
 ```
 
-### 分析レポート
+### ターミナルでの対話実行
 ```bash
-# データ分析リクエスト
-POST /analysis
-Content-Type: application/json
+# ターミナルでエージェントと直接対話
+adk run analysis_agent
 
-{
-  "content": "分析対象のデータやテキスト"
-}
+# 実行例:
+# User: 売上データを分析してください。Q1: 100万円、Q2: 150万円...
+# Agent: [詳細な分析レポートを出力]
 
-# レスポンス例
-{
-  "success": true,
-  "result": "詳細な分析レポート...",
-  "processing_time_ms": 25000,
-  "agent": "analysis"
-}
+# セッション保存
+adk run analysis_agent --save_session --session_id "analysis_session_001"
+
+# セッション再開
+adk run analysis_agent --resume analysis_session_001.json
 ```
 
-### UI生成
+### デバッグとテスト
 ```bash
-# UI生成リクエスト
-POST /ui_generation
-Content-Type: application/json
+# デバッグサーバー起動（詳細ログ付き）
+python debug/debug_server.py
 
-{
-  "content": "ログインフォームのUIを作成"
-}
+# エージェント自動テスト
+python debug/test_agents.py
 
-# レスポンス例
-{
-  "success": true,
-  "result": {"html": "<div>...</div>", "css": "..."},
-  "processing_time_ms": 30000,
-  "agent": "ui_generation"
-}
+# 環境診断
+python debug/local_debug_helper.py
 ```
 
 ## 🔍 トラブルシューティング
@@ -225,17 +230,17 @@ pip install -r requirements.txt
 pip install --upgrade -r requirements.txt
 ```
 
-#### 2. Flask アプリ起動エラー
+#### 2. ADK コマンドエラー
 ```bash
-# ポート競合の確認
-lsof -i :8080
+# ADKが認識されない場合
+pip install google-adk
 
-# 別ポートで起動
-PORT=8081 python app.py
+# ポート競合の確認（デフォルト8000）
+lsof -i :8000
 
 # 環境変数の確認
-echo $VERTEX_AI_PROJECT_ID
-echo $VERTEX_AI_LOCATION
+echo $GOOGLE_CLOUD_PROJECT
+echo $GOOGLE_CLOUD_LOCATION
 ```
 
 #### 3. GCP認証エラー
@@ -252,14 +257,15 @@ gcloud services enable aiplatform.googleapis.com
 
 #### 4. デプロイメントエラー
 ```bash
-# Cloud Runログ確認
-gcloud run services logs read ai-chat-agent-engine-dev --region us-central1
+# Agent Engineデプロイログ確認
+python deploy/deploy_analysis.py
 
-# サービス状態確認
-gcloud run services describe ai-chat-agent-engine-dev --region us-central1
+# デプロイ済みエージェント確認
+gcloud ai-platform agent-engines list --region=us-central1
 
-# リビジョン履歴
-gcloud run revisions list --service ai-chat-agent-engine-dev --region us-central1
+# 環境変数確認
+echo $VERTEX_AI_PROJECT_ID
+echo $VERTEX_AI_LOCATION
 ```
 
 ## 📊 パフォーマンス・スケーリング
@@ -270,6 +276,7 @@ gcloud run revisions list --service ai-chat-agent-engine-dev --region us-central
 |------|---------------|-------------|-------------|
 | 分析レポート | 20-30秒 | ~300MB | 5-10 |
 | UI生成 | 25-45秒 | ~350MB | 5-10 |
+| レストラン検索 | 15-25秒 | ~250MB | 5-10 |
 
 ### スケーリング設定
 ```bash
@@ -293,25 +300,40 @@ MAX_INSTANCES="10"
 
 ### パフォーマンステスト
 ```bash
-# レスポンス時間測定
-time curl -X POST http://localhost:8080/analysis \
-  -H "Content-Type: application/json" \
-  -d '{"content": "テスト分析"}'
+# ローカルレスポンス時間測定
+time echo "売上データ分析テスト" | adk run analysis_agent
 
-# 同時接続テスト
+# 複数エージェント同時テスト
+python debug/test_agents.py
+
+# 負荷テスト
 for i in {1..5}; do
-  curl -X POST http://localhost:8080/health &
+  adk run analysis_agent --replay test_session.json &
 done
 wait
 ```
 
 ## 📚 関連リソース
 
-- **[QUICKSTART.md](../../QUICKSTART.md)** - クイックスタートガイド
-- **[ARCHITECTURE.md](../../ARCHITECTURE.md)** - アーキテクチャ詳細
-- **[CLAUDE.md](../../CLAUDE.md)** - 開発者向けガイド
-- **[debug.sh](../../debug.sh)** - デバッグ・診断ツール
+- **[debug/README.md](./debug/README.md)** - ローカルデバッグツール詳細
+- **[QUICKSTART.md](../../docs/QUICKSTART.md)** - 全体クイックスタートガイド
+- **[ローカル開発ガイド](../../docs/quickstart/local-development.md)** - ローカル開発詳細
+- **[ADK公式ドキュメント](https://google.github.io/adk-docs/)** - Agent Development Kit公式
+
+## 🎯 開発のベストプラクティス
+
+### ローカル開発フロー
+1. **ADK Web UI**でアイデア検証 (`adk web analysis_agent`)
+2. **セッション保存**で重要な対話を記録
+3. **デバッグツール**で詳細確認
+4. **デプロイテスト**で本番確認
+
+### 新機能開発
+1. 既存エージェントを参考に構造作成
+2. ADK標準の `LlmAgent` を使用
+3. instruction（プロンプト）に注力
+4. ローカルテスト → デプロイの順序
 
 ---
 
-**🚀 AI Agent Engineで高品質なAI処理を実現しましょう！**
+**🚀 ADK標準コマンドで効率的なAI Agent開発を実現しましょう！**

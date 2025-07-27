@@ -1,22 +1,15 @@
 """
 UI Generation Agent - UI生成専用エージェント
-HTML/Tailwind CSSコンポーネント生成に特化したAgent Engine
+HTML/Tailwind CSSコンポーネント生成に特化したAgent
 """
 
 from google.adk.agents import LlmAgent
-import logging
-import json
 
-logger = logging.getLogger(__name__)
-
-def create_ui_generation_agent():
-    """UI生成専用エージェントを作成"""
-    
-    agent = LlmAgent(
-        name="ui_generation_specialist",
-        model="gemini-2.0-flash-exp",
-        description="HTML/UI生成専門エージェント。Tailwind CSSを使用した高品質なUIコンポーネント生成が可能",
-        instruction="""あなたはUI生成の専門エージェントです。
+root_agent = LlmAgent(
+    name="ui_generation_specialist",
+    model="gemini-2.0-flash-exp",
+    description="HTML/UI生成専門エージェント。Tailwind CSSを使用した高品質なUIコンポーネント生成が可能",
+    instruction="""あなたはUI生成の専門エージェントです。
 
 ユーザーからのリクエストを解析し、指定されたdevice_typeに最適化されたUIを生成してください：
 
@@ -73,11 +66,4 @@ UI生成要件：
 
 Tailwind CDN：
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">"""
-    )
-    
-    logger.info("UI Generation Agent created successfully")
-    return agent
-
-def create_agent():
-    """ファクトリー関数（Agent Engine デプロイ用）"""
-    return create_ui_generation_agent()
+)

@@ -1,21 +1,15 @@
 """
 Analysis Agent - 分析レポート専用エージェント
-データ分析と詳細レポート作成に特化したAgent Engine
+データ分析と詳細レポート作成に特化したAgent
 """
 
 from google.adk.agents import LlmAgent
-import logging
 
-logger = logging.getLogger(__name__)
-
-def create_analysis_agent():
-    """分析専用エージェントを作成"""
-    
-    agent = LlmAgent(
-        name="analysis_specialist",
-        model="gemini-2.0-flash-exp",
-        description="データ分析と詳細レポート作成の専門エージェント。トレンド分析、統計処理、実行可能な推奨事項の提案が可能",
-        instruction="""あなたはデータ分析の専門家です。
+root_agent = LlmAgent(
+    name="analysis_specialist",
+    model="gemini-2.0-flash-exp",
+    description="データ分析と詳細レポート作成の専門エージェント。トレンド分析、統計処理、実行可能な推奨事項の提案が可能",
+    instruction="""あなたはデータ分析の専門家です。
 
 以下の手順で分析を実行してください：
 1. データの概要把握と前処理
@@ -67,11 +61,4 @@ def create_analysis_agent():
 
 ## 次のステップ
 [具体的なアクションプラン]"""
-    )
-    
-    logger.info("Analysis Agent created successfully")
-    return agent
-
-def create_agent():
-    """ファクトリー関数（Agent Engine デプロイ用）"""
-    return create_analysis_agent()
+)

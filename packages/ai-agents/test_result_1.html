@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渋谷 デート向けディナー レストラン特集</title>
+    <style>
+        body {
+            font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .header {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .search-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .restaurant-card {
+            background: white;
+            margin-bottom: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+        }
+        .restaurant-name {
+            color: #e74c3c;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 5px;
+        }
+        .restaurant-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .restaurant-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            color: #7f8c8d;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 1.5em; }
+            .restaurant-info { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>渋谷 デート向けディナー レストラン特集</h1>
+        <div class="search-info">
+            <strong>検索条件:</strong> 渋谷エリア、デート、ディナー
+        </div>
+    </div>
+
+    <div class="restaurant-card">
+        <div class="restaurant-name">BEE HOUSE 渋谷店</div>
+        <div class="restaurant-info">
+            <span class="info-label">エリア:</span> <span>渋谷</span>
+            <span class="info-label">ジャンル:</span> <span>イタリアン、ダイニングバー</span>
+            <span class="info-label">予算:</span> <span>3,000円～4,000円</span>
+            <span class="info-label">営業時間:</span> <span>17:00～23:30</span>
+        </div>
+        <div class="restaurant-description">
+            渋谷の夜景を一望できる隠れ家のようなイタリアン。名物の"チーズフォンデュ"は、二人の距離をグッと縮めること間違いなし。誕生日サプライズにも対応してくれるので、特別な夜に最適です。
+        </div>
+    </div>
+
+    <div class="restaurant-card">
+        <div class="restaurant-name">Trattoria Godereccio （トラットリア ゴデレッチョ）</div>
+        <div class="restaurant-info">
+            <span class="info-label">エリア:</span> <span>渋谷</span>
+            <span class="info-label">ジャンル:</span> <span>イタリアン</span>
+            <span class="info-label">予算:</span> <span>5,000円～6,000円</span>
+            <span class="info-label">営業時間:</span> <span>11:30～15:00, 17:30～23:00</span>
+        </div>
+        <div class="restaurant-description">
+            落ち着いた雰囲気の中で本格イタリアンを堪能できるお店。旬の食材を使った手打ちパスタは絶品。ワインの種類も豊富なので、料理に合わせて楽しめます。大人のデートにぴったり。
+        </div>
+    </div>
+
+    <div class="restaurant-card">
+        <div class="restaurant-name">神南軒</div>
+        <div class="restaurant-info">
+            <span class="info-label">エリア:</span> <span>渋谷</span>
+            <span class="info-label">ジャンル:</span> <span>懐石・会席料理</span>
+            <span class="info-label">予算:</span> <span>8,000円～10,000円</span>
+            <span class="info-label">営業時間:</span> <span>11:30～15:00, 17:30～22:30</span>
+        </div>
+        <div class="restaurant-description">
+            都会の喧騒を忘れさせる、隠れ家のような和食店。庭園を眺めながら、旬の食材を活かした美しい懐石料理を味わえます。特別な記念日デートにおすすめです。
+        </div>
+    </div>
+
+     <div class="restaurant-card">
+        <div class="restaurant-name">アプト （äöto）</div>
+        <div class="restaurant-info">
+            <span class="info-label">エリア:</span> <span>渋谷</span>
+            <span class="info-label">ジャンル:</span> <span>イノベーティブ・フュージョン</span>
+            <span class="info-label">予算:</span> <span>10,000円～15,000円</span>
+            <span class="info-label">営業時間:</span> <span>18:00～23:00</span>
+        </div>
+        <div class="restaurant-description">
+            渋谷を一望できる絶景レストラン。独創的なフュージョン料理は、五感を刺激する新しい体験。会話も弾むこと間違いなし。記憶に残る、特別なデートになるでしょう。
+        </div>
+    </div>
+
+    <div class="restaurant-card">
+        <div class="restaurant-name">Hacienda del cielo -MODERN MEXICANO- （アシエンダ デル シエロ）</div>
+        <div class="restaurant-info">
+            <span class="info-label">エリア:</span> <span>渋谷</span>
+            <span class="info-label">ジャンル:</span> <span>メキシコ料理</span>
+            <span class="info-label">予算:</span> <span>3,000円～4,000円</span>
+            <span class="info-label">営業時間:</span> <span>11:30～23:00</span>
+        </div>
+        <div class="restaurant-description">
+            ルーフトップで渋谷の夜景を見下ろしながら、本格メキシコ料理を楽しめます。カジュアルな雰囲気なので、気軽に立ち寄れるのが魅力。テキーラを片手に、賑やかなデートを。
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🍽️ 素敵なお食事をお楽しみください！</p>
+        <p><small>※ 営業時間や料金は変更される場合があります。事前にご確認ください。</small></p>
+    </div>
+</body>
+</html>

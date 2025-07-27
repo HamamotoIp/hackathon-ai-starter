@@ -12,7 +12,8 @@ export type AIFeatureType =
 // 処理モード
 export type ProcessingMode = 
   | 'vertex_direct'    // Vertex AI直接呼び出し（高速・低コスト）
-  | 'adk_agent';       // ADK Agent Engine（高品質・専門処理）
+  | 'adk_agent'        // ADK Agent Engine（高品質・専門処理）
+  | 'local_fallback';  // ローカルフォールバック（開発時）
 
 // コストティア
 export type CostTier = 'low' | 'medium' | 'high';

@@ -4,12 +4,14 @@ Analysis Agent Deployment Script
 """
 
 import os
+import sys
 import logging
 from datetime import datetime
 from vertexai import init, agent_engines
 
-# 分析専用エージェントをインポート
-from agents.analysis_agent import create_agent as create_analysis_agent
+# ADK標準構造からエージェントをインポート
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from analysis_agent.agent import root_agent as analysis_agent
 
 # ログ設定（警告以上のみ表示）
 logging.basicConfig(level=logging.WARNING)
@@ -18,21 +20,34 @@ logger = logging.getLogger(__name__)
 
 def deploy_analysis_agent():
     """Analysis AgentをAgent Engineにデプロイ"""
+    # config.shから環境変数を読み込み
+    config_path = os.path.join(os.path.dirname(__file__), "../../../config.sh")
+    if os.path.exists(config_path):
+        # config.shからPROJECT_IDとREGIONを読み取り
+        with open(config_path, 'r') as f:
+            config_content = f.read()
+        
+        import re
+        project_match = re.search(r'PROJECT_ID="([^"]+)"', config_content)
+        region_match = re.search(r'REGION="([^"]+)"', config_content)
+        
+        if project_match:
+            os.environ['VERTEX_AI_PROJECT_ID'] = project_match.group(1)
+        if region_match:
+            os.environ['VERTEX_AI_LOCATION'] = region_match.group(1)
+    
     # 環境確認
     project_id = os.getenv('VERTEX_AI_PROJECT_ID')
     location = os.getenv('VERTEX_AI_LOCATION', 'us-central1')
     
     if not project_id:
-        raise ValueError("VERTEX_AI_PROJECT_ID environment variable required")
+        raise ValueError("PROJECT_ID not found in config.sh. Please set PROJECT_ID in config.sh")
     
     print(f"🚀 Analysis Agent デプロイ中...")
     
     # Vertex AI初期化
     init(project=project_id, location=location, 
          staging_bucket=f"gs://{project_id}-agent-engine-staging")
-    
-    # 分析専用エージェント作成
-    analysis_agent = create_analysis_agent()
     
     # Agent Engineにデプロイ
     remote_app = agent_engines.create(

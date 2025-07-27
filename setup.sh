@@ -102,12 +102,12 @@ if ! gsutil ls "gs://$STAGING_BUCKET" >/dev/null 2>&1; then
 fi
 
 # 複数Agent Engine順次デプロイ
-echo -e "${BLUE}📊 分析・比較・UI生成エージェントを順次デプロイ中...${NC}"
+echo -e "${BLUE}📊 分析・UI生成・飲食店検索エージェントを順次デプロイ中...${NC}"
 
 
 # Analysis Agent
 echo "  📊 Analysis Agent デプロイ開始..."
-python deploy_analysis.py
+python deploy/deploy_analysis.py
 ANALYSIS_EXIT=$?
 
 if [ $ANALYSIS_EXIT -eq 0 ]; then
@@ -119,7 +119,7 @@ fi
 
 # UI Generation Agent
 echo "  🎨 UI Generation Agent デプロイ開始..."
-python deploy_ui_generation.py
+python deploy/deploy_ui_generation.py
 UI_GENERATION_EXIT=$?
 
 if [ $UI_GENERATION_EXIT -eq 0 ]; then
@@ -128,9 +128,22 @@ else
     echo -e "  ${RED}❌ UI Generation Agent デプロイ失敗${NC}"
 fi
 
+
+# Restaurant Search Agent
+echo "  🍽️ Restaurant Search Agent デプロイ開始..."
+python deploy/deploy_restaurant_search.py
+RESTAURANT_SEARCH_EXIT=$?
+
+if [ $RESTAURANT_SEARCH_EXIT -eq 0 ]; then
+    echo -e "  ${GREEN}✅ Restaurant Search Agent デプロイ完了${NC}"
+else
+    echo -e "  ${RED}❌ Restaurant Search Agent デプロイ失敗${NC}"
+fi
+
 # 結果確認とURL取得
 ANALYSIS_URL=""
 UI_GENERATION_URL=""
+RESTAURANT_SEARCH_URL=""
 
 if [ $ANALYSIS_EXIT -eq 0 ] && [ -f "analysis_agent_url.txt" ]; then
     ANALYSIS_URL=$(cat analysis_agent_url.txt)
@@ -149,13 +162,22 @@ else
     cat ui_generation_deploy.log
 fi
 
+
+if [ $RESTAURANT_SEARCH_EXIT -eq 0 ] && [ -f "restaurant_search_agent_url.txt" ]; then
+    RESTAURANT_SEARCH_URL=$(cat restaurant_search_agent_url.txt)
+    echo -e "${GREEN}✅ Restaurant Search Agent URL: ${RESTAURANT_SEARCH_URL}${NC}"
+else
+    echo -e "${RED}❌ Restaurant Search Agent URL取得失敗${NC}"
+    cat restaurant_search_deploy.log
+fi
+
 # 最低1つのAgent Engineが成功していることを確認
-if [ -z "$ANALYSIS_URL" ] && [ -z "$COMPARISON_URL" ] && [ -z "$UI_GENERATION_URL" ]; then
+if [ -z "$ANALYSIS_URL" ] && [ -z "$UI_GENERATION_URL" ] && [ -z "$RESTAURANT_SEARCH_URL" ]; then
     echo -e "${RED}❌ すべてのAgent Engineデプロイが失敗しました${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Agent Engine デプロイ完了 (成功: $((3-$([ -z "$ANALYSIS_URL" ] && echo 1 || echo 0)-$([ -z "$COMPARISON_URL" ] && echo 1 || echo 0)-$([ -z "$UI_GENERATION_URL" ] && echo 1 || echo 0)))/3)${NC}"
+echo -e "${GREEN}✅ Agent Engine デプロイ完了 (成功: $((3-$([ -z "$ANALYSIS_URL" ] && echo 1 || echo 0)-$([ -z "$UI_GENERATION_URL" ] && echo 1 || echo 0)-$([ -z "$RESTAURANT_SEARCH_URL" ] && echo 1 || echo 0)))/3)${NC}"
 
 cd ../..
 
@@ -174,8 +196,8 @@ NODE_ENV=production
 VERTEX_AI_PROJECT_ID=$PROJECT_ID
 VERTEX_AI_LOCATION=$REGION
 ANALYSIS_AGENT_URL=$ANALYSIS_URL
-COMPARISON_AGENT_URL=$COMPARISON_URL
 UI_GENERATION_AGENT_URL=$UI_GENERATION_URL
+RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL
 BUCKET_NAME=$BUCKET_NAME
 SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL
 EOF
@@ -191,13 +213,13 @@ if [ -n "$ANALYSIS_URL" ]; then
     DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,ANALYSIS_AGENT_URL=$ANALYSIS_URL"
     echo "     → Analysis Agent統合: 有効"
 fi
-if [ -n "$COMPARISON_URL" ]; then
-    DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,COMPARISON_AGENT_URL=$COMPARISON_URL"
-    echo "     → Comparison Agent統合: 有効"
-fi
 if [ -n "$UI_GENERATION_URL" ]; then
     DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,UI_GENERATION_AGENT_URL=$UI_GENERATION_URL"
     echo "     → UI Generation Agent統合: 有効"
+fi
+if [ -n "$RESTAURANT_SEARCH_URL" ]; then
+    DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL"
+    echo "     → Restaurant Search Agent統合: 有効"
 fi
 
 
@@ -243,11 +265,11 @@ echo -e "${BLUE}🤖 デプロイ済みAgent Engine:${NC}"
 if [ -n "$ANALYSIS_URL" ]; then
     echo "  📊 分析レポート: $ANALYSIS_URL"
 fi
-if [ -n "$COMPARISON_URL" ]; then
-    echo "  ⚖️ 比較研究: $COMPARISON_URL"
-fi
 if [ -n "$UI_GENERATION_URL" ]; then
     echo "  🎨 UI生成: $UI_GENERATION_URL"
+fi
+if [ -n "$RESTAURANT_SEARCH_URL" ]; then
+    echo "  🍽️ 飲食店検索: $RESTAURANT_SEARCH_URL"
 fi
 echo ""
 echo -e "${BLUE}📋 利用可能機能:${NC}"
@@ -257,11 +279,11 @@ echo "     - ✅ 基本チャット（Vertex AI Direct）"
 if [ -n "$ANALYSIS_URL" ]; then
     echo "     - 📊 分析レポート（Analysis Agent）"
 fi
-if [ -n "$COMPARISON_URL" ]; then
-    echo "     - ⚖️ 比較研究（Comparison Agent）"
-fi
 if [ -n "$UI_GENERATION_URL" ]; then
     echo "     - 🎨 UI生成（UI Generation Agent）"
+fi
+if [ -n "$RESTAURANT_SEARCH_URL" ]; then
+    echo "     - 🍽️ 飲食店検索（Restaurant Search Agent）"
 fi
 echo "  3. 問題があれば ./debug.sh を実行"
 echo ""

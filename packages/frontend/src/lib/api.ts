@@ -37,6 +37,11 @@ export interface UIGenerationAPIResponse extends BaseAIResponse {
   result: UIGenerationResult;
 }
 
+/** 飲食店検索APIレスポンス */
+export type RestaurantSearchAPIResponse = 
+  | (BaseAIResponse & { result: string; error?: never; }) // 成功時
+  | (AIErrorResponse & { result?: never; }); // エラー時
+
 // =============================================================================
 // ADK Agent専用型（サーバーサイドで使用）
 // =============================================================================
@@ -95,6 +100,7 @@ export const API_ENDPOINTS = {
   BASIC_CHAT: '/api/chat/basic',
   ANALYSIS: '/api/analysis',
   UI_GENERATION: '/api/ui-generation',
+  RESTAURANT_SEARCH: '/api/restaurant-search',
   DEBUG: '/api/debug',
   IMAGE_UPLOAD: '/api/images/upload'
 } as const;

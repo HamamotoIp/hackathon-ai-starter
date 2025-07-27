@@ -53,6 +53,25 @@ export async function processUIGeneration(
 }
 
 /**
+ * ADK Agent - 飲食店検索処理
+ */
+export async function processRestaurantSearch(
+  serviceUrl: string,
+  message: string
+): Promise<string> {
+  if (!serviceUrl) {
+    throw new Error('ADK Agent URLが設定されていません');
+  }
+
+  try {
+    const sessionId = await createADKSession(serviceUrl);
+    return await sendADKMessage(serviceUrl, sessionId, message);
+  } catch (error) {
+    throw new Error(`飲食店検索処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * ADKセッション作成
  */
 async function createADKSession(serviceUrl: string): Promise<string> {
