@@ -160,6 +160,13 @@ function createUIGenerationMessage(message: string, options?: UIGenerationOption
  */
 function parseADKResponse(responseData: string): string {
   try {
+    // レストラン検索エージェントの場合、最終的なHTML出力のみを抽出
+    // 複数のJSONイベントから最後のHTMLを見つける
+    const htmlMatch = responseData.match(/<!DOCTYPE html>[\s\S]*?<\/html>/);
+    if (htmlMatch) {
+      return htmlMatch[0];
+    }
+
     // SSE形式のレスポンスを解析
     const lines = responseData.split('\n');
     const dataLines = lines.filter(line => line.startsWith('data: '));
@@ -182,6 +189,7 @@ function parseADKResponse(responseData: string): string {
 
     // すべてのデータラインから内容を結合
     let fullMessage = '';
+    let lastHtmlContent = '';
     
     for (const line of dataLines) {
       const jsonData = line.replace('data: ', '').trim();
@@ -198,7 +206,7 @@ function parseADKResponse(responseData: string): string {
         
         // content.parts[0].text パターン
         if (typeof parsedData.content === 'object' && parsedData.content?.parts?.[0]?.text) {
-          content = parsedData.content.parts[0].text;
+          content = cleanHTMLContent(parsedData.content.parts[0].text);
         } else {
           // 従来のパターン
           const contentValue = typeof parsedData.content === 'string' ? parsedData.content : undefined;
@@ -206,19 +214,55 @@ function parseADKResponse(responseData: string): string {
         }
         
         if (content && typeof content === 'string') {
-          fullMessage += content;
+          // HTMLコンテンツの場合は最後のものを保持
+          if (content.includes('<!DOCTYPE html>') || content.includes('<html')) {
+            lastHtmlContent = content;
+          } else {
+            fullMessage += content;
+          }
+        }
+        
+        // actions.state_delta.html パターンも確認（レストラン検索エージェント用）
+        if (parsedData.actions?.state_delta?.html) {
+          lastHtmlContent = parsedData.actions.state_delta.html;
         }
       } catch {
         // JSONパースエラーは無視
       }
     }
     
-    return fullMessage || responseData;
+    // HTMLコンテンツがある場合はそれを返す
+    if (lastHtmlContent) {
+      return cleanHTMLContent(lastHtmlContent);
+    }
+    
+    return cleanHTMLContent(fullMessage) || responseData;
 
   } catch {
     // JSON解析に失敗した場合は生のレスポンスを返す
     return responseData;
   }
+}
+
+/**
+ * HTMLコンテンツからコードブロックを除去し、Unicodeエスケープをデコード
+ */
+function cleanHTMLContent(content: string): string {
+  // ```html と ``` を除去
+  let cleaned = content
+    .replace(/^```html\s*\n?/i, '')
+    .replace(/\n?```\s*$/i, '')
+    .trim();
+  
+  // Unicodeエスケープをデコード（\uXXXX形式）
+  cleaned = cleaned.replace(/\\u([\d\w]{4})/gi, (_, grp) => {
+    return String.fromCharCode(parseInt(grp, 16));
+  });
+  
+  // 改行文字のエスケープを実際の改行に変換
+  cleaned = cleaned.replace(/\\n/g, '\n');
+  
+  return cleaned;
 }
 
 // 🚨 型安全性：クライアントサイドでの使用を防ぐ

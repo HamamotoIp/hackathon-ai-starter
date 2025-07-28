@@ -54,6 +54,7 @@ def deploy_restaurant_search_agent():
             "google-cloud-aiplatform[adk,agent_engines]>=1.88.0",
             "pydantic>=2.0.0"
         ],
+        extra_packages=["restaurant_search_agent"],
         env_vars={"VERTEX_AI_PROJECT_ID": project_id},
         display_name="AI Chat Starter Kit - Restaurant Search Agent",
         description="飲食店検索とHTML記事生成専用エージェント"
