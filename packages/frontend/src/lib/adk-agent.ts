@@ -264,36 +264,32 @@ function parseADKResponse(responseData: string): string {
  * HTMLコンテンツからコードブロックを除去し、Unicodeエスケープをデコード
  */
 function cleanHTMLContent(content: string): string {
-  // ```html と ``` を除去
+  // ```html と ``` を除去（より厳密に）
   let cleaned = content
     .replace(/^```html\s*\n?/i, '')
     .replace(/\n?```\s*$/i, '')
+    .replace(/^```\s*\n?/i, '')  // 一般的な```も除去
+    .replace(/\n?```\s*$/i, '')
     .trim();
   
-  // JSON文字列として解析を試行（ダブルエスケープ対応）
-  try {
-    // JSONパースでエスケープを解除
-    cleaned = JSON.parse(`"${cleaned.replace(/"/g, '\\"')}"`);
-  } catch {
-    // JSONパースに失敗した場合は手動でエスケープを処理
-    
-    // Unicodeエスケープをデコード（\uXXXX形式）
-    cleaned = cleaned.replace(/\\u([\d\w]{4})/gi, (_, grp) => {
-      return String.fromCharCode(parseInt(grp, 16));
-    });
-    
-    // 改行文字のエスケープを実際の改行に変換
-    cleaned = cleaned.replace(/\\n/g, '\n');
-    
-    // タブ文字のエスケープを実際のタブに変換
-    cleaned = cleaned.replace(/\\t/g, '\t');
-    
-    // ダブルクォートのエスケープを解除
-    cleaned = cleaned.replace(/\\"/g, '"');
-    
-    // バックスラッシュのエスケープを解除
-    cleaned = cleaned.replace(/\\\\/g, '\\');
-  }
+  // 手動でエスケープを処理（JSONパースより確実）
+  
+  // Unicodeエスケープをデコード（\uXXXX形式）
+  cleaned = cleaned.replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => {
+    return String.fromCharCode(parseInt(hex, 16));
+  });
+  
+  // 改行文字のエスケープを実際の改行に変換
+  cleaned = cleaned.replace(/\\n/g, '\n');
+  
+  // タブ文字のエスケープを実際のタブに変換
+  cleaned = cleaned.replace(/\\t/g, '\t');
+  
+  // ダブルクォートのエスケープを解除
+  cleaned = cleaned.replace(/\\"/g, '"');
+  
+  // バックスラッシュのエスケープを解除（最後に実行）
+  cleaned = cleaned.replace(/\\\\/g, '\\');
   
   return cleaned;
 }
