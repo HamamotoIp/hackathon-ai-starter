@@ -156,106 +156,176 @@ function createUIGenerationMessage(message: string, options?: UIGenerationOption
 }
 
 /**
- * ADKレスポンス解析
+ * ADKレスポンス解析（堅牢性改善版）
  */
 function parseADKResponse(responseData: string): string {
   // デバッグ: レスポンス全体を確認
   console.log('[DEBUG] Raw ADK Response:', `${responseData.substring(0, 500)}...`);
+  
   try {
-    // レストラン検索エージェントの場合、最終的なHTML出力のみを抽出
-    // 複数のJSONイベントから最後のHTMLを見つける
-    const htmlMatch = responseData.match(/<!DOCTYPE html>[\s\S]*?<\/html>/);
-    if (htmlMatch) {
-      return htmlMatch[0];
-    }
-
     // SSE形式のレスポンスを解析
     const lines = responseData.split('\n');
     const dataLines = lines.filter(line => line.startsWith('data: '));
     
     if (dataLines.length === 0) {
-      // SSE形式でない場合、JSON全体をパースして内容を抽出
-      try {
-        const jsonResponse = JSON.parse(responseData);
-        // content.parts[0].text の形式を試す
-        if (jsonResponse?.content?.parts?.[0]?.text) {
-          return jsonResponse.content.parts[0].text;
-        }
-        // その他の可能なパスを試す
-        const content = jsonResponse.message ?? jsonResponse.response ?? jsonResponse.content ?? jsonResponse.text ?? jsonResponse.output;
-        return typeof content === 'string' ? content : responseData;
-      } catch {
-        return responseData;
-      }
+      // SSE形式でない場合のフォールバック処理
+      return handleNonSSEResponse(responseData);
     }
 
-    // すべてのデータラインから内容を結合
-    let fullMessage = '';
-    let lastHtmlContent = '';
+    // マルチエージェント対応の堅牢な処理
+    const result = parseMultiAgentSSEResponse(dataLines);
     
-    for (const line of dataLines) {
-      const jsonData = line.replace('data: ', '').trim();
+    return result || responseData;
+
+  } catch (error) {
+    console.error('[DEBUG] Parse error:', error);
+    return responseData;
+  }
+}
+
+/**
+ * マルチエージェントSSEレスポンスの解析結果（将来の拡張用）
+ */
+interface _ParsedMultiAgentResponse {
+  result: string;
+  workflowComplete: boolean;
+  finalAgent?: string;
+}
+
+/**
+ * マルチエージェントSSEレスポンスの解析
+ */
+function parseMultiAgentSSEResponse(dataLines: string[]): string {
+  let finalUIAgentHtml = '';
+  let lastAnyHtml = '';
+  let fullMessage = '';
+  let isStreamComplete = false;
+  let _finalAgentName = '';
+  
+  for (const line of dataLines) {
+    const jsonData = line.replace('data: ', '').trim();
+    
+    // SSE完了シグナルの検出
+    if (jsonData === '[DONE]') {
+      isStreamComplete = true;
+      console.log('[DEBUG] SSE stream completed with [DONE] signal');
+      break;
+    }
+    
+    try {
+      const parsedData = JSON.parse(jsonData) as ADKSSEEventData;
       
-      if (jsonData === '[DONE]') {
-        break;
+      // デバッグ: エージェント名と出力を確認
+      console.log(`[DEBUG] Agent: ${parsedData.author ?? 'unknown'}, Event:`, 
+                 `${JSON.stringify(parsedData).substring(0, 200)}...`);
+      
+      // 1. SimpleUIAgentの最終HTML出力を優先的に検出
+      if (parsedData.author === 'SimpleUIAgent' && parsedData.actions?.state_delta?.html) {
+        finalUIAgentHtml = parsedData.actions.state_delta.html;
+        _finalAgentName = 'SimpleUIAgent';
+        console.log('[DEBUG] Found final UI Agent HTML output');
+        continue;
       }
       
-      try {
-        const parsedData = JSON.parse(jsonData) as ADKSSEEventData;
-        
-        // デバッグ: パースされたデータの構造を確認
-        console.log('[DEBUG] Parsed SSE Event:', `${JSON.stringify(parsedData).substring(0, 300)}...`);
-        
-        // 深くネストされた構造を確認
-        let content: string | undefined;
-        
-        // content.parts[0].text パターン
-        if (typeof parsedData.content === 'object' && parsedData.content?.parts?.[0]?.text) {
-          content = cleanHTMLContent(parsedData.content.parts[0].text);
-        } else {
-          // 従来のパターン
-          const contentValue = typeof parsedData.content === 'string' ? parsedData.content : undefined;
-          content = parsedData.message ?? parsedData.response ?? contentValue ?? parsedData.text ?? parsedData.output;
-        }
-        
-        if (content && typeof content === 'string') {
-          // HTMLコンテンツの場合は最後のものを保持
-          if (content.includes('<!DOCTYPE html>') || content.includes('<html')) {
-            lastHtmlContent = content;
+      // 2. 他のエージェントのHTML出力もフォールバック用に保持
+      if (parsedData.actions?.state_delta?.html) {
+        lastAnyHtml = parsedData.actions.state_delta.html;
+        console.log(`[DEBUG] Found HTML from agent: ${parsedData.author ?? 'unknown'}`);
+        continue;
+      }
+      
+      // 3. content.parts[0].textからのHTML検出
+      if (typeof parsedData.content === 'object' && parsedData.content?.parts?.[0]?.text) {
+        const content = parsedData.content.parts[0].text;
+        if (content.includes('<!DOCTYPE html>') || content.includes('<html')) {
+          if (parsedData.author === 'SimpleUIAgent') {
+            finalUIAgentHtml = content;
+            _finalAgentName = 'SimpleUIAgent';
+            console.log('[DEBUG] Found UI Agent HTML in content.parts[0].text');
           } else {
-            fullMessage += content;
+            lastAnyHtml = content;
           }
+        } else {
+          fullMessage += content;
         }
-        
-        // actions.state_delta.html パターンも確認（レストラン検索エージェント用）
-        if (parsedData.actions?.state_delta?.html) {
-          console.log('[DEBUG] Found HTML in actions.state_delta.html');
-          lastHtmlContent = parsedData.actions.state_delta.html;
-        }
-        
-        // state.html パターンも確認（AIエージェントの出力キーに対応）
-        if (parsedData.actions?.state_delta && 'html' in parsedData.actions.state_delta) {
-          console.log('[DEBUG] Found HTML in state_delta');
-          const htmlContent = parsedData.actions.state_delta.html;
-          if (typeof htmlContent === 'string') {
-            lastHtmlContent = htmlContent;
-          }
-        }
-      } catch {
-        // JSONパースエラーは無視
+        continue;
       }
+      
+      // 4. その他のコンテンツパターン
+      const contentValue = typeof parsedData.content === 'string' ? parsedData.content : undefined;
+      const content = parsedData.message ?? parsedData.response ?? contentValue ?? parsedData.text ?? parsedData.output;
+      
+      if (content && typeof content === 'string') {
+        if (content.includes('<!DOCTYPE html>') || content.includes('<html')) {
+          if (parsedData.author === 'SimpleUIAgent') {
+            finalUIAgentHtml = content;
+            _finalAgentName = 'SimpleUIAgent';
+          } else {
+            lastAnyHtml = content;
+          }
+        } else {
+          fullMessage += content;
+        }
+      }
+      
+    } catch (parseError) {
+      console.warn('[DEBUG] Failed to parse SSE event:', parseError);
+      // JSONパースエラーは無視して継続
     }
-    
-    // HTMLコンテンツがある場合はそれを返す
-    if (lastHtmlContent) {
-      console.log('[DEBUG] Returning HTML content:', `${lastHtmlContent.substring(0, 200)}...`);
-      return cleanHTMLContent(lastHtmlContent);
-    }
-    
-    return cleanHTMLContent(fullMessage) || responseData;
+  }
+  
+  // 優先順位に基づいて最終結果を決定
+  let finalResult = '';
+  
+  if (finalUIAgentHtml) {
+    // 1. SimpleUIAgentのHTML出力が最優先
+    finalResult = finalUIAgentHtml;
+    console.log('[DEBUG] Using SimpleUIAgent HTML output');
+  } else if (lastAnyHtml) {
+    // 2. 他のエージェントのHTML出力をフォールバック
+    finalResult = lastAnyHtml;
+    console.log('[DEBUG] Using fallback HTML output from other agent');
+  } else if (fullMessage.trim()) {
+    // 3. 非HTMLメッセージの結合
+    finalResult = fullMessage;
+    console.log('[DEBUG] Using concatenated message content');
+  }
+  
+  // SSE完了シグナルの確認
+  if (!isStreamComplete) {
+    console.warn('[DEBUG] SSE stream did not complete with [DONE] signal');
+  }
+  
+  if (finalResult) {
+    console.log('[DEBUG] Final result length:', finalResult.length);
+    return cleanHTMLContent(finalResult);
+  }
+  
+  return '';
+}
 
+/**
+ * 非SSE形式レスポンスの処理
+ */
+function handleNonSSEResponse(responseData: string): string {
+  try {
+    const jsonResponse = JSON.parse(responseData);
+    
+    // content.parts[0].text の形式を試す
+    if (jsonResponse?.content?.parts?.[0]?.text) {
+      return cleanHTMLContent(jsonResponse.content.parts[0].text);
+    }
+    
+    // その他の可能なパスを試す
+    const content = jsonResponse.message ?? jsonResponse.response ?? jsonResponse.content ?? jsonResponse.text ?? jsonResponse.output;
+    return typeof content === 'string' ? cleanHTMLContent(content) : responseData;
   } catch {
-    // JSON解析に失敗した場合は生のレスポンスを返す
+    // HTMLの直接マッチングを試行
+    const htmlMatch = responseData.match(/<!DOCTYPE html>[\s\S]*?<\/html>/);
+    if (htmlMatch) {
+      return cleanHTMLContent(htmlMatch[0]);
+    }
+    
     return responseData;
   }
 }
@@ -275,7 +345,7 @@ function cleanHTMLContent(content: string): string {
   // 手動でエスケープを処理（JSONパースより確実）
   
   // Unicodeエスケープをデコード（\uXXXX形式）
-  cleaned = cleaned.replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => {
+  cleaned = cleaned.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => {
     return String.fromCharCode(parseInt(hex, 16));
   });
   

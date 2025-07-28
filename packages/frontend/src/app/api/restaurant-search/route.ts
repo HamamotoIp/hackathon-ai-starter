@@ -30,13 +30,19 @@ export async function POST(req: NextRequest) {
     const result = await processRestaurantSearch(serviceUrl, body.message);
     const processingTime = Date.now() - startTime;
 
+    // HTMLの完全性をチェック
+    const isCompleteHtml = result.includes('<!DOCTYPE html>') && result.includes('</html>');
+    const finalAgent = result.includes('SimpleUIAgent') ? 'SimpleUIAgent' : 'unknown';
+
     const response: RestaurantSearchAPIResponse = {
       success: true,
       result,
       processingMode: "adk_agent",
       processingTimeMs: processingTime,
       sessionId: getOrCreateSessionId(body),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      workflowComplete: isCompleteHtml,
+      finalAgent: isCompleteHtml ? finalAgent : undefined
     };
     
     return createSuccessResponse(response);

@@ -39,7 +39,12 @@ export interface UIGenerationAPIResponse extends BaseAIResponse {
 
 /** 飲食店検索APIレスポンス */
 export type RestaurantSearchAPIResponse = 
-  | (BaseAIResponse & { result: string; error?: never; }) // 成功時
+  | (BaseAIResponse & { 
+      result: string; 
+      error?: never;
+      workflowComplete?: boolean;
+      finalAgent?: string;
+    }) // 成功時
   | (AIErrorResponse & { result?: never; }); // エラー時
 
 // =============================================================================
@@ -89,6 +94,10 @@ export interface ADKSSEEventData {
   };
   text?: string;
   output?: string;
+  author?: string;
+  invocation_id?: string;
+  id?: string;
+  timestamp?: number;
   actions?: {
     state_delta?: {
       html?: string;
