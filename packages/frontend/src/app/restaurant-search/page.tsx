@@ -146,15 +146,14 @@ export default function RestaurantSearchPage() {
               <p className="text-blue-100">AI生成レストラン特集記事</p>
             </div>
             
-            <div className="p-6">
+            <div className="p-0">
               {/* HTMLを直接表示 */}
               <div 
                 className="restaurant-search-result"
                 dangerouslySetInnerHTML={{ __html: result }}
                 style={{
-                  // 結果表示エリアのスタイルをリセット
-                  all: 'initial',
-                  fontFamily: 'inherit'
+                  width: '100%',
+                  overflow: 'hidden'
                 }}
               />
             </div>

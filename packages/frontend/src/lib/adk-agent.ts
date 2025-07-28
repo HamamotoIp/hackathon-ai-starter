@@ -159,6 +159,8 @@ function createUIGenerationMessage(message: string, options?: UIGenerationOption
  * ADKレスポンス解析
  */
 function parseADKResponse(responseData: string): string {
+  // デバッグ: レスポンス全体を確認
+  console.log('[DEBUG] Raw ADK Response:', `${responseData.substring(0, 500)}...`);
   try {
     // レストラン検索エージェントの場合、最終的なHTML出力のみを抽出
     // 複数のJSONイベントから最後のHTMLを見つける
@@ -201,6 +203,9 @@ function parseADKResponse(responseData: string): string {
       try {
         const parsedData = JSON.parse(jsonData) as ADKSSEEventData;
         
+        // デバッグ: パースされたデータの構造を確認
+        console.log('[DEBUG] Parsed SSE Event:', `${JSON.stringify(parsedData).substring(0, 300)}...`);
+        
         // 深くネストされた構造を確認
         let content: string | undefined;
         
@@ -224,7 +229,17 @@ function parseADKResponse(responseData: string): string {
         
         // actions.state_delta.html パターンも確認（レストラン検索エージェント用）
         if (parsedData.actions?.state_delta?.html) {
+          console.log('[DEBUG] Found HTML in actions.state_delta.html');
           lastHtmlContent = parsedData.actions.state_delta.html;
+        }
+        
+        // state.html パターンも確認（AIエージェントの出力キーに対応）
+        if (parsedData.actions?.state_delta && 'html' in parsedData.actions.state_delta) {
+          console.log('[DEBUG] Found HTML in state_delta');
+          const htmlContent = parsedData.actions.state_delta.html;
+          if (typeof htmlContent === 'string') {
+            lastHtmlContent = htmlContent;
+          }
         }
       } catch {
         // JSONパースエラーは無視
@@ -233,6 +248,7 @@ function parseADKResponse(responseData: string): string {
     
     // HTMLコンテンツがある場合はそれを返す
     if (lastHtmlContent) {
+      console.log('[DEBUG] Returning HTML content:', `${lastHtmlContent.substring(0, 200)}...`);
       return cleanHTMLContent(lastHtmlContent);
     }
     
@@ -254,13 +270,30 @@ function cleanHTMLContent(content: string): string {
     .replace(/\n?```\s*$/i, '')
     .trim();
   
-  // Unicodeエスケープをデコード（\uXXXX形式）
-  cleaned = cleaned.replace(/\\u([\d\w]{4})/gi, (_, grp) => {
-    return String.fromCharCode(parseInt(grp, 16));
-  });
-  
-  // 改行文字のエスケープを実際の改行に変換
-  cleaned = cleaned.replace(/\\n/g, '\n');
+  // JSON文字列として解析を試行（ダブルエスケープ対応）
+  try {
+    // JSONパースでエスケープを解除
+    cleaned = JSON.parse(`"${cleaned.replace(/"/g, '\\"')}"`);
+  } catch {
+    // JSONパースに失敗した場合は手動でエスケープを処理
+    
+    // Unicodeエスケープをデコード（\uXXXX形式）
+    cleaned = cleaned.replace(/\\u([\d\w]{4})/gi, (_, grp) => {
+      return String.fromCharCode(parseInt(grp, 16));
+    });
+    
+    // 改行文字のエスケープを実際の改行に変換
+    cleaned = cleaned.replace(/\\n/g, '\n');
+    
+    // タブ文字のエスケープを実際のタブに変換
+    cleaned = cleaned.replace(/\\t/g, '\t');
+    
+    // ダブルクォートのエスケープを解除
+    cleaned = cleaned.replace(/\\"/g, '"');
+    
+    // バックスラッシュのエスケープを解除
+    cleaned = cleaned.replace(/\\\\/g, '\\');
+  }
   
   return cleaned;
 }

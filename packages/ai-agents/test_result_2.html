@@ -3,164 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新宿 おしゃれカフェ ランチ特集</title>
+    <title>新宿 おしゃれカフェランチ特集</title>
     <style>
         body {
-            font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', sans-serif;
-            line-height: 1.6;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
-        .header {
+
+        .container {
+            width: 90%;
+            max-width: 960px;
+            margin: 20px auto;
+        }
+
+        h1 {
             text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: #555;
             margin-bottom: 30px;
         }
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2em;
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
         }
-        .search-info {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        .restaurant-card {
-            background: white;
-            margin-bottom: 25px;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        .card {
+            width: 300px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
             transition: transform 0.3s ease;
         }
-        .restaurant-card:hover {
+
+        .card:hover {
             transform: translateY(-5px);
         }
-        .restaurant-name {
-            color: #e74c3c;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e74c3c;
-            padding-bottom: 5px;
+
+        .card-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
         }
-        .restaurant-info {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #34495e;
-        }
-        .restaurant-description {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-        }
-        .footer {
-            text-align: center;
-            background: white;
+
+        .card-content {
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 30px;
-            color: #7f8c8d;
         }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card-description {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            .header h1 { font-size: 1.5em; }
-            .restaurant-info { grid-template-columns: 1fr; }
+            .card {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>新宿 おしゃれカフェ ランチ特集</h1>
-        <div class="search-info">
-            <strong>検索条件:</strong> 新宿エリア、ランチ、おしゃれなカフェ
+
+    <div class="container">
+        <h1>新宿 おしゃれカフェランチ特集</h1>
+        <p style="text-align:center;">新宿でランチにおすすめのおしゃれなカフェをご紹介します。</p>
+        <div class="card-container">
+
+            <div class="card">
+                <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200/87CEEB/FFFFFF?text=BlueBottleCoffee');"></div>
+                <div class="card-content">
+                    <h2 class="card-title">ブルーボトルコーヒー 新宿カフェ</h2>
+                    <p class="card-description">洗練された空間で、スペシャルティコーヒーと軽食はいかが？スタイリッシュなカフェで、こだわりの一杯と共に優雅なランチタイムを。新宿でのおしゃれなカフェランチにぴったり。</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200/F08080/FFFFFF?text=WiredCafe');"></div>
+                <div class="card-content">
+                    <h2 class="card-title">WIRED CAFE ルミネ新宿店</h2>
+                    <p class="card-description">ルミネ新宿でアクセス抜群！おしゃれな空間で、豊富な食事メニューを楽しめます。友人とのランチや、買い物の休憩に最適。落ち着いた雰囲気でゆっくり過ごせるカフェ。</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200/BDB76B/FFFFFF?text=HANZ');"></div>
+                <div class="card-content">
+                    <h2 class="card-title">HANZ 新宿店</h2>
+                    <p class="card-description">アンティーク調のインテリアが魅力的なカフェ。こだわりのコーヒーと共に、軽食を味わいながら、ゆったりとしたランチ時間を過ごせます。新宿の喧騒を忘れ、落ち着いた空間で癒されて。</p>
+                </div>
+            </div>
+
+             <div class="card">
+                <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200/CD5C5C/FFFFFF?text=LaCocotte');"></div>
+                <div class="card-content">
+                    <h2 class="card-title">La Cocotte</h2>
+                    <p class="card-description">新宿マルイ本館にあるおしゃれカフェ。フレンチトーストやサンドイッチなど、見た目も味も楽しめるランチメニューが豊富！女子会やデートにもおすすめ。新宿で話題のカフェランチをぜひ。</p>
+                </div>
+            </div>
+
+             <div class="card">
+                <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200/E9967A/FFFFFF?text=AfternoonTea');"></div>
+                <div class="card-content">
+                    <h2 class="card-title">アフタヌーンティー・ラブアンドテーブル ルミネ新宿店</h2>
+                    <p class="card-description">ルミネ新宿で、おしゃれなアフタヌーンティーはいかが？ケーキや紅茶はもちろん、パスタやサンドイッチも楽しめます。優雅な空間で、特別なランチタイムを過ごせるカフェ。</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- 各レストランカード（5つ） -->
-    <div class="restaurant-card">
-        <div class="restaurant-name">RACINES BREAD & SALAD（ラシーヌ ブレッド アンド サラダ）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>新宿</span>
-            <span class="info-label">ジャンル:</span> <span>カフェ・パン・サンドイッチ</span>
-            <span class="info-label">予算:</span> <span>1,000円〜2,000円</span>
-            <span class="info-label">営業時間:</span> <span>8:00～22:00 (ランチタイムあり)</span>
-        </div>
-        <div class="restaurant-description">
-            緑に囲まれた都会のオアシスのようなカフェ。自家製パンを使ったサンドイッチやサラダは見た目も美しく、SNS映えもバッチリ。開放的な空間でゆったりとしたランチタイムを過ごせます。
-        </div>
-    </div>
-
-    <div class="restaurant-card">
-        <div class="restaurant-name">WIRED CAFE ルミネエスト新宿店</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>新宿</span>
-            <span class="info-label">ジャンル:</span> <span>カフェ・ダイニング</span>
-            <span class="info-label">予算:</span> <span>800円〜1,500円</span>
-            <span class="info-label">営業時間:</span> <span>11:00～22:30 (ランチタイムあり)</span>
-        </div>
-        <div class="restaurant-description">
-            ルミネエスト内にあるアクセス抜群のカフェ。店内は落ち着いた雰囲気で、ソファ席も充実。ランチには、タコライスやパスタなど、豊富なメニューが楽しめます。ショッピングの合間の休憩にも最適。
-        </div>
-    </div>
-
-    <div class="restaurant-card">
-        <div class="restaurant-name">CAFE AALIYA（カフェ アリヤ）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>新宿</span>
-            <span class="info-label">ジャンル:</span> <span>カフェ・フレンチトースト</span>
-            <span class="info-label">予算:</span> <span>800円〜1,200円</span>
-            <span class="info-label">営業時間:</span> <span>10:00～22:30 (ランチタイムあり)</span>
-        </div>
-        <div class="restaurant-description">
-            隠れ家のような雰囲気のカフェ。名物のフレンチトーストは、外はカリカリ、中はふわふわで絶品！ランチには、サラダやスープが付いたお得なセットもあります。ゆっくりと時間を過ごしたい方におすすめ。
-        </div>
-    </div>
-
-    <div class="restaurant-card">
-        <div class="restaurant-name">BROOKLYN PARLOR SHINJUKU（ブルックリンパーラー 新宿）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>新宿</span>
-            <span class="info-label">ジャンル:</span> <span>カフェ・ダイニング・バー</span>
-            <span class="info-label">予算:</span> <span>1,000円〜2,000円</span>
-            <span class="info-label">営業時間:</span> <span>11:30～23:00 (ランチタイムあり)</span>
-        </div>
-        <div class="restaurant-description">
-            本に囲まれたおしゃれな空間で、ランチを楽しめるカフェ。ハンバーガーやサンドイッチなど、ボリューム満点のメニューが豊富。読書好きにはたまらない、落ち着いた雰囲気です。
-        </div>
-    </div>
-
-    <div class="restaurant-card">
-        <div class="restaurant-name">Sarabeth's LUMINE2（サラベス ルミネ2）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>新宿</span>
-            <span class="info-label">ジャンル:</span> <span>カフェ・レストラン・パンケーキ</span>
-            <span class="info-label">予算:</span> <span>1,500円〜2,500円</span>
-            <span class="info-label">営業時間:</span> <span>9:00～22:00 (ランチタイムあり)</span>
-        </div>
-        <div class="restaurant-description">
-            ニューヨーク発の人気レストラン。ふわふわのパンケーキやエッグベネディクトなど、優雅なランチを楽しめます。店内は明るく開放的で、女子会にもぴったり。
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>🍽️ 素敵なお食事をお楽しみください！</p>
-        <p><small>※ 営業時間や料金は変更される場合があります。事前にご確認ください。</small></p>
-    </div>
 </body>
 </html>

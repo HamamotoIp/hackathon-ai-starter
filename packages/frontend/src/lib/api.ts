@@ -92,9 +92,9 @@ export interface ADKSSEEventData {
   actions?: {
     state_delta?: {
       html?: string;
-      [key: string]: any;
+      [key: string]: unknown;
     };
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

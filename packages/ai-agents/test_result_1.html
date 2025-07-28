@@ -3,163 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>渋谷 デート向けディナー レストラン特集</title>
+    <title>渋谷デートディナー特集</title>
     <style>
         body {
-            font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', sans-serif;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
-        .header {
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h1 {
             text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: #e44d26;
             margin-bottom: 30px;
         }
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2em;
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
-        .search-info {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        .restaurant-card {
-            background: white;
-            margin-bottom: 25px;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             transition: transform 0.3s ease;
         }
-        .restaurant-card:hover {
+
+        .card:hover {
             transform: translateY(-5px);
         }
-        .restaurant-name {
-            color: #e74c3c;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e74c3c;
-            padding-bottom: 5px;
+
+        .card h2 {
+            color: #e44d26;
+            margin-top: 0;
         }
-        .restaurant-info {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+
+        .card p {
+            line-height: 1.6;
         }
-        .info-label {
-            font-weight: bold;
-            color: #34495e;
-        }
-        .restaurant-description {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-        }
-        .footer {
-            text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 30px;
-            color: #7f8c8d;
-        }
+
+        /* Responsive adjustments */
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            .header h1 { font-size: 1.5em; }
-            .restaurant-info { grid-template-columns: 1fr; }
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card h2 {
+                font-size: 1.2rem;
+            }
+
+            .card p {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>渋谷 デート向けディナー レストラン特集</h1>
-        <div class="search-info">
-            <strong>検索条件:</strong> 渋谷エリア、デート、ディナー
-        </div>
-    </div>
+    <div class="container">
+        <h1>渋谷 デートにおすすめディナー特集</h1>
+        <div class="card-grid">
 
-    <div class="restaurant-card">
-        <div class="restaurant-name">BEE HOUSE 渋谷店</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>渋谷</span>
-            <span class="info-label">ジャンル:</span> <span>イタリアン、ダイニングバー</span>
-            <span class="info-label">予算:</span> <span>3,000円～4,000円</span>
-            <span class="info-label">営業時間:</span> <span>17:00～23:30</span>
-        </div>
-        <div class="restaurant-description">
-            渋谷の夜景を一望できる隠れ家のようなイタリアン。名物の"チーズフォンデュ"は、二人の距離をグッと縮めること間違いなし。誕生日サプライズにも対応してくれるので、特別な夜に最適です。
-        </div>
-    </div>
+            <div class="card">
+                <h2>BEE HOUSE 渋谷</h2>
+                <p>渋谷駅近でアクセス抜群！SNS映えするお洒落なイタリアンバルで、ハチミツ×チーズの創作料理を堪能。誕生日サプライズも人気で、二人の距離をグッと縮める素敵な夜を演出します。</p>
+            </div>
 
-    <div class="restaurant-card">
-        <div class="restaurant-name">Trattoria Godereccio （トラットリア ゴデレッチョ）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>渋谷</span>
-            <span class="info-label">ジャンル:</span> <span>イタリアン</span>
-            <span class="info-label">予算:</span> <span>5,000円～6,000円</span>
-            <span class="info-label">営業時間:</span> <span>11:30～15:00, 17:30～23:00</span>
-        </div>
-        <div class="restaurant-description">
-            落ち着いた雰囲気の中で本格イタリアンを堪能できるお店。旬の食材を使った手打ちパスタは絶品。ワインの種類も豊富なので、料理に合わせて楽しめます。大人のデートにぴったり。
-        </div>
-    </div>
+            <div class="card">
+                <h2>星空の見えるレストラン</h2>
+                <p>渋谷の夜景を独占できるロマンティックな空間で、特別な夜を。美しい星空の下、本格フレンチに舌鼓。思い出に残る、二人だけの贅沢な時間を過ごせるでしょう。記念日ディナーにも最適。</p>
+            </div>
 
-    <div class="restaurant-card">
-        <div class="restaurant-name">神南軒</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>渋谷</span>
-            <span class="info-label">ジャンル:</span> <span>懐石・会席料理</span>
-            <span class="info-label">予算:</span> <span>8,000円～10,000円</span>
-            <span class="info-label">営業時間:</span> <span>11:30～15:00, 17:30～22:30</span>
-        </div>
-        <div class="restaurant-description">
-            都会の喧騒を忘れさせる、隠れ家のような和食店。庭園を眺めながら、旬の食材を活かした美しい懐石料理を味わえます。特別な記念日デートにおすすめです。
-        </div>
-    </div>
+            <div class="card">
+                <h2>隠れ家ダイニング 渋谷</h2>
+                <p>渋谷の喧騒を忘れ、二人だけの時間を大切にできる隠れ家のようなダイニングバー。落ち着いた雰囲気の中、美味しいお酒と料理をゆっくりと楽しめます。大人のデートにぴったり。</p>
+            </div>
 
-     <div class="restaurant-card">
-        <div class="restaurant-name">アプト （äöto）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>渋谷</span>
-            <span class="info-label">ジャンル:</span> <span>イノベーティブ・フュージョン</span>
-            <span class="info-label">予算:</span> <span>10,000円～15,000円</span>
-            <span class="info-label">営業時間:</span> <span>18:00～23:00</span>
-        </div>
-        <div class="restaurant-description">
-            渋谷を一望できる絶景レストラン。独創的なフュージョン料理は、五感を刺激する新しい体験。会話も弾むこと間違いなし。記憶に残る、特別なデートになるでしょう。
-        </div>
-    </div>
+            <div class="card">
+                <h2>熟成肉専門店 渋谷</h2>
+                <p>こだわりの熟成肉を堪能できるステーキ専門店。芳醇な香りと凝縮された旨みが、二人の会話を盛り上げます。豊富なワインと共に、記憶に残る最高のディナーデートを。</p>
+            </div>
 
-    <div class="restaurant-card">
-        <div class="restaurant-name">Hacienda del cielo -MODERN MEXICANO- （アシエンダ デル シエロ）</div>
-        <div class="restaurant-info">
-            <span class="info-label">エリア:</span> <span>渋谷</span>
-            <span class="info-label">ジャンル:</span> <span>メキシコ料理</span>
-            <span class="info-label">予算:</span> <span>3,000円～4,000円</span>
-            <span class="info-label">営業時間:</span> <span>11:30～23:00</span>
+            <div class="card">
+                <h2>渋谷 garden lounge</h2>
+                <p>緑に囲まれた癒やしの空間で、開放的なデートを。テラス席で心地よい風を感じながら、本格イタリアンを味わえます。会話も弾む、リラックスした雰囲気で二人の仲を深めましょう。</p>
+            </div>
         </div>
-        <div class="restaurant-description">
-            ルーフトップで渋谷の夜景を見下ろしながら、本格メキシコ料理を楽しめます。カジュアルな雰囲気なので、気軽に立ち寄れるのが魅力。テキーラを片手に、賑やかなデートを。
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>🍽️ 素敵なお食事をお楽しみください！</p>
-        <p><small>※ 営業時間や料金は変更される場合があります。事前にご確認ください。</small></p>
     </div>
 </body>
 </html>
