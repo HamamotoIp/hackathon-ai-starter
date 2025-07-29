@@ -7,6 +7,7 @@ Agent Engine 古いバージョン削除スクリプト
 import os
 import re
 import sys
+import time
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 import vertexai
@@ -139,13 +140,15 @@ def cleanup_old_agents(dry_run: bool = True) -> None:
     
     # 実際の削除実行
     print(f"\n🚨 削除を開始します...")
+    print(f"⏱️  レート制限対応: 削除間隔6秒で実行します")
     
     successful_deletions = 0
     failed_deletions = 0
+    retry_list = []  # リトライ対象
     
-    for engine_name, display_name, create_time in engines_to_delete:
+    for i, (engine_name, display_name, create_time) in enumerate(engines_to_delete):
         try:
-            print(f"🗑️  削除中: {display_name} ({create_time})")
+            print(f"🗑️  削除中 ({i+1}/{len(engines_to_delete)}): {display_name} ({create_time})")
             
             # AgentEngineインスタンスを作成して削除
             agent_engine = AgentEngine(resource_name=engine_name)
@@ -154,9 +157,43 @@ def cleanup_old_agents(dry_run: bool = True) -> None:
             print(f"✅ 削除成功: {display_name}")
             successful_deletions += 1
             
+            # レート制限対応: 6秒間隔
+            if i < len(engines_to_delete) - 1:  # 最後の削除以外
+                print(f"⏳ 6秒待機中...")
+                time.sleep(6)
+            
         except Exception as e:
-            print(f"❌ 削除失敗: {display_name} - {e}")
-            failed_deletions += 1
+            error_msg = str(e)
+            if "RATE_LIMIT_EXCEEDED" in error_msg:
+                print(f"⚠️  レート制限: {display_name} - リトライキューに追加")
+                retry_list.append((engine_name, display_name, create_time))
+            else:
+                print(f"❌ 削除失敗: {display_name} - {e}")
+                failed_deletions += 1
+    
+    # リトライ処理
+    if retry_list:
+        print(f"\n🔄 リトライ処理開始: {len(retry_list)}個")
+        print(f"⏱️  60秒待機後、30秒間隔でリトライします")
+        time.sleep(60)  # 1分待機
+        
+        for i, (engine_name, display_name, create_time) in enumerate(retry_list):
+            try:
+                print(f"🔄 リトライ中 ({i+1}/{len(retry_list)}): {display_name}")
+                agent_engine = AgentEngine(resource_name=engine_name)
+                agent_engine.delete(force=True)
+                
+                print(f"✅ リトライ成功: {display_name}")
+                successful_deletions += 1
+                
+                # リトライ間隔: 30秒
+                if i < len(retry_list) - 1:
+                    print(f"⏳ 30秒待機中...")
+                    time.sleep(30)
+                    
+            except Exception as e:
+                print(f"❌ リトライ失敗: {display_name} - {e}")
+                failed_deletions += 1
     
     print(f"\n📊 削除結果")
     print(f"  • 成功: {successful_deletions}個")
