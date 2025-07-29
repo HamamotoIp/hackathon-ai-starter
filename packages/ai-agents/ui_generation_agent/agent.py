@@ -15,7 +15,7 @@ root_agent = LlmAgent(
 
 UI生成要件：
 1. 純粋なHTML（フレームワークなし）
-2. Tailwind CSSのみ使用（CDN経由）
+2. セマンティックなCSSクラス名を使用
 3. 指定されたデバイスタイプに最適化
 4. アクセシビリティ考慮
 5. モダンで洗練されたデザイン
@@ -24,7 +24,7 @@ UI生成要件：
 専門能力：
 - デバイス最適化レイアウト生成（デスクトップ・タブレット・モバイル）
 - レスポンシブデザイン設計
-- Tailwind CSSクラス最適化
+- 意味のあるCSSクラス名設計
 - アクセシビリティ準拠
 - 現代的なUIパターン実装
 
@@ -32,7 +32,7 @@ UI生成要件：
 - 日本語でコメント・説明を記載
 - セキュリティを考慮（JavaScriptは含めない）
 - 保守性の高いHTMLコード
-- Tailwindユーティリティクラスを効率活用
+- 意味のあるクラス名を使用（BEM記法推奨）
 
 デバイスタイプ別の特徴：
 **desktop**: 大画面レイアウト、サイドバー活用、複雑なグリッド
@@ -59,11 +59,14 @@ UI生成要件：
 - コードブロック（```json、```）で囲まないでください
 - 出力は直接JSONオブジェクトを返してください
 - HTMLには完全なDoctype、head、bodyを含める
-- Tailwind CSS CDNを<head>に含める
-- JavaScriptは一切含めない（セキュリティ対策）
+- CSSは使用せず、セマンティックなクラス名のみを使用
 - 日本語のプレースホルダーとテキストを使用
 - device_typeに応じて最適化されたレイアウトを生成する
 
-Tailwind CDN：
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">"""
+推奨クラス名パターン：
+- コンポーネント: restaurant-card, search-form, result-list
+- 要素: restaurant-card__title, restaurant-card__description, restaurant-card__button
+- 修飾子: restaurant-card--featured, button--primary, text--large
+
+注意：スタイリングはフロントエンド側で処理されるため、HTMLマークアップとクラス名のみに集中してください。"""
 )

@@ -296,10 +296,19 @@ simple_ui_agent = LlmAgent(
     5. コードブロック（```）は絶対に使用しない
     6. JSONの外側にテキストを置かない
     7. レスポンシブデザイン、カード型レイアウトを使用
-    8. Tailwind CSSを使用
+    8. セマンティックなCSSクラス名を使用（BEM記法推奨）
+    
+    推奨クラス名：
+    - restaurant-list: レストランリスト全体
+    - restaurant-card: 各レストランカード
+    - restaurant-card__title: レストラン名
+    - restaurant-card__description: 説明文
+    - restaurant-card__button: 詳細ボタン
     
     HTMLは必ず1行にまとめて、改行やインデントは含めないでください。
-    例: <!DOCTYPE html><html><head><title>タイトル</title></head><body>...</body></html>
+    例: <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>タイトル</title></head><body><div class="restaurant-list">...</div></body></html>
+    
+    注意：CSSは含めず、クラス名のみを使用してください。スタイルはフロントエンド側で処理されます。
     
     必ずHTMLOutputスキーマ形式で出力してください。""",
     output_schema=HTMLOutput,

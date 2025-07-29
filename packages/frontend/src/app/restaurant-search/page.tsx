@@ -147,9 +147,9 @@ export default function RestaurantSearchPage() {
             </div>
             
             <div className="p-0">
-              {/* HTMLを直接表示 */}
+              {/* AI生成HTMLを表示（スタイル適用） */}
               <div 
-                className="restaurant-search-result"
+                className="restaurant-search-result ai-generated-content"
                 dangerouslySetInnerHTML={{ __html: result }}
                 style={{
                   width: '100%',

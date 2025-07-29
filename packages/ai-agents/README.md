@@ -8,6 +8,7 @@
 - **UI生成**: HTML/Tailwind CSS生成・プロトタイプ作成 (25-45秒)
 - **レストラン検索**: 6段階処理で1行形式HTML出力 (15-25秒)
 - **構造化出力**: Pydanticスキーマ対応・エスケープ問題を根本解決
+- **Tailwind CSS対応**: 静的CSSファイル使用でJavaScriptフリー（2025年7月29日更新）
 
 ## 📝 プロジェクト構造
 
@@ -138,11 +139,21 @@ function cleanHTMLContent(content: string): string {
 }
 ```
 
-**3. 効果**
+**3. Tailwind CSS CDN修正（2025年7月29日）**
+```html
+<!-- 変更前（JavaScript必須） -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- 変更後（静的CSSファイル） -->
+<link href="https://unpkg.com/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+```
+
+**4. 効果**
 - ✅ HTMLエスケープ文字が完全に除去される
 - ✅ 改行問題が解決される
 - ✅ JSON二重エスケープが処理される
 - ✅ 美しくレンダリングされたHTMLが表示される
+- ✅ Tailwind CSSが正しく適用される（JavaScriptフリー）
 
 ## 🔧 環境設定
 
@@ -181,12 +192,13 @@ export MAX_INSTANCES="1"
 ### 専門特化エージェント
 - **Analysis Agent** (`analysis_agent/`): データ分析・トレンド抽出・洞察生成
 - **UI Generation Agent** (`ui_generation_agent/`): HTML/Tailwind CSS生成・プロトタイプ作成
+  - 静的Tailwind CSS CDN使用（JavaScriptフリー）
 - **Restaurant Search Agent** (`restaurant_search_agent/`): 6段階処理による完全な飲食店検索システム
   - SimpleIntentAgent: 意図理解・パラメータ抽出
   - SimpleSearchAgent: 2段階Google検索実行
   - SimpleSelectionAgent: 条件に最適な5店舗選定
   - SimpleDescriptionAgent: 魅力的な説明文生成
-  - SimpleUIAgent: 1行形式HTMLを生成（エスケープ問題解決）
+  - SimpleUIAgent: 1行形式HTMLを生成（エスケープ問題解決・Tailwind CSS対応）
   - HTMLExtractorAgent: 純粋な1行HTMLを最終抽出
 
 ## 🔄 開発フロー（人間-AI協働）
@@ -378,6 +390,7 @@ wait
 - **[debug/README.md](./debug/README.md)** - ローカルデバッグツール詳細
 - **[QUICKSTART.md](../../docs/QUICKSTART.md)** - 全体クイックスタートガイド
 - **[ローカル開発ガイド](../../docs/quickstart/local-development.md)** - ローカル開発詳細
+- **[Tailwind CSS設定](../../docs/development/tailwind-css-configuration.md)** - Tailwind CSS CDN設定詳細
 - **[ADK公式ドキュメント](https://google.github.io/adk-docs/)** - Agent Development Kit公式
 
 ## 🎯 開発のベストプラクティス

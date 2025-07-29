@@ -101,14 +101,42 @@ if ! gsutil ls "gs://$STAGING_BUCKET" >/dev/null 2>&1; then
     gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$STAGING_BUCKET"
 fi
 
-# 複数Agent Engine順次デプロイ
-echo -e "${BLUE}📊 分析・UI生成・飲食店検索エージェントを順次デプロイ中...${NC}"
+# 複数Agent Engine並列デプロイ
+echo -e "${BLUE}📊 分析・UI生成・飲食店検索エージェントを並列デプロイ中...${NC}"
+echo "  ⚡ 3つのエージェントを同時実行（処理時間を約1/3に短縮）"
+echo ""
 
-
-# Analysis Agent
+# 並列デプロイ開始
 echo "  📊 Analysis Agent デプロイ開始..."
-python deploy/deploy_analysis.py
+python deploy/deploy_analysis.py &
+ANALYSIS_PID=$!
+
+echo "  🎨 UI Generation Agent デプロイ開始..."
+python deploy/deploy_ui_generation.py &
+UI_GENERATION_PID=$!
+
+echo "  🍽️ Restaurant Search Agent デプロイ開始..."
+python deploy/deploy_restaurant_search.py &
+RESTAURANT_SEARCH_PID=$!
+
+echo ""
+echo "  ⏳ 並列デプロイ実行中... (数分かかる場合があります)"
+
+# 各プロセスの完了を待機して結果を取得
+echo "  📊 Analysis Agent の完了を待機中..."
+wait $ANALYSIS_PID
 ANALYSIS_EXIT=$?
+
+echo "  🎨 UI Generation Agent の完了を待機中..."
+wait $UI_GENERATION_PID
+UI_GENERATION_EXIT=$?
+
+echo "  🍽️ Restaurant Search Agent の完了を待機中..."
+wait $RESTAURANT_SEARCH_PID
+RESTAURANT_SEARCH_EXIT=$?
+
+echo ""
+echo -e "${BLUE}📋 並列デプロイ結果:${NC}"
 
 if [ $ANALYSIS_EXIT -eq 0 ]; then
     echo -e "  ${GREEN}✅ Analysis Agent デプロイ完了${NC}"
@@ -116,23 +144,11 @@ else
     echo -e "  ${RED}❌ Analysis Agent デプロイ失敗${NC}"
 fi
 
-
-# UI Generation Agent
-echo "  🎨 UI Generation Agent デプロイ開始..."
-python deploy/deploy_ui_generation.py
-UI_GENERATION_EXIT=$?
-
 if [ $UI_GENERATION_EXIT -eq 0 ]; then
     echo -e "  ${GREEN}✅ UI Generation Agent デプロイ完了${NC}"
 else
     echo -e "  ${RED}❌ UI Generation Agent デプロイ失敗${NC}"
 fi
-
-
-# Restaurant Search Agent
-echo "  🍽️ Restaurant Search Agent デプロイ開始..."
-python deploy/deploy_restaurant_search.py
-RESTAURANT_SEARCH_EXIT=$?
 
 if [ $RESTAURANT_SEARCH_EXIT -eq 0 ]; then
     echo -e "  ${GREEN}✅ Restaurant Search Agent デプロイ完了${NC}"

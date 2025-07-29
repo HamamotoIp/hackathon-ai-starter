@@ -99,6 +99,18 @@ export async function processRestaurantSearch(
     const sessionId = await createADKSession(serviceUrl);
     const response = await sendADKMessage(serviceUrl, sessionId, message);
     
+    // レスポンスが不完全な場合のチェックを追加
+    if (!response || response.length < 100) {
+      console.warn('[DEBUG] レスポンスが不完全です:', response?.length || 0, '文字');
+      throw new Error('レスポンスが不完全です。ワークフローが途中で停止した可能性があります。再試行してください。');
+    }
+    
+    // HTMLが含まれているかチェック
+    if (!response.includes('<!DOCTYPE html>') && !response.includes('<html')) {
+      console.warn('[DEBUG] HTMLが含まれていないレスポンス');
+      throw new Error('HTML出力が生成されませんでした。ワークフローが完了していない可能性があります。');
+    }
+    
     // レスポンスがJSONオブジェクトの場合、htmlフィールドを抽出
     // これはHTMLExtractorAgentが処理する前のフォールバック
     try {
@@ -114,7 +126,9 @@ export async function processRestaurantSearch(
     
     return response;
   } catch (error) {
-    throw new Error(`飲食店検索処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[ERROR] Restaurant search failed:', errorMessage);
+    throw new Error(`飲食店検索処理エラー: ${errorMessage}`);
   }
 }
 
@@ -184,11 +198,13 @@ async function sendADKMessage(
       'Accept': 'text/event-stream'
     },
     data: requestData,
-    responseType: 'text'
+    responseType: 'text',
+    timeout: 120000  // 2分に延長
   });
 
   console.log('[DEBUG] ADK Response status:', response.status);
   console.log('[DEBUG] ADK Response type:', typeof response.data);
+  console.log('[DEBUG] ADK Response length:', (response.data as string).length);
   console.log('[DEBUG] ADK Response first 1000 chars:', (response.data as string).substring(0, 1000));
 
   return parseADKResponse(response.data as string);
