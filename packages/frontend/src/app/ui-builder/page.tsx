@@ -230,7 +230,7 @@ export default function UIBuilderPage() {
                   作りたいUIの説明を入力すると、デバイス最適化されたHTML/CSSを生成します
                 </p>
                 <div className="text-sm text-gray-400">
-                  <p>• Tailwind CSSを使用した高品質なデザイン</p>
+                  <p>• インラインCSS完全対応の高品質なデザイン</p>
                   <p>• デバイス別最適化対応</p>
                   <p>• プレビューとコード表示</p>
                 </div>

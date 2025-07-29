@@ -147,14 +147,12 @@ export default function RestaurantSearchPage() {
             </div>
             
             <div className="p-0">
-              {/* AI生成HTMLを表示（スタイル適用） */}
-              <div 
-                className="restaurant-search-result ai-generated-content"
-                dangerouslySetInnerHTML={{ __html: result }}
-                style={{
-                  width: '100%',
-                  overflow: 'hidden'
-                }}
+              {/* AI生成HTMLをiframeでプレビュー */}
+              <iframe
+                srcDoc={result}
+                className="w-full h-[600px] border-0"
+                title="Restaurant Search Result Preview"
+                sandbox="allow-same-origin"
               />
             </div>
             

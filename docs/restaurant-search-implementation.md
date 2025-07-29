@@ -2,7 +2,17 @@
 
 ## 概要
 
-AI Chat Starter Kitに追加された飲食店検索機能の実装について説明します。この機能は、ユーザーの要望に基づいて最適なレストランを推薦し、美しいHTMLフォーマットで特集記事を生成します。
+AI Chat Starter Kitに追加された飲食店検索機能の実装について説明します。この機能は、6段階Sequential Agentによる革新的実装で、ユーザーの要望に基づいて最適なレストランを推薦し、インラインCSS完全対応の美しいHTMLフォーマットで特集記事を生成します。
+
+## 技術革新
+
+### エスケープ問題の根本解決
+従来のHTML生成において「\\"店舗名\\"」や「\\n」が表示される問題を、以下の革新的アプローチで完全解決：
+
+1. **Pydanticスキーマ**: HTMLOutputスキーマで1行形式HTML強制
+2. **6段階処理**: SequentialAgentによる段階的な処理
+3. **シングルクォート戦略**: HTML属性にシングルクォート使用でエスケープ回避
+4. **包括的クリーンアップ**: cleanHTMLContent関数による完全なエスケープ除去
 
 ## アーキテクチャ
 
@@ -37,11 +47,19 @@ root_agent = LlmAgent(
 )
 ```
 
-**主な特徴**:
+**6段階処理システム**:
+1. **SimpleIntentAgent**: ユーザー入力から検索パラメータ抽出
+2. **SimpleSearchAgent**: TwoStepSearchToolで2段階Google検索
+3. **SimpleSelectionAgent**: 条件に最適な5店舗選定
+4. **SimpleDescriptionAgent**: 魅力的な説明文生成（150文字）
+5. **SimpleUIAgent**: HTMLOutputスキーマで1行形式HTML生成
+6. **HTMLExtractorAgent**: 純粋な1行HTML最終抽出
+
+**技術的特徴**:
 - Gemini 2.0 Flash Expモデルを使用
-- HTMLを直接生成（コードブロックなし）
-- 5つのレストランを推薦
-- レスポンシブデザイン対応
+- インラインCSS完全対応（globals.css不使用）
+- シングルクォート戦略でエスケープ問題回避
+- レスポンシブデザイン対応（headタグ内メディアクエリ）
 
 ### 2. フロントエンド実装
 

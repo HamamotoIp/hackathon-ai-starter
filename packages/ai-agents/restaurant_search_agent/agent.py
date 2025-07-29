@@ -282,7 +282,7 @@ simple_ui_agent = LlmAgent(
     name="SimpleUIAgent",
     model="gemini-2.0-flash-exp",
     description="1行形式のHTML記事を生成",
-    instruction="""以下の情報を使って、美しい特集記事HTMLを生成してください：
+    instruction="""以下の情報を使って、globals.cssと完全連携したレストラン特集記事HTMLを生成してください：
     
     - 検索条件: state['search_params']
     - 選定店舗: state['selected_restaurants']
@@ -295,20 +295,34 @@ simple_ui_agent = LlmAgent(
     4. すべてのタグと内容を1行に連結する
     5. コードブロック（```）は絶対に使用しない
     6. JSONの外側にテキストを置かない
-    7. レスポンシブデザイン、カード型レイアウトを使用
-    8. セマンティックなCSSクラス名を使用（BEM記法推奨）
     
-    推奨クラス名：
-    - restaurant-list: レストランリスト全体
-    - restaurant-card: 各レストランカード
-    - restaurant-card__title: レストラン名
-    - restaurant-card__description: 説明文
-    - restaurant-card__button: 詳細ボタン
+    🎨 **必須インラインスタイル設計**：
+    完全なセルフコンテインドHTMLとして、すべてのスタイルをインラインで記述してください。
     
-    HTMLは必ず1行にまとめて、改行やインデントは含めないでください。
-    例: <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>タイトル</title></head><body><div class="restaurant-list">...</div></body></html>
+    📋 **HTMLテンプレート構造**：
+    <!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>[検索条件に基づくタイトル]</title><style>@media (max-width: 768px) { .restaurant-container { grid-template-columns: 1fr !important; gap: 16px !important; padding: 16px !important; } .restaurant-card { padding: 16px !important; } }</style></head><body style='font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px;'><div class='restaurant-container' style='display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto;'>[レストランカード群]</div></body></html>
     
-    注意：CSSは含めず、クラス名のみを使用してください。スタイルはフロントエンド側で処理されます。
+    ✅ **必須インラインスタイル（エスケープ回避版）**：
+    - コンテナ: class='restaurant-container' style='display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto;'
+    - カード: class='restaurant-card' style='background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 20px; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e5e7eb;'
+    - タイトル: style='font-size: 20px; font-weight: bold; color: #1f2937; margin-bottom: 12px; line-height: 1.3;'
+    - 説明文: style='color: #6b7280; margin-bottom: 16px; line-height: 1.6; font-size: 14px;'
+    - ボタン: style='background-color: #3b82f6; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; transition: background-color 0.2s;'
+    - ホバー効果: onmouseover='this.style.backgroundColor="#2563eb"' onmouseout='this.style.backgroundColor="#3b82f6"'
+    
+    🎯 **レスポンシブデザイン**：
+    headタグ内の<style>でメディアクエリを使用してモバイル対応。
+    
+    ✅ **許可される要素**：
+    - インラインstyle属性（必須）
+    - レスポンシブ用の最小限のclass属性（restaurant-container, restaurant-card のみ）
+    - headタグ内の<style>タグ（メディアクエリ用のみ）
+    
+    🛡️ **HTMLエスケープ問題回避戦略**：
+    - HTML属性は必ずシングルクォート（'）で囲む
+    - JavaScript文字列はダブルクォート（"）を使用
+    - 例: onmouseover='this.style.color="red"'（外側シングル、内側ダブル）
+    - 一貫性を保ち、JSON出力時のエスケープを最小化
     
     必ずHTMLOutputスキーマ形式で出力してください。""",
     output_schema=HTMLOutput,

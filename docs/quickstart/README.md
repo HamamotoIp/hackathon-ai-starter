@@ -4,7 +4,7 @@ AI Chat Starter Kitを最速で始めるためのガイドです。
 
 ## 📋 目次
 
-1. **[ローカル開発](#ローカル開発)** - 30秒でスタート（Vertex AI機能のみ）
+1. **[ローカル開発](#ローカル開発)** - 高速スタート（Vertex AI機能のみ）
 2. **[本格デプロイ](./deployment.md)** - GCP Cloud Run + ADK Agent Engine
 
 ## ⚡ ローカル開発

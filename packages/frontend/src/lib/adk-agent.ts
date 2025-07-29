@@ -584,13 +584,15 @@ function handleNonSSEResponse(responseData: string): string {
 }
 
 /**
- * HTMLコンテンツのエスケープを完全除去（シンプル化版）
+ * HTMLコンテンツのエスケープを完全除去（強化版）
  * 
  * 問題: HTMLに改行やエスケープ文字が表示される
- * 解決: すべてのバックスラッシュエスケープを除去し、HTMLを1行化
+ * 原因: LLMのJSON出力時にダブルクォートがエスケープされる + 改行が削除される
+ * 解決: 段階的なエスケープ除去処理でHTMLを完全復元
  */
 function cleanHTMLContent(content: string): string {
   console.log('[DEBUG] cleanHTMLContent input length:', content.length);
+  console.log('[DEBUG] cleanHTMLContent first 200 chars:', content.substring(0, 200));
   
   // Step 1: コードブロックマーカーを除去
   let cleaned = content
@@ -610,14 +612,24 @@ function cleanHTMLContent(content: string): string {
     }
   }
   
-  // Step 3: すべてのエスケープ文字を除去（HTMLに改行不要）
+  // Step 3: 段階的エスケープ除去（順序重要）
   cleaned = cleaned
+    // 3-1: 改行・タブ・キャリッジリターンを適切なスペースに
     .replace(/\\n/g, ' ')      // 改行をスペースに
-    .replace(/\\r/g, ' ')      // キャリッジリターンをスペースに
+    .replace(/\\r/g, ' ')      // キャリッジリターンをスペースに  
     .replace(/\\t/g, ' ')      // タブをスペースに
-    .replace(/\\"/g, '"')      // ダブルクォート
-    .replace(/\\'/g, "'")      // シングルクォート
-    .replace(/\\\\/g, '\\')    // バックスラッシュ
+    
+    // 3-2: クォートのエスケープを除去
+    .replace(/\\"/g, '"')      // ダブルクォート復元（最重要）
+    .replace(/\\'/g, "'")      // シングルクォート復元
+    
+    // 3-3: その他のエスケープ
+    .replace(/\\\\/g, '\\')    // バックスラッシュ復元
+    .replace(/\\&/g, '&')      // アンパサンド復元
+    .replace(/\\</g, '<')      // 小なり復元
+    .replace(/\\>/g, '>')      // 大なり復元
+    
+    // 3-4: 空白の正規化
     .replace(/\s+/g, ' ')      // 連続する空白を1つに
     .trim();
   
@@ -626,8 +638,17 @@ function cleanHTMLContent(content: string): string {
     return String.fromCharCode(parseInt(hex, 16));
   });
   
+  // Step 5: HTMLエンティティのデコード（必要に応じて）
+  cleaned = cleaned
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');  // 最後に処理
+  
   console.log('[DEBUG] cleanHTMLContent output length:', cleaned.length);
-  console.log('[DEBUG] Successfully cleaned HTML - all escapes removed');
+  console.log('[DEBUG] cleanHTMLContent first 200 chars after cleaning:', cleaned.substring(0, 200));
+  console.log('[DEBUG] Successfully cleaned HTML - comprehensive escape removal complete');
   
   return cleaned;
 }

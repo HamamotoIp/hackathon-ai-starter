@@ -1,6 +1,6 @@
 # 💻 ローカル開発ガイド
 
-## ⚡ 30秒スタート
+## ⚡ クイックスタート
 
 ```bash
 git clone https://github.com/HamamotoIp/hackathon-ai-starter.git
