@@ -1,6 +1,12 @@
 /**
- * API型定義 - 統合版
+ * API型定義 - 統合版（エスケープ問題解決対応）
  * フロントエンド・バックエンド間のインターフェース
+ * 
+ * 更新履歴：
+ * - ADKSSEEventDataを拡張してRestaurant Search Agentの複数レスポンス形式に対応
+ * - HTMLOutputスキーマ（structured_html, final_html）フィールドを追加
+ * - エスケープ問題解決のための1行形式HTML対応
+ * - シンプル化されたエスケープ除去処理に対応した型定義
  */
 
 import { 
@@ -37,7 +43,18 @@ export interface UIGenerationAPIResponse extends BaseAIResponse {
   result: UIGenerationResult;
 }
 
-/** 飲食店検索APIレスポンス */
+/** 飲食店検索APIレスポンス（エスケープ問題解決版）
+ * 
+ * 6段階処理により確実に1行形式の純粋なHTMLが返される：
+ * - result: HTMLExtractorAgentによって抽出された1行形式の純粋なHTML
+ * - workflowComplete: 6段階すべての処理が完了したかどうか  
+ * - finalAgent: 最終処理を行ったエージェント名（通常は'HTMLExtractorAgent'）
+ * 
+ * エスケープ問題解決の特徴：
+ * - エージェント側で1行形式HTML出力を強制
+ * - フロントエンド側でシンプル化されたエスケープ除去処理
+ * - 結果として綺麗にレンダリングされるHTML
+ */
 export type RestaurantSearchAPIResponse = 
   | (BaseAIResponse & { 
       result: string; 
@@ -83,7 +100,14 @@ export interface ADKStreamQueryRequest {
   };
 }
 
-/** ADK SSEイベントデータ */
+/** ADK SSEイベントデータ（エスケープ問題解決対応）
+ * 
+ * Restaurant Search Agentの6段階処理に対応：
+ * - 各エージェントのレスポンスを適切に解析
+ * - HTMLOutputスキーマ（structured_html, final_html）に対応
+ * - 1行形式HTML出力に対応
+ * - シンプル化されたエスケープ除去処理に対応
+ */
 export interface ADKSSEEventData {
   message?: string;
   response?: string;
@@ -94,6 +118,7 @@ export interface ADKSSEEventData {
   };
   text?: string;
   output?: string;
+  html?: string;  // レストラン検索レスポンス用
   author?: string;
   invocation_id?: string;
   id?: string;
@@ -101,9 +126,27 @@ export interface ADKSSEEventData {
   actions?: {
     state_delta?: {
       html?: string;
+      structured_html?: unknown;  // Pydanticスキーマレスポンス
+      final_html?: unknown;
       [key: string]: unknown;
     };
     [key: string]: unknown;
+  };
+  // HTMLOutputスキーマレスポンス用
+  structured_html?: {
+    html?: string;
+  };
+  final_html?: {
+    html?: string;
+  };
+}
+
+/** レストラン検索専用のレスポンス形式 */
+export interface RestaurantSearchResponse {
+  html?: string;
+  metadata?: {
+    deviceType?: string;
+    responsive?: boolean;
   };
 }
 

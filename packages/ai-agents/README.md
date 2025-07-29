@@ -6,8 +6,8 @@
 
 - **分析レポート**: データ分析・詳細レポート生成 (20-30秒)
 - **UI生成**: HTML/Tailwind CSS生成・プロトタイプ作成 (25-45秒)
-- **レストラン検索**: 飲食店推薦・HTML特集記事生成 (15-25秒)
-- **構造化出力**: JSON Schema対応・一貫したレスポンス形式
+- **レストラン検索**: 6段階処理で1行形式HTML出力 (15-25秒)
+- **構造化出力**: Pydanticスキーマ対応・エスケープ問題を根本解決
 
 ## 📝 プロジェクト構造
 
@@ -90,6 +90,60 @@ python deploy/deploy_restaurant_search.py
 python deploy/deploy_all_agents.py
 ```
 
+## 🛠️ 技術的課題と解決策
+
+### HTMLエスケープ問題の根本解決
+
+#### 問題の背景
+従来、Restaurant Search AgentのHTML出力で以下の問題が発生していました：
+- HTMLに `\"店舗イメージ\"` や `\\n` などのエスケープ文字が表示される
+- 改行文字がそのまま `\n` として表示される  
+- JSON二重エスケープによる表示崩れ
+
+#### 根本的解決策の実装
+
+**1. エージェント側での改良**
+```python
+# SimpleUIAgent - 1行形式HTML出力を強制
+instruction="""
+⚠️ 重要な指示：
+3. HTMLは必ず1行形式で出力（改行文字\\nは使用禁止）
+4. すべてのタグと内容を1行に連結する
+8. Tailwind CSSを使用
+
+HTMLは必ず1行にまとめて、改行やインデントは含めないでください。
+例: <!DOCTYPE html><html><head><title>タイトル</title></head><body>...</body></html>
+"""
+
+# HTMLOutputスキーマ - 1行形式を明示
+class HTMLOutput(BaseModel):
+    html: str = Field(
+        description="Complete HTML document in single line format starting with <!DOCTYPE html> and ending with </html>. No newlines, no indentation, no code blocks, no JSON, just raw HTML in one line."
+    )
+```
+
+**2. フロントエンド側での強化処理**
+```typescript
+function cleanHTMLContent(content: string): string {
+  // Step 3: すべてのエスケープ文字を除去（HTMLに改行不要）
+  cleaned = cleaned
+    .replace(/\\n/g, ' ')      // 改行をスペースに
+    .replace(/\\r/g, ' ')      // キャリッジリターンをスペースに
+    .replace(/\\t/g, ' ')      // タブをスペースに
+    .replace(/\\"/g, '"')      // ダブルクォート
+    .replace(/\\'/g, "'")      // シングルクォート
+    .replace(/\\\\/g, '\\')    // バックスラッシュ
+    .replace(/\s+/g, ' ')      // 連続する空白を1つに
+    .trim();
+}
+```
+
+**3. 効果**
+- ✅ HTMLエスケープ文字が完全に除去される
+- ✅ 改行問題が解決される
+- ✅ JSON二重エスケープが処理される
+- ✅ 美しくレンダリングされたHTMLが表示される
+
 ## 🔧 環境設定
 
 ### 共通環境変数
@@ -122,12 +176,18 @@ export MAX_INSTANCES="1"
 |-----------|------|---------------|------|
 | `Analysis Agent` | 分析レポート | 20-30秒 | データ分析・詳細レポート |
 | `UI Generation Agent` | UI生成 | 25-45秒 | HTML/Tailwind生成 |
-| `Restaurant Search Agent` | レストラン検索 | 15-25秒 | 飲食店推薦・HTML特集記事 |
+| `Restaurant Search Agent` | レストラン検索 | 15-25秒 | 飲食店推薦・1行形式HTML記事 |
 
 ### 専門特化エージェント
 - **Analysis Agent** (`analysis_agent/`): データ分析・トレンド抽出・洞察生成
 - **UI Generation Agent** (`ui_generation_agent/`): HTML/Tailwind CSS生成・プロトタイプ作成
-- **Restaurant Search Agent** (`restaurant_search_agent/`): 飲食店推薦・HTML特集記事生成
+- **Restaurant Search Agent** (`restaurant_search_agent/`): 6段階処理による完全な飲食店検索システム
+  - SimpleIntentAgent: 意図理解・パラメータ抽出
+  - SimpleSearchAgent: 2段階Google検索実行
+  - SimpleSelectionAgent: 条件に最適な5店舗選定
+  - SimpleDescriptionAgent: 魅力的な説明文生成
+  - SimpleUIAgent: 1行形式HTMLを生成（エスケープ問題解決）
+  - HTMLExtractorAgent: 純粋な1行HTMLを最終抽出
 
 ## 🔄 開発フロー（人間-AI協働）
 
@@ -272,11 +332,11 @@ echo $VERTEX_AI_LOCATION
 
 ### パフォーマンス指標（実測値）
 
-| 機能 | レスポンス時間 | メモリ使用量 | 同時処理数 |
-|------|---------------|-------------|-------------|
-| 分析レポート | 20-30秒 | ~300MB | 5-10 |
-| UI生成 | 25-45秒 | ~350MB | 5-10 |
-| レストラン検索 | 15-25秒 | ~250MB | 5-10 |
+| 機能 | レスポンス時間 | メモリ使用量 | 同時処理数 | 特徴 |
+|------|---------------|-------------|-------------|------|
+| 分析レポート | 20-30秒 | ~300MB | 5-10 | 構造化分析 |
+| UI生成 | 25-45秒 | ~350MB | 5-10 | HTML/CSS生成 |
+| レストラン検索 | 15-25秒 | ~250MB | 5-10 | 6段階処理・1行形式HTML・エスケープ問題解決済 |
 
 ### スケーリング設定
 ```bash

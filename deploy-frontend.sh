@@ -49,6 +49,7 @@ echo -e "${BLUE}📋 Agent Engine URL確認中...${NC}"
 
 ANALYSIS_URL=""
 UI_GENERATION_URL=""
+RESTAURANT_SEARCH_URL=""
 
 # 既存のAgent Engine URLファイルから取得
 if [ -f "packages/ai-agents/analysis_agent_url.txt" ]; then
@@ -61,8 +62,13 @@ if [ -f "packages/ai-agents/ui_generation_agent_url.txt" ]; then
     echo "  🎨 UI Generation Agent: ${UI_GENERATION_URL}"
 fi
 
-# Analysis AgentとUI Generation Agentが必要
-if [ -z "$ANALYSIS_URL" ] || [ -z "$UI_GENERATION_URL" ]; then
+if [ -f "packages/ai-agents/restaurant_search_agent_url.txt" ]; then
+    RESTAURANT_SEARCH_URL=$(cat packages/ai-agents/restaurant_search_agent_url.txt)
+    echo "  🍽️ Restaurant Search Agent: ${RESTAURANT_SEARCH_URL}"
+fi
+
+# 必要なAgent Engineの確認
+if [ -z "$ANALYSIS_URL" ] || [ -z "$UI_GENERATION_URL" ] || [ -z "$RESTAURANT_SEARCH_URL" ]; then
     echo -e "${RED}❌ 必要なAgent Engine URLが見つかりません${NC}"
     echo "先にAgent Engineをデプロイしてください:"
     echo "  ./setup.sh  # 全体デプロイ"
@@ -71,6 +77,7 @@ if [ -z "$ANALYSIS_URL" ] || [ -z "$UI_GENERATION_URL" ]; then
     echo "必要なAgent Engine:"
     echo "  📊 Analysis Agent (分析レポート用)"
     echo "  🎨 UI Generation Agent (UI生成用)"
+    echo "  🍽️ Restaurant Search Agent (飲食店検索用)"
     exit 1
 fi
 
@@ -97,7 +104,7 @@ VERTEX_AI_PROJECT_ID=$PROJECT_ID
 VERTEX_AI_LOCATION=$REGION
 ANALYSIS_AGENT_URL=$ANALYSIS_URL
 UI_GENERATION_AGENT_URL=$UI_GENERATION_URL
-RESTAURANT_SEARCH_AGENT_URL=$UI_GENERATION_URL
+RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL
 BUCKET_NAME=$BUCKET_NAME
 SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL
 EOF
@@ -106,10 +113,11 @@ echo "     → プロジェクトID: $PROJECT_ID"
 echo "     → Agent Engine統合設定完了"
 
 # デプロイ用環境変数準備
-DEPLOY_ENV_VARS="NODE_ENV=production,VERTEX_AI_PROJECT_ID=$PROJECT_ID,VERTEX_AI_LOCATION=$REGION,BUCKET_NAME=$BUCKET_NAME,SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL,ANALYSIS_AGENT_URL=$ANALYSIS_URL,UI_GENERATION_AGENT_URL=$UI_GENERATION_URL,RESTAURANT_SEARCH_AGENT_URL=$UI_GENERATION_URL"
+DEPLOY_ENV_VARS="NODE_ENV=production,VERTEX_AI_PROJECT_ID=$PROJECT_ID,VERTEX_AI_LOCATION=$REGION,BUCKET_NAME=$BUCKET_NAME,SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL,ANALYSIS_AGENT_URL=$ANALYSIS_URL,UI_GENERATION_AGENT_URL=$UI_GENERATION_URL,RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL"
 
 echo "     → Analysis Agent統合: 有効"
 echo "     → UI Generation Agent統合: 有効"
+echo "     → Restaurant Search Agent統合: 有効"
 
 # Cloud Run デプロイ（複数Agent Engine対応）
 FRONTEND_SERVICE="ai-chat-frontend-$ENVIRONMENT"
@@ -152,6 +160,7 @@ echo ""
 echo -e "${BLUE}🤖 統合済みAgent Engine:${NC}"
 echo "  📊 分析レポート: ${ANALYSIS_URL}"
 echo "  🎨 UI生成: ${UI_GENERATION_URL}"
+echo "  🍽️ 飲食店検索: ${RESTAURANT_SEARCH_URL}"
 echo ""
 echo -e "${BLUE}📋 利用可能機能:${NC}"
 echo "  1. ブラウザでアクセス: $FRONTEND_URL"
@@ -159,5 +168,6 @@ echo "  2. AI機能が利用可能:"
 echo "     - 💬 シンプルチャット（Vertex AI Direct - 高速3秒以内）"
 echo "     - 📊 分析レポート（Analysis Agent - 詳細構造化）"
 echo "     - 🎨 UI生成（UI Generation Agent - HTML/Tailwind CSS）"
+echo "     - 🍽️ 飲食店検索（Restaurant Search Agent - 6段階処理）"
 echo "  3. 問題があれば ./debug.sh を実行"
 echo ""

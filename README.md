@@ -34,7 +34,7 @@ npm install && npm run dev
 | **💬 チャット** | `/simple-chat` | `/api/chat` | Vertex AI Direct、高速レスポンス（3秒以内） |
 | **📊 分析レポート** | `/ai-features` | `/api/analysis` | ADK Analysis Agent、詳細な分析・構造化出力 |
 | **🎨 UI生成** | `/ui-builder` | `/api/ui-generation` | ADK UI Generation Agent、デバイス最適化HTML生成 |
-| **🍽️ レストラン検索** | `/restaurant-search` | `/api/restaurant-search` | ADK Restaurant Search Agent、HTML特集記事生成 |
+| **🍽️ レストラン検索** | `/restaurant-search` | `/api/restaurant-search` | ADK Restaurant Search Agent、6段階処理・エスケープ問題解決済 |
 | **📁 コンテンツ管理** | `/content-management` | - | テキストコンテンツの作成・編集・管理 |
 
 ## 🚀 始め方
@@ -145,6 +145,52 @@ cp config.example.sh config.sh
 - **ハッカソン**: $3-8 (中程度の使用)
 - **プロトタイプ運用**: $8-15 (継続的使用)
 
+## 🛠️ 技術的特徴
+
+### Restaurant Search Agentの革新的実装
+
+**エスケープ問題の根本解決**を実現した6段階処理システム：
+
+#### 解決した技術課題
+- **問題**: HTMLに `\"店舗イメージ\"` や `\\n` が表示される
+- **解決策**: エージェント側で1行形式HTML出力 + フロントエンド側でシンプル化エスケープ除去
+- **結果**: 美しくレンダリングされるHTML記事
+
+#### 6段階処理フロー
+1. **SimpleIntentAgent**: ユーザー意図の構造化
+2. **SimpleSearchAgent**: 2段階Google検索実行
+3. **SimpleSelectionAgent**: 条件最適化5店舗選定
+4. **SimpleDescriptionAgent**: 魅力的説明文生成
+5. **SimpleUIAgent**: 1行形式HTML生成（⭐エスケープ問題解決）
+6. **HTMLExtractorAgent**: 純粋HTML最終抽出
+
+#### コード例
+
+```typescript
+// フロントエンド - シンプル化されたエスケープ除去
+function cleanHTMLContent(content: string): string {
+  return content
+    .replace(/\\n/g, ' ')      // 改行をスペースに
+    .replace(/\\"/g, '"')      // クォート復元
+    .replace(/\s+/g, ' ')      // 空白正規化
+    .trim();
+}
+```
+
+```python
+# エージェント - 1行形式強制
+class HTMLOutput(BaseModel):
+    html: str = Field(
+        description="Complete HTML document in single line format"
+    )
+
+# SimpleUIAgent指示
+instruction="""
+HTMLは必ず1行形式で出力（改行文字\\nは使用禁止）
+例: <!DOCTYPE html><html><head>...</head><body>...</body></html>
+"""
+```
+
 ## 🤝 コントリビューション
 
 このプロジェクトは、人間-AI協働開発の実践例でもあります。
@@ -166,6 +212,8 @@ Apache License 2.0 - 商用利用・改変・再配布自由
 
 - **[デモサイト](#)** - ライブデモ（デプロイ後に更新）
 - **[ドキュメント](./docs/)** - 完全なガイド
+- **[AIエージェント詳細](./packages/ai-agents/README.md)** - ADKエージェント技術仕様
+- **[Restaurant Search Agent](./packages/ai-agents/restaurant_search_agent/README.md)** - エスケープ問題解決の詳細
 - **[Issue Tracker](https://github.com/your-username/ai-chat-starter-kit/issues)** - バグ報告・機能要求
 
 ---

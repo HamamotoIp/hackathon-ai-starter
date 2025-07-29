@@ -1,8 +1,16 @@
 from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.tools import google_search, BaseTool
 from typing import Dict, List, Any
+from pydantic import BaseModel, Field
 import json
 import re
+
+# Pydanticモデル定義
+class HTMLOutput(BaseModel):
+    """1行形式の純粋なHTML出力用のスキーマ"""
+    html: str = Field(
+        description="Complete HTML document in single line format starting with <!DOCTYPE html> and ending with </html>. No newlines, no indentation, no code blocks, no JSON, just raw HTML in one line."
+    )
 
 # カスタムツールとして実装（より安定）
 class TwoStepSearchTool(BaseTool):
@@ -269,24 +277,56 @@ simple_description_agent = LlmAgent(
     output_key="descriptions"
 )
 
-# 5. UI生成エージェント
+# 5. UI生成エージェント（1行形式HTML出力）
 simple_ui_agent = LlmAgent(
     name="SimpleUIAgent",
     model="gemini-2.0-flash-exp",
-    description="HTML記事を生成",
+    description="1行形式のHTML記事を生成",
     instruction="""以下の情報を使って、美しい特集記事HTMLを生成してください：
     
     - 検索条件: state['search_params']
     - 選定店舗: state['selected_restaurants']
     - 説明文: state['descriptions']
     
-    重要：
-    - コードブロック（```）は使用しない
-    - <!DOCTYPE html>から始まる完全なHTMLを直接出力
-    - レスポンシブデザイン
-    - カード型レイアウト
+    ⚠️ 重要な指示：
+    1. 必ずHTMLOutputスキーマに従って出力する
+    2. htmlフィールドに<!DOCTYPE html>から始まる完全なHTMLを入れる
+    3. HTMLは必ず1行形式で出力（改行文字\\nは使用禁止）
+    4. すべてのタグと内容を1行に連結する
+    5. コードブロック（```）は絶対に使用しない
+    6. JSONの外側にテキストを置かない
+    7. レスポンシブデザイン、カード型レイアウトを使用
+    8. Tailwind CSSを使用
     
-    HTMLのみを出力してください。""",
+    HTMLは必ず1行にまとめて、改行やインデントは含めないでください。
+    例: <!DOCTYPE html><html><head><title>タイトル</title></head><body>...</body></html>
+    
+    必ずHTMLOutputスキーマ形式で出力してください。""",
+    output_schema=HTMLOutput,
+    output_key="structured_html"
+)
+
+# 6. HTML抽出エージェント（1行形式で出力）
+html_extractor_agent = LlmAgent(
+    name="HTMLExtractorAgent",
+    model="gemini-2.0-flash-exp",
+    description="構造化されたHTMLから1行形式の純粋なHTMLを抽出",
+    instruction="""state['structured_html']から純粋なHTMLを抽出してください。
+    
+    入力がHTMLOutputスキーマ形式の場合：
+    - htmlフィールドの値のみを取り出す
+    - JSONやコードブロックは除去
+    
+    入力がすでに純粋なHTMLの場合：
+    - そのまま出力
+    
+    ⚠️ 重要：
+    最終出力は<!DOCTYPE html>から始まる純粋なHTMLのみにしてください。
+    - 1行形式で出力（改行文字は含めない）
+    - コードブロック（```）やJSON構造は絶対に含めない
+    - インデントや余分な空白は除去
+    
+    例: <!DOCTYPE html><html><head>...</head><body>...</body></html>""",
     output_key="html"
 )
 
@@ -298,7 +338,8 @@ root_agent = SequentialAgent(
         simple_search_agent,
         simple_selection_agent,
         simple_description_agent,
-        simple_ui_agent
+        simple_ui_agent,
+        html_extractor_agent
     ],
-    description="シンプルな飲食店検索フロー"
+    description="シンプルな飲食店検索フロー（HTML抽出付き）"
 )
