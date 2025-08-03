@@ -17,8 +17,8 @@ npm install && npm run dev
 
 ### GCPデプロイ
 ```bash
-cp config.example.sh config.sh
-# config.shでPROJECT_IDを設定
+cp .env.example .env
+# .envでPROJECT_IDを設定
 ./setup.sh
 ```
 

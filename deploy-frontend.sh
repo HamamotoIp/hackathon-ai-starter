@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-source config.sh
+source load-env.sh
+load_env
 REGION=${REGION:-us-central1}
 ENVIRONMENT=${ENVIRONMENT:-dev}
 

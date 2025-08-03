@@ -22,8 +22,8 @@ ERROR: PROJECT_ID is not set
 
 **解決方法:**
 ```bash
-# config.shを確認
-cat config.sh
+# .envを確認
+cat .env
 
 # PROJECT_IDを設定
 export PROJECT_ID="your-project-id"
@@ -129,7 +129,7 @@ ERROR: Container memory limit exceeded
 
 **解決方法:**
 ```bash
-# config.shでメモリ増加
+# .envでメモリ増加
 MEMORY="1Gi"  # 512Mi → 1Gi
 
 # 再デプロイ
@@ -204,7 +204,7 @@ npm cache clean --force
 
 #### 1. Cloud Run設定
 ```bash
-# config.sh で最適化
+# .env で最適化
 MEMORY="512Mi"      # 最小限
 CPU="1"             # 1CPU
 MAX_INSTANCES="1"   # コスト削減
@@ -275,7 +275,7 @@ gcloud firestore databases delete --database="(default)"
 2. **設定確認**
    ```bash
    gcloud config list
-   cat config.sh
+   cat .env
    ```
 
 3. **環境情報**

@@ -11,8 +11,8 @@ gcloud auth application-default login
 
 ### 2. 設定ファイル
 ```bash
-cp config.example.sh config.sh
-# config.shでPROJECT_IDを設定
+cp .env.example .env
+# .envでPROJECT_IDを設定
 ```
 
 ## スクリプト一覧
@@ -129,8 +129,8 @@ gcloud auth application-default login
 
 #### 2. PROJECT_ID未設定
 ```bash
-# config.shを確認・編集
-cat config.sh
+# .envを確認・編集
+cat .env
 ```
 
 #### 3. API未有効化

@@ -7,6 +7,7 @@ import os
 import sys
 import logging
 from datetime import datetime
+from dotenv import load_dotenv
 from vertexai import init, agent_engines
 
 # ADK標準構造からエージェントをインポート
@@ -20,28 +21,17 @@ logger = logging.getLogger(__name__)
 
 def deploy_ui_generation_agent():
     """UI Generation AgentをAgent Engineにデプロイ"""
-    # config.shから環境変数を読み込み
-    config_path = os.path.join(os.path.dirname(__file__), "../../../config.sh")
-    if os.path.exists(config_path):
-        # config.shからPROJECT_IDとREGIONを読み取り
-        with open(config_path, 'r') as f:
-            config_content = f.read()
-        
-        import re
-        project_match = re.search(r'PROJECT_ID="([^"]+)"', config_content)
-        region_match = re.search(r'REGION="([^"]+)"', config_content)
-        
-        if project_match:
-            os.environ['VERTEX_AI_PROJECT_ID'] = project_match.group(1)
-        if region_match:
-            os.environ['VERTEX_AI_LOCATION'] = region_match.group(1)
+    # .envファイルから環境変数を読み込み
+    env_path = os.path.join(os.path.dirname(__file__), "../../../.env")
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
     
     # 環境確認
-    project_id = os.getenv('VERTEX_AI_PROJECT_ID')
-    location = os.getenv('VERTEX_AI_LOCATION', 'us-central1')
+    project_id = os.getenv('PROJECT_ID') or os.getenv('VERTEX_AI_PROJECT_ID')
+    location = os.getenv('REGION') or os.getenv('VERTEX_AI_LOCATION', 'us-central1')
     
     if not project_id:
-        raise ValueError("PROJECT_ID not found in config.sh. Please set PROJECT_ID in config.sh")
+        raise ValueError("PROJECT_ID not found in .env file. Please set PROJECT_ID in .env")
     
     print(f"🚀 UI Generation Agent デプロイ中...")
     

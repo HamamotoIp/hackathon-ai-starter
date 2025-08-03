@@ -35,7 +35,7 @@ pnpm-debug.log*
 **/.env
 
 # === Configuration Files ===
-config.sh
+.env
 lifecycle.json
 
 # === Agent URLs and Debug Scripts ===

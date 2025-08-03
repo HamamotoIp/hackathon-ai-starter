@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     // ADK Agentで直接処理
     const serviceUrl = process.env.RESTAURANT_SEARCH_AGENT_URL;
     if (!serviceUrl) {
-      throw new Error('RESTAURANT_SEARCH_AGENT_URL環境変数が設定されていません。config.shを使って環境変数を設定してください。');
+      throw new Error('RESTAURANT_SEARCH_AGENT_URL環境変数が設定されていません。.envファイルを使って環境変数を設定してください。');
     }
 
     const result = await processRestaurantSearch(serviceUrl, body.message);

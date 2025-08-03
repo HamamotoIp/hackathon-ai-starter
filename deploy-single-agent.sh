@@ -14,7 +14,8 @@ fi
 
 AGENT_SCRIPT="$1"
 
-source config.sh
+source load-env.sh
+load_env
 REGION=${REGION:-us-central1}
 
 gcloud config set project "$PROJECT_ID" --quiet >/dev/null 2>&1
