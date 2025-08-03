@@ -10,7 +10,6 @@
  */
 
 import { 
-  BaseAIRequest, 
   BaseAIResponse, 
   AIErrorResponse
 } from './ai-features';
