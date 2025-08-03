@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
-import { processAnalysis } from "@/lib/adk-agent";
+import { processAnalysis } from "@/lib/features/analysis/adk-processor";
 import { 
   parseRequestBody, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/lib/apiHelpers';
-import type { BaseAIRequest } from '@/lib/ai-features';
-import type { AnalysisAPIResponse } from '@/lib/api';
+} from '@/lib/core/api/helpers';
+import type { BaseAIRequest } from '@/lib/types/api-common';
+import type { AnalysisAPIResponse } from '@/lib/features/analysis/types';
 
 export const runtime = "nodejs";
 

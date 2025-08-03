@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import type { BaseAIRequest, AIErrorResponse } from '@/lib/ai-features';
+import type { BaseAIRequest, AIErrorResponse } from '@/lib/types/api-common';
 
 /**
  * 標準的な成功レスポンスを作成

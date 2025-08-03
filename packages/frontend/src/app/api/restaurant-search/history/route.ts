@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import type { SavedRestaurantResult } from '@/lib/types/saved-result';
+import type { SavedRestaurantResult } from '@/lib/features/restaurant-search/types';
 
 // Firebase Admin初期化（セキュア版）
 if (!getApps().length) {

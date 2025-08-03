@@ -1,167 +1,14 @@
 /**
- * ADK Agent処理ヘルパー - サーバーサイド専用
- * 
- * このモジュールは2つのADK Agentと統合します：
- * - Analysis Agent: データ分析・レポート生成
- * - Restaurant Search Agent: 6段階処理による飲食店検索
- * 
- * Restaurant Search Agentの革新的実装：
- * - 1行形式HTML出力によるエスケープ問題の根本解決
- * - Pydanticスキーマでの厳密な出力制御
- * - HTMLExtractorAgentで純粋な1行HTMLを最終抽出
- * - 複数のレスポンス形式に対応した堅牢な解析処理
- * - シンプル化されたエスケープ除去処理
- * 
- * レスポンス解析アーキテクチャ（エスケープ問題解決版）：
- * 1. 直接JSONレスポンス解析（最優先）
- * 2. SSE形式レスポンス解析
- * 3. 直接HTML抽出
- * 4. シンプル化されたエスケープ除去処理
- * 5. フォールバック処理
+ * ADK Agentレスポンス解析
+ * 複雑なSSEレスポンスとHTMLエスケープ処理
  */
 
-import { GoogleAuth } from 'google-auth-library';
-import type {
-  ADKCreateSessionRequest,
-  ADKCreateSessionResponse,
-  ADKStreamQueryRequest,
-  ADKSSEEventData
-} from '@/lib/api';
-
-/**
- * ADK Agent - Analysis処理
- */
-export async function processAnalysis(
-  serviceUrl: string,
-  message: string
-): Promise<string> {
-  if (!serviceUrl) {
-    throw new Error('ADK Agent URLが設定されていません');
-  }
-
-  try {
-    const sessionId = await createADKSession(serviceUrl);
-    return await sendADKMessage(serviceUrl, sessionId, message);
-  } catch (error) {
-    throw new Error(`Analysis処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
-
-
-/**
- * ADK Agent - 飲食店検索処理
- * 
- * 6段階のAIエージェントワークフローによるレストラン検索：
- * 1. SimpleIntentAgent: ユーザー入力から検索パラメータ抽出
- * 2. SimpleSearchAgent: 固定レストランデータ取得
- * 3. SimpleSelectionAgent: 条件に最適な5店舗選定
- * 4. SimpleDescriptionAgent: 魅力的な説明文生成
- * 5. SimpleUIAgent: 美しいHTML記事生成
- * 6. HTMLExtractorAgent: 最終HTML抽出
- */
-export async function processRestaurantSearch(
-  serviceUrl: string,
-  message: string
-): Promise<string> {
-  if (!serviceUrl) {
-    throw new Error('ADK Agent URLが設定されていません');
-  }
-
-  const sessionId = await createADKSession(serviceUrl);
-  const response = await sendADKMessage(serviceUrl, sessionId, message);
-  
-  // レスポンスがJSONオブジェクトの場合、htmlフィールドを抽出
-  try {
-    const parsed = JSON.parse(response);
-    if (parsed.html && typeof parsed.html === 'string') {
-      return parsed.html;
-    }
-  } catch {
-    // JSONパースエラーの場合は元のレスポンスを返す
-  }
-  
-  return response;
-}
-
-
-/**
- * ADKセッション作成
- */
-async function createADKSession(serviceUrl: string): Promise<string> {
-  const sessionUrl = serviceUrl.replace(':streamQuery?alt=sse', ':query');
-  const userId = 'demo-user';
-
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-  });
-
-  const client = await auth.getClient();
-  
-  const requestData: ADKCreateSessionRequest = {
-    class_method: 'create_session',
-    input: { user_id: userId }
-  };
-  
-  const response = await client.request({
-    url: sessionUrl,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: requestData
-  });
-
-  const sessionData = response.data as ADKCreateSessionResponse;
-
-  if (!sessionData?.output?.id) {
-    throw new Error('セッションIDの取得に失敗しました');
-  }
-  return sessionData.output.id;
-}
-
-/**
- * ADKメッセージ送信
- */
-async function sendADKMessage(
-  serviceUrl: string,
-  sessionId: string,
-  message: string
-): Promise<string> {
-  const messageUrl = serviceUrl;
-
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-  });
-
-  const client = await auth.getClient();
-  
-  const requestData: ADKStreamQueryRequest = {
-    class_method: 'stream_query',
-    input: {
-      message,  // ここで実際に送信されるのは第3引数のmessage
-      session_id: sessionId,
-      user_id: 'demo-user'
-    }
-  };
-  
-  const response = await client.request({
-    url: messageUrl,
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Accept': 'text/event-stream'
-    },
-    data: requestData,
-    responseType: 'text',
-    timeout: 120000  // 2分に延長
-  });
-
-  return parseADKResponse(response.data as string);
-}
-
+import type { ADKSSEEventData } from '@/lib/types/adk';
 
 /**
  * ADKレスポンス解析（完全再構築版）
  */
-function parseADKResponse(responseData: string): string {
+export function parseADKResponse(responseData: string): string {
   
   try {
     // Step 1: 直接JSONレスポンスのチェック（最優先）
@@ -461,7 +308,7 @@ function handleNonSSEResponse(responseData: string): string {
  * 原因: LLMのJSON出力時にダブルクォートがエスケープされる + 改行が削除される
  * 解決: 段階的なエスケープ除去処理でHTMLを完全復元
  */
-function cleanHTMLContent(content: string): string {
+export function cleanHTMLContent(content: string): string {
   // Step 1: コードブロックマーカーを除去
   let cleaned = content
     .replace(/^```html\s*\n?/i, '')
@@ -514,12 +361,4 @@ function cleanHTMLContent(content: string): string {
     .replace(/&amp;/g, '&');  // 最後に処理
   
   return cleaned;
-}
-
-// 🚨 型安全性：クライアントサイドでの使用を防ぐ
-if (typeof window !== 'undefined') {
-  throw new Error(
-    '🚨 ADK Agentはサーバーサイド専用です。' +
-    'クライアントサイドではclient/services/api-client.tsを使用してください。'
-  );
 }

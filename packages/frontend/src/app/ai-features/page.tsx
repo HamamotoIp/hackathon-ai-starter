@@ -1,7 +1,7 @@
 'use client';
 
 import { useAnalysis } from '@/components/hooks/use-analysis';
-import { sanitizeHTML } from '@/lib/sanitize';
+import { sanitizeHTML } from '@/lib/core/utils/sanitize';
 
 export default function AIFeaturesPage() {
   const { input, setInput, report, isProcessing, error, analyze } = useAnalysis();

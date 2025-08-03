@@ -7,7 +7,7 @@ import type {
   SaveResultRequest, 
   SaveResultResponse, 
   HistoryResponse 
-} from '@/lib/types/saved-result';
+} from './types';
 
 export class CloudRestaurantStorage {
   /**

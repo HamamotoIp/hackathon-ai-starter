@@ -7,11 +7,13 @@
 
 import type { 
   BaseAIRequest
-} from '@/lib/ai-features';
+} from '@/lib/types/api-common';
 import type { 
-  BasicChatAPIResponse,
+  BasicChatAPIResponse
+} from '@/lib/features/chat/types';
+import type {
   AnalysisAPIResponse
-} from '@/lib/api';
+} from '@/lib/features/analysis/types';
 
 
 /**

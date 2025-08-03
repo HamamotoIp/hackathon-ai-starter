@@ -5,8 +5,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { apiClient } from '@/lib/api-client';
-import type { AnalysisAPIResponse } from '@/lib/api';
+import { apiClient } from '@/lib/core/api/client';
+import type { AnalysisAPIResponse } from '@/lib/features/analysis/types';
 
 interface UseAnalysisReturn {
   input: string;

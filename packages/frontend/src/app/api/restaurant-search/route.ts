@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
-import { processRestaurantSearch } from "@/lib/adk-agent";
+import { processRestaurantSearch } from "@/lib/features/restaurant-search/adk-processor";
 import { 
   parseRequestBody, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/lib/apiHelpers';
-import type { BaseAIRequest } from '@/lib/ai-features';
-import type { RestaurantSearchAPIResponse } from '@/lib/api';
+} from '@/lib/core/api/helpers';
+import type { BaseAIRequest } from '@/lib/types/api-common';
+import type { RestaurantSearchAPIResponse } from '@/lib/features/restaurant-search/types';
 
 export const runtime = "nodejs";
 

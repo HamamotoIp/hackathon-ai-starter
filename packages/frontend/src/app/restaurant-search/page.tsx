@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CloudRestaurantStorage } from '@/lib/services/cloud-restaurant-storage';
-import type { SavedRestaurantResult } from '@/lib/types/saved-result';
-import { sanitizeHTML } from '@/lib/sanitize';
+import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
+import type { SavedRestaurantResult } from '@/lib/features/restaurant-search/types';
+import { sanitizeHTML } from '@/lib/core/utils/sanitize';
 
 export default function RestaurantSearchPage() {
   const [searchMessage, setSearchMessage] = useState('');

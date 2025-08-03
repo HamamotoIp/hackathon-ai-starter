@@ -5,9 +5,9 @@
 'use client';
 
 import { useState } from 'react';
-import type { AIProcessingStatus } from '@/lib/ai-features';
-import type { AnalysisAPIResponse } from '@/lib/api';
-import { apiClient } from '@/lib/api-client';
+import type { AIProcessingStatus } from '@/lib/types/api-common';
+import type { AnalysisAPIResponse } from '@/lib/features/analysis/types';
+import { apiClient } from '@/lib/core/api/client';
 
 interface FeatureCardConfig {
   type: 'analysis_report';

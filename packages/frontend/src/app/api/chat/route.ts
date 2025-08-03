@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server';
-import { createVertexAIProvider } from '@/lib/vertex-ai';
+import { createVertexAIProvider } from '@/lib/features/chat/vertex-ai-provider';
 import { 
   parseRequestBody, 
   createSuccessResponse, 
   createErrorResponse,
   getOrCreateSessionId
-} from '@/lib/apiHelpers';
-import type { BaseAIRequest } from '@/lib/ai-features';
-import type { BasicChatAPIResponse } from '@/lib/api';
+} from '@/lib/core/api/helpers';
+import type { BaseAIRequest } from '@/lib/types/api-common';
+import type { BasicChatAPIResponse } from '@/lib/features/chat/types';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
