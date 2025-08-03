@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import type { SavedRestaurantResult } from '@/lib/features/restaurant-search/types';
+import type { SavedTourismSpotsResult } from '@/lib/features/tourism-spots/types';
 
 // Firebase Admin初期化（セキュア版）
 if (!getApps().length) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get('tag');
     const search = searchParams.get('search');
 
-    let query = db.collection('restaurant-results')
+    let query = db.collection('tourism-spots-results')
       .orderBy('createdAt', 'desc');
 
     // タグフィルター
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         ...data,
         createdAt: data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt,
         updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt,
-      } as SavedRestaurantResult;
+      } as SavedTourismSpotsResult;
     });
 
     // クライアント側での検索フィルタリング

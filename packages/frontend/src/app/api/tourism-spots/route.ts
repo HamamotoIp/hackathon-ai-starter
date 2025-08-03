@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { processRestaurantSearch } from "@/lib/features/restaurant-search/adk-processor";
+import { processTourismSpotsSearch } from "@/lib/features/tourism-spots/adk-processor";
 import { 
   parseRequestBody, 
   createSuccessResponse, 
@@ -7,12 +7,12 @@ import {
   getOrCreateSessionId
 } from '@/lib/core/api/helpers';
 import type { BaseAIRequest } from '@/lib/types/api-common';
-import type { RestaurantSearchAPIResponse } from '@/lib/features/restaurant-search/types';
+import type { TourismSpotsSearchAPIResponse } from '@/lib/features/tourism-spots/types';
 
 export const runtime = "nodejs";
 
 /**
- * 飲食店検索 API
+ * 観光スポット検索 API
  * ADK Agentを使用
  */
 export async function POST(req: NextRequest) {
@@ -22,19 +22,19 @@ export async function POST(req: NextRequest) {
     const body = await parseRequestBody<BaseAIRequest>(req);
 
     // ADK Agentで直接処理
-    const serviceUrl = process.env.RESTAURANT_SEARCH_AGENT_URL;
+    const serviceUrl = process.env.TOURISM_SPOTS_SEARCH_AGENT_URL;
     if (!serviceUrl) {
-      throw new Error('RESTAURANT_SEARCH_AGENT_URL環境変数が設定されていません。.envファイルを使って環境変数を設定してください。');
+      throw new Error('TOURISM_SPOTS_SEARCH_AGENT_URL環境変数が設定されていません。.envファイルを使って環境変数を設定してください。');
     }
 
-    const result = await processRestaurantSearch(serviceUrl, body.message);
+    const result = await processTourismSpotsSearch(serviceUrl, body.message);
     const processingTime = Date.now() - startTime;
 
     // HTMLの完全性をチェック
     const isCompleteHtml = result.includes('<!DOCTYPE html>') && result.includes('</html>');
     const finalAgent = result.includes('SimpleUIAgent') ? 'SimpleUIAgent' : 'unknown';
 
-    const response: RestaurantSearchAPIResponse = {
+    const response: TourismSpotsSearchAPIResponse = {
       success: true,
       result,
       processingMode: "adk_agent",

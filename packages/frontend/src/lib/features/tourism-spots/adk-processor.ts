@@ -1,20 +1,20 @@
 /**
- * Restaurant Search Agent処理
- * 6段階のAIエージェントワークフローによるレストラン検索
+ * Tourism Spots Search Agent処理
+ * 6段階のAIエージェントワークフローによる観光スポット検索
  */
 
 /**
- * ADK Agent - 飲食店検索処理
+ * ADK Agent - 観光スポット検索処理
  * 
- * 6段階のAIエージェントワークフローによるレストラン検索：
+ * 6段階のAIエージェントワークフローによる観光スポット検索：
  * 1. SimpleIntentAgent: ユーザー入力から検索パラメータ抽出
- * 2. SimpleSearchAgent: 固定レストランデータ取得
- * 3. SimpleSelectionAgent: 条件に最適な5店舗選定
+ * 2. SimpleSearchAgent: 固定観光スポットデータ取得
+ * 3. SimpleSelectionAgent: 条件に最適な5スポット選定
  * 4. SimpleDescriptionAgent: 魅力的な説明文生成
  * 5. SimpleUIAgent: 美しいHTML記事生成
  * 6. HTMLExtractorAgent: 最終HTML抽出
  */
-export async function processRestaurantSearch(
+export async function processTourismSpotsSearch(
   serviceUrl: string,
   message: string
 ): Promise<string> {

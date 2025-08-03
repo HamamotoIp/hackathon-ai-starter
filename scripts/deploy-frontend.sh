@@ -9,10 +9,10 @@ ENVIRONMENT=${ENVIRONMENT:-dev}
 gcloud config set project "$PROJECT_ID" --quiet >/dev/null 2>&1
 
 ANALYSIS_URL=""
-RESTAURANT_SEARCH_URL=""
+TOURISM_SPOTS_SEARCH_URL=""
 
 [ -f "../packages/ai-agents/analysis_agent_url.txt" ] && ANALYSIS_URL=$(cat ../packages/ai-agents/analysis_agent_url.txt)
-[ -f "../packages/ai-agents/restaurant_search_agent_url.txt" ] && RESTAURANT_SEARCH_URL=$(cat ../packages/ai-agents/restaurant_search_agent_url.txt)
+[ -f "../packages/ai-agents/tourism_spots_search_agent_url.txt" ] && TOURISM_SPOTS_SEARCH_URL=$(cat ../packages/ai-agents/tourism_spots_search_agent_url.txt)
 
 BUCKET_NAME="$PROJECT_ID-images"
 RESTAURANT_BUCKET_NAME="$PROJECT_ID-restaurant-results"
@@ -26,6 +26,6 @@ gcloud builds submit . --config=cloudbuild.yaml --substitutions="_SERVICE_NAME=$
 
 ENV_VARS="NODE_ENV=production,VERTEX_AI_PROJECT_ID=$PROJECT_ID,VERTEX_AI_LOCATION=$REGION,BUCKET_NAME=$BUCKET_NAME,RESTAURANT_BUCKET_NAME=$RESTAURANT_BUCKET_NAME,SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL"
 [ -n "$ANALYSIS_URL" ] && ENV_VARS="$ENV_VARS,ANALYSIS_AGENT_URL=$ANALYSIS_URL"
-[ -n "$RESTAURANT_SEARCH_URL" ] && ENV_VARS="$ENV_VARS,RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL"
+[ -n "$TOURISM_SPOTS_SEARCH_URL" ] && ENV_VARS="$ENV_VARS,TOURISM_SPOTS_SEARCH_AGENT_URL=$TOURISM_SPOTS_SEARCH_URL"
 
-gcloud run services update "$FRONTEND_SERVICE" --region "$REGION" --update-env-vars "$ENV_VARS" --quiet
+gcloud run services update "$FRONTEND_SERVICE" --region "$REGION" --update-env-vars "$ENV_VARS" --allow-unauthenticated --quiet

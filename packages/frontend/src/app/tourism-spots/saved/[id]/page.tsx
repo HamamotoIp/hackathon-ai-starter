@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
-import type { SavedRestaurantResult } from '@/lib/features/restaurant-search/types';
+import { CloudTourismSpotsStorage } from '@/lib/features/tourism-spots/tourism-storage';
+import type { SavedTourismSpotsResult } from '@/lib/features/tourism-spots/types';
 import { sanitizeHTML } from '@/lib/core/utils/sanitize';
 
-export default function SavedRestaurantResultPage() {
+export default function SavedTourismSpotsResultPage() {
   const params = useParams();
   const router = useRouter();
-  const [result, setResult] = useState<SavedRestaurantResult | null>(null);
+  const [result, setResult] = useState<SavedTourismSpotsResult | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,12 +20,12 @@ export default function SavedRestaurantResultPage() {
       
       setIsLoading(true);
       try {
-        const savedResult = await CloudRestaurantStorage.getById(params.id as string);
+        const savedResult = await CloudTourismSpotsStorage.getById(params.id as string);
         setResult(savedResult);
         
         // HTMLコンテンツを取得
         try {
-          const html = await CloudRestaurantStorage.getHtmlContent(params.id as string);
+          const html = await CloudTourismSpotsStorage.getHtmlContent(params.id as string);
           setHtmlContent(html);
         } catch {
           // HTMLコンテンツ取得失敗時はフォールバック表示
@@ -33,7 +33,7 @@ export default function SavedRestaurantResultPage() {
         }
       } catch {
         // Error handling - redirect to search page
-        router.push('/restaurant-search');
+        router.push('/tourism-spots');
       } finally {
         setIsLoading(false);
       }
@@ -45,8 +45,8 @@ export default function SavedRestaurantResultPage() {
   const handleDelete = async () => {
     if (result && confirm('この検索結果を削除しますか？')) {
       try {
-        await CloudRestaurantStorage.delete(result.id);
-        router.push('/restaurant-search');
+        await CloudTourismSpotsStorage.delete(result.id);
+        router.push('/tourism-spots');
       } catch (error) {
         const message = error instanceof Error ? error.message : '削除に失敗しました';
         alert(message);
@@ -82,7 +82,7 @@ export default function SavedRestaurantResultPage() {
           {/* アクションボタン */}
           <div className="flex gap-3">
             <Link
-              href="/restaurant-search"
+              href="/tourism-spots"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               ← 一覧に戻る

@@ -1,10 +1,10 @@
 /**
- * レストラン検索機能の型定義
+ * 観光スポット検索機能の型定義
  */
 
 import type { BaseAIResponse, AIErrorResponse } from '@/lib/types/api-common';
 
-/** 飲食店検索APIレスポンス（エスケープ問題解決版）
+/** 観光スポット検索APIレスポンス（エスケープ問題解決版）
  * 
  * 6段階処理により確実に1行形式の純粋なHTMLが返される：
  * - result: HTMLExtractorAgentによって抽出された1行形式の純粋なHTML
@@ -16,7 +16,7 @@ import type { BaseAIResponse, AIErrorResponse } from '@/lib/types/api-common';
  * - フロントエンド側でシンプル化されたエスケープ除去処理
  * - 結果として綺麗にレンダリングされるHTML
  */
-export type RestaurantSearchAPIResponse = 
+export type TourismSpotsSearchAPIResponse = 
   | (BaseAIResponse & { 
       result: string; 
       error?: never;
@@ -25,8 +25,8 @@ export type RestaurantSearchAPIResponse =
     }) // 成功時
   | (AIErrorResponse & { result?: never; }); // エラー時
 
-/** レストラン検索専用のレスポンス形式 */
-export interface RestaurantSearchResponse {
+/** 観光スポット検索専用のレスポンス形式 */
+export interface TourismSpotsSearchResponse {
   html?: string;
   metadata?: {
     deviceType?: string;
@@ -38,13 +38,13 @@ export interface RestaurantSearchResponse {
 // Cloud Storage + Firestore保存結果の型定義（saved-result.tsから移動）
 // =============================================================================
 
-export interface SavedRestaurantResult {
+export interface SavedTourismSpotsResult {
   id: string;
   query: string;
   searchParams: {
     area?: string;
-    scene?: string;
-    time?: string;
+    category?: string;
+    season?: string;
     requests?: string[];
   };
   htmlStorageUrl: string;
@@ -77,7 +77,7 @@ export interface SaveResultResponse {
 
 export interface HistoryResponse {
   success: boolean;
-  results: SavedRestaurantResult[];
+  results: SavedTourismSpotsResult[];
   totalCount: number;
   availableTags: string[];
 }

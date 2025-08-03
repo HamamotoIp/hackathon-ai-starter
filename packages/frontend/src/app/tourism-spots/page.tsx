@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
-import type { SavedRestaurantResult } from '@/lib/features/restaurant-search/types';
+import { CloudTourismSpotsStorage } from '@/lib/features/tourism-spots/tourism-storage';
+import type { SavedTourismSpotsResult } from '@/lib/features/tourism-spots/types';
 import { sanitizeHTML } from '@/lib/core/utils/sanitize';
 
-export default function RestaurantSearchPage() {
+export default function TourismSpotsSearchPage() {
   const [searchMessage, setSearchMessage] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<SavedRestaurantResult[]>([]);
+  const [history, setHistory] = useState<SavedTourismSpotsResult[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // 履歴読み込み
@@ -21,7 +21,7 @@ export default function RestaurantSearchPage() {
   const loadHistory = async () => {
     setIsLoadingHistory(true);
     try {
-      const response = await CloudRestaurantStorage.getHistory({ limit: 10 });
+      const response = await CloudTourismSpotsStorage.getHistory({ limit: 10 });
       setHistory(response.results);
     } catch {
       // エラーは無視
@@ -41,7 +41,7 @@ export default function RestaurantSearchPage() {
     
     try {
       // 1. 検索実行
-      const response = await fetch('/api/restaurant-search', {
+      const response = await fetch('/api/tourism-spots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: searchMessage }),
@@ -60,7 +60,7 @@ export default function RestaurantSearchPage() {
       setResult(data.result);
       
       // 2. 結果を保存
-      await CloudRestaurantStorage.save({
+      await CloudTourismSpotsStorage.save({
         htmlContent: data.result,
         query: searchMessage,
         title: `${searchMessage.substring(0, 30)}${searchMessage.length > 30 ? '...' : ''}`,
@@ -78,14 +78,14 @@ export default function RestaurantSearchPage() {
     }
   };
 
-  const handleHistoryClick = (item: SavedRestaurantResult) => {
+  const handleHistoryClick = (item: SavedTourismSpotsResult) => {
     // 専用ページに遷移
-    window.open(`/restaurant-search/saved/${item.id}`, '_blank');
+    window.open(`/tourism-spots/saved/${item.id}`, '_blank');
   };
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">🍽️ レストラン検索</h1>
+      <h1 className="text-3xl font-bold mb-8">🏛️ 観光スポット検索</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* 検索フォーム */}
@@ -100,7 +100,7 @@ export default function RestaurantSearchPage() {
                   id="search"
                   value={searchMessage}
                   onChange={(e) => setSearchMessage(e.target.value)}
-                  placeholder="例：渋谷でデートに使えるイタリアン"
+                  placeholder="例：東京で歴史を感じられる観光スポット"
                   rows={3}
                   disabled={isSearching}
                   className="w-full p-3 border rounded-lg disabled:bg-gray-100"

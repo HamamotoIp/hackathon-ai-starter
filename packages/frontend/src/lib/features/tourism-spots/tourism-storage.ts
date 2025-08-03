@@ -1,20 +1,20 @@
 /**
- * Cloud Storage + Firestore を使った飲食店検索結果管理
+ * Cloud Storage + Firestore を使った観光スポット検索結果管理
  */
 
 import type { 
-  SavedRestaurantResult, 
+  SavedTourismSpotsResult, 
   SaveResultRequest, 
   SaveResultResponse, 
   HistoryResponse 
 } from './types';
 
-export class CloudRestaurantStorage {
+export class CloudTourismSpotsStorage {
   /**
    * 検索結果を保存
    */
   static async save(request: SaveResultRequest): Promise<SaveResultResponse> {
-    const response = await fetch('/api/restaurant-search/save', {
+    const response = await fetch('/api/tourism-spots/save', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,8 +33,8 @@ export class CloudRestaurantStorage {
   /**
    * IDで検索結果を取得
    */
-  static async getById(id: string): Promise<SavedRestaurantResult> {
-    const response = await fetch(`/api/restaurant-search/saved/${id}`);
+  static async getById(id: string): Promise<SavedTourismSpotsResult> {
+    const response = await fetch(`/api/tourism-spots/saved/${id}`);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -61,7 +61,7 @@ export class CloudRestaurantStorage {
     if (options?.tag) params.set('tag', options.tag);
     if (options?.search) params.set('search', options.search);
 
-    const response = await fetch(`/api/restaurant-search/history?${params}`);
+    const response = await fetch(`/api/tourism-spots/history?${params}`);
 
     if (!response.ok) {
       const error = await response.json();
@@ -75,7 +75,7 @@ export class CloudRestaurantStorage {
    * タイトルを更新
    */
   static async updateTitle(id: string, title: string): Promise<void> {
-    const response = await fetch(`/api/restaurant-search/saved/${id}`, {
+    const response = await fetch(`/api/tourism-spots/saved/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export class CloudRestaurantStorage {
    * 検索結果を削除
    */
   static async delete(id: string): Promise<void> {
-    const response = await fetch(`/api/restaurant-search/saved/${id}`, {
+    const response = await fetch(`/api/tourism-spots/saved/${id}`, {
       method: 'DELETE',
     });
 
@@ -107,7 +107,7 @@ export class CloudRestaurantStorage {
    * HTMLコンテンツをAPIルート経由で取得
    */
   static async getHtmlContent(id: string): Promise<string> {
-    const response = await fetch(`/api/restaurant-search/saved/${id}?html=true`);
+    const response = await fetch(`/api/tourism-spots/saved/${id}?html=true`);
     
     if (!response.ok) {
       throw new Error('HTMLコンテンツの取得に失敗しました');
