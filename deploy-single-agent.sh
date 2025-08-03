@@ -1,5 +1,18 @@
 #!/bin/bash
+# 単独エージェントデプロイスクリプト（サンプル）
+# 新しいエージェント追加時の参考用
+
 set -e
+
+# 使用方法チェック
+if [ $# -eq 0 ]; then
+    echo "使用方法: $0 <agent_script_name>"
+    echo "例: $0 deploy_analysis.py"
+    echo "例: $0 deploy_new_agent.py"
+    exit 1
+fi
+
+AGENT_SCRIPT="$1"
 
 source config.sh
 REGION=${REGION:-us-central1}
@@ -19,13 +32,4 @@ pip install -r requirements.txt --quiet
 export VERTEX_AI_PROJECT_ID="$PROJECT_ID"
 export VERTEX_AI_LOCATION="$REGION"
 
-deploy_agent() {
-    python "deploy/$1" >/dev/null 2>&1
-}
-
-deploy_agent "deploy_analysis.py" &
-deploy_agent "deploy_ui_generation.py" &
-deploy_agent "deploy_restaurant_search.py" &
-
-wait
-cd ../..
+python "deploy/$AGENT_SCRIPT"
