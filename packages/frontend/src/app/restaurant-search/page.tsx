@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CloudRestaurantStorage } from '@/lib/services/cloud-restaurant-storage';
 import type { SavedRestaurantResult } from '@/lib/types/saved-result';
+import { sanitizeHTML } from '@/lib/sanitize';
 
 export default function RestaurantSearchPage() {
   const [searchMessage, setSearchMessage] = useState('');
@@ -128,7 +129,7 @@ export default function RestaurantSearchPage() {
               <h2 className="text-xl font-bold mb-4">検索結果</h2>
               <div 
                 className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: result }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHTML(result) }}
               />
             </div>
           ) : null}

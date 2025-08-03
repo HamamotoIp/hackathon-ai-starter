@@ -1,6 +1,7 @@
 'use client';
 
 import { useAnalysis } from '@/components/hooks/use-analysis';
+import { sanitizeHTML } from '@/lib/sanitize';
 
 export default function AIFeaturesPage() {
   const { input, setInput, report, isProcessing, error, analyze } = useAnalysis();
@@ -55,7 +56,7 @@ export default function AIFeaturesPage() {
           <div 
             className="prose max-w-none whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ 
-              __html: report.result.replace(/\n/g, '<br>') 
+              __html: sanitizeHTML(report.result.replace(/\n/g, '<br>')) 
             }}
           />
         </div>

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CloudRestaurantStorage } from '@/lib/services/cloud-restaurant-storage';
 import type { SavedRestaurantResult } from '@/lib/types/saved-result';
+import { sanitizeHTML } from '@/lib/sanitize';
 
 export default function SavedRestaurantResultPage() {
   const params = useParams();
@@ -103,7 +104,7 @@ export default function SavedRestaurantResultPage() {
           
           <div className="p-0">
             <div 
-              dangerouslySetInnerHTML={{ __html: htmlContent || '<p>コンテンツを読み込み中...</p>' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHTML(htmlContent || '<p>コンテンツを読み込み中...</p>') }}
               className="w-full min-h-[600px]"
             />
           </div>
