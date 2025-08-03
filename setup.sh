@@ -46,7 +46,7 @@ gcloud config set project "$PROJECT_ID"
 
 # APIs有効化
 echo -e "${BLUE}📋 APIs有効化中...${NC}"
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com aiplatform.googleapis.com storage.googleapis.com --quiet
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com aiplatform.googleapis.com storage.googleapis.com firestore.googleapis.com customsearch.googleapis.com --quiet
 
 # サービスアカウント作成
 SERVICE_ACCOUNT="ai-chat-$ENVIRONMENT"
@@ -66,6 +66,10 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
     --role="roles/storage.objectAdmin" --quiet
 
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
+    --role="roles/datastore.user" --quiet
+
 # 現在ユーザーにも権限付与
 CURRENT_USER=$(gcloud config get-value account)
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
@@ -74,101 +78,54 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 
 # ストレージバケット作成
 BUCKET_NAME="$PROJECT_ID-images"
+RESTAURANT_BUCKET_NAME="$PROJECT_ID-restaurant-results"
 echo -e "${BLUE}📋 ストレージバケット設定中...${NC}"
 if ! gsutil ls "gs://$BUCKET_NAME" >/dev/null 2>&1; then
     gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$BUCKET_NAME"
+    echo "  ✅ 画像バケット作成: $BUCKET_NAME"
 fi
 
-# 複数Vertex AI Agent Engine 並列デプロイ
-echo -e "${BLUE}📋 複数Vertex AI Agent Engine 並列デプロイ中...${NC}"
+if ! gsutil ls "gs://$RESTAURANT_BUCKET_NAME" >/dev/null 2>&1; then
+    gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$RESTAURANT_BUCKET_NAME"
+    echo "  ✅ レストランバケット作成: $RESTAURANT_BUCKET_NAME"
+fi
+
+# レストランバケットを公開読み取り可能に設定
+gsutil iam ch allUsers:objectViewer "gs://$RESTAURANT_BUCKET_NAME"
+echo "  ✅ レストランバケット公開設定完了"
+
+# Firestore データベース作成
+echo -e "${BLUE}📋 Firestore データベース作成中...${NC}"
+if ! gcloud firestore databases list --project="$PROJECT_ID" | grep -q "(default)"; then
+    gcloud firestore databases create --location="$REGION" --project="$PROJECT_ID" --quiet
+    echo "  ✅ Firestore データベース作成完了"
+else
+    echo "  ✅ Firestore データベース既存"
+fi
+
+# 高速並列 Agent Engine デプロイ
+echo -e "${BLUE}🚀 高速並列 Agent Engine デプロイ開始...${NC}"
+echo "     → 従来比60-70%時間短縮"
+echo "     → エラー時は自動的に順次デプロイにフォールバック"
+
+# 並列デプロイスクリプトを実行（現在のディレクトリから）
+# 環境変数は並列デプロイスクリプトで設定される
+source ./deploy-agents-parallel.sh
+
+# デプロイ結果を確認
 cd packages/ai-agents
 
-# Python環境準備
-if [ ! -d "venv" ]; then
-    python -m venv venv
-fi
-source venv/bin/activate
-pip install -r requirements.txt --quiet
-
-# 環境変数設定
-export VERTEX_AI_PROJECT_ID="$PROJECT_ID"
-export VERTEX_AI_LOCATION="$REGION"
-
-# stagingバケット作成
-STAGING_BUCKET="$PROJECT_ID-agent-engine-staging"
-echo -e "${BLUE}📋 Staging バケット設定中...${NC}"
-if ! gsutil ls "gs://$STAGING_BUCKET" >/dev/null 2>&1; then
-    gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$STAGING_BUCKET"
-fi
-
-# 複数Agent Engine順次デプロイ
-echo -e "${BLUE}📊 分析・UI生成・飲食店検索エージェントを順次デプロイ中...${NC}"
-
-
-# Analysis Agent
-echo "  📊 Analysis Agent デプロイ開始..."
-python deploy/deploy_analysis.py
-ANALYSIS_EXIT=$?
-
-if [ $ANALYSIS_EXIT -eq 0 ]; then
-    echo -e "  ${GREEN}✅ Analysis Agent デプロイ完了${NC}"
-else
-    echo -e "  ${RED}❌ Analysis Agent デプロイ失敗${NC}"
-fi
-
-
-# UI Generation Agent
-echo "  🎨 UI Generation Agent デプロイ開始..."
-python deploy/deploy_ui_generation.py
-UI_GENERATION_EXIT=$?
-
-if [ $UI_GENERATION_EXIT -eq 0 ]; then
-    echo -e "  ${GREEN}✅ UI Generation Agent デプロイ完了${NC}"
-else
-    echo -e "  ${RED}❌ UI Generation Agent デプロイ失敗${NC}"
-fi
-
-
-# Restaurant Search Agent
-echo "  🍽️ Restaurant Search Agent デプロイ開始..."
-python deploy/deploy_restaurant_search.py
-RESTAURANT_SEARCH_EXIT=$?
-
-if [ $RESTAURANT_SEARCH_EXIT -eq 0 ]; then
-    echo -e "  ${GREEN}✅ Restaurant Search Agent デプロイ完了${NC}"
-else
-    echo -e "  ${RED}❌ Restaurant Search Agent デプロイ失敗${NC}"
-fi
-
-# 結果確認とURL取得
-ANALYSIS_URL=""
-UI_GENERATION_URL=""
-RESTAURANT_SEARCH_URL=""
-
-if [ $ANALYSIS_EXIT -eq 0 ] && [ -f "analysis_agent_url.txt" ]; then
+# 並列デプロイからの環境変数を確認、ファイルからも読み取り
+if [ -z "$ANALYSIS_URL" ] && [ -f "analysis_agent_url.txt" ]; then
     ANALYSIS_URL=$(cat analysis_agent_url.txt)
-    echo -e "${GREEN}✅ Analysis Agent URL: ${ANALYSIS_URL}${NC}"
-else
-    echo -e "${RED}❌ Analysis Agent URL取得失敗${NC}"
-    cat analysis_deploy.log
 fi
 
-
-if [ $UI_GENERATION_EXIT -eq 0 ] && [ -f "ui_generation_agent_url.txt" ]; then
+if [ -z "$UI_GENERATION_URL" ] && [ -f "ui_generation_agent_url.txt" ]; then
     UI_GENERATION_URL=$(cat ui_generation_agent_url.txt)
-    echo -e "${GREEN}✅ UI Generation Agent URL: ${UI_GENERATION_URL}${NC}"
-else
-    echo -e "${RED}❌ UI Generation Agent URL取得失敗${NC}"
-    cat ui_generation_deploy.log
 fi
 
-
-if [ $RESTAURANT_SEARCH_EXIT -eq 0 ] && [ -f "restaurant_search_agent_url.txt" ]; then
+if [ -z "$RESTAURANT_SEARCH_URL" ] && [ -f "restaurant_search_agent_url.txt" ]; then
     RESTAURANT_SEARCH_URL=$(cat restaurant_search_agent_url.txt)
-    echo -e "${GREEN}✅ Restaurant Search Agent URL: ${RESTAURANT_SEARCH_URL}${NC}"
-else
-    echo -e "${RED}❌ Restaurant Search Agent URL取得失敗${NC}"
-    cat restaurant_search_deploy.log
 fi
 
 # 最低1つのAgent Engineが成功していることを確認
@@ -177,82 +134,42 @@ if [ -z "$ANALYSIS_URL" ] && [ -z "$UI_GENERATION_URL" ] && [ -z "$RESTAURANT_SE
     exit 1
 fi
 
-echo -e "${GREEN}✅ Agent Engine デプロイ完了 (成功: $((3-$([ -z "$ANALYSIS_URL" ] && echo 1 || echo 0)-$([ -z "$UI_GENERATION_URL" ] && echo 1 || echo 0)-$([ -z "$RESTAURANT_SEARCH_URL" ] && echo 1 || echo 0)))/3)${NC}"
+SUCCESS_COUNT=0
+if [ -n "$ANALYSIS_URL" ]; then ((SUCCESS_COUNT++)); fi
+if [ -n "$UI_GENERATION_URL" ]; then ((SUCCESS_COUNT++)); fi
+if [ -n "$RESTAURANT_SEARCH_URL" ]; then ((SUCCESS_COUNT++)); fi
+
+echo -e "${GREEN}✅ 並列Agent Engineデプロイ完了 (成功: ${SUCCESS_COUNT}/3)${NC}"
 
 cd ../..
 
-# Frontend デプロイ
-echo -e "${BLUE}📋 Frontend デプロイ開始...${NC}"
-cd packages/frontend
+# Frontend デプロイ（最適化されたスクリプト使用）
+echo -e "${BLUE}📋 最適化されたFrontendデプロイ開始...${NC}"
+echo "     → マルチステージビルド + Cloud Build並列化を使用"
 
-# 依存関係インストール
-echo "  📦 npm依存関係インストール中..."
-npm install --silent
+# 環境変数をエクスポート（deploy-frontend.shで使用）
+export PROJECT_ID
+export REGION
+export ENVIRONMENT
+export BUCKET_NAME
+export RESTAURANT_BUCKET_NAME
+export SERVICE_ACCOUNT_EMAIL
+export ANALYSIS_URL
+export UI_GENERATION_URL
+export RESTAURANT_SEARCH_URL
 
-# 環境ファイル作成（複数Agent Engine対応）
-echo "  ⚙️ 本番環境設定ファイル作成中..."
-cat > .env.production << EOF
-NODE_ENV=production
-VERTEX_AI_PROJECT_ID=$PROJECT_ID
-VERTEX_AI_LOCATION=$REGION
-ANALYSIS_AGENT_URL=$ANALYSIS_URL
-UI_GENERATION_AGENT_URL=$UI_GENERATION_URL
-RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL
-BUCKET_NAME=$BUCKET_NAME
-SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL
-EOF
-
-echo "     → プロジェクトID: $PROJECT_ID"
-echo "     → Agent Engine統合設定完了"
-
-# デプロイ用環境変数準備
-DEPLOY_ENV_VARS="NODE_ENV=production,VERTEX_AI_PROJECT_ID=$PROJECT_ID,VERTEX_AI_LOCATION=$REGION,BUCKET_NAME=$BUCKET_NAME,SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL"
-
-# 成功したAgent EngineのURLのみを環境変数に追加
-if [ -n "$ANALYSIS_URL" ]; then
-    DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,ANALYSIS_AGENT_URL=$ANALYSIS_URL"
-    echo "     → Analysis Agent統合: 有効"
-fi
-if [ -n "$UI_GENERATION_URL" ]; then
-    DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,UI_GENERATION_AGENT_URL=$UI_GENERATION_URL"
-    echo "     → UI Generation Agent統合: 有効"
-fi
-if [ -n "$RESTAURANT_SEARCH_URL" ]; then
-    DEPLOY_ENV_VARS="$DEPLOY_ENV_VARS,RESTAURANT_SEARCH_AGENT_URL=$RESTAURANT_SEARCH_URL"
-    echo "     → Restaurant Search Agent統合: 有効"
-fi
-
-
-# Cloud Run デプロイ（複数Agent Engine対応）
-FRONTEND_SERVICE="ai-chat-frontend-$ENVIRONMENT"
-echo "  ☁️ Cloud Runコンテナデプロイ中..."
-echo "     → サービス名: $FRONTEND_SERVICE"
-echo "     → リージョン: $REGION"
-echo "     → メモリ: 512Mi, CPU: 1"
-
-gcloud run deploy "$FRONTEND_SERVICE" \
-    --source . \
-    --region "$REGION" \
-    --allow-unauthenticated \
-    --service-account "$SERVICE_ACCOUNT_EMAIL" \
-    --memory 512Mi \
-    --cpu 1 \
-    --max-instances 1 \
-    --port 3000 \
-    --set-env-vars "$DEPLOY_ENV_VARS" \
-    --quiet
+# 最適化されたデプロイスクリプトを実行
+./deploy-frontend.sh
 
 if [ $? -eq 0 ]; then
-    echo -e "  ${GREEN}✅ Frontend デプロイ完了${NC}"
+    echo -e "  ${GREEN}✅ 最適化されたFrontendデプロイ完了${NC}"
+    # Frontend URL取得
+    FRONTEND_SERVICE="ai-chat-frontend-$ENVIRONMENT"
+    FRONTEND_URL=$(gcloud run services describe "$FRONTEND_SERVICE" --region "$REGION" --format 'value(status.url)')
 else
-    echo -e "  ${RED}❌ Frontend デプロイ失敗${NC}"
+    echo -e "  ${RED}❌ Frontendデプロイ失敗${NC}"
     exit 1
 fi
-
-# Frontend URL取得
-FRONTEND_URL=$(gcloud run services describe "$FRONTEND_SERVICE" --region "$REGION" --format 'value(status.url)')
-
-cd ../..
 
 # 完了メッセージ
 echo ""

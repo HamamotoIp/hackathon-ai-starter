@@ -73,3 +73,4 @@ agents/.env
 # === VSCode / Codespaces (optional, safe) ===
 .vscode/
 .history/
+deploy_logs_*/

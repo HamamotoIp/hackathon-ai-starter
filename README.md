@@ -193,16 +193,16 @@ cp config.example.sh config.sh
 ## 📚 ドキュメント
 
 ### 🚀 すぐ始める
-- **[クイックスタート](./docs/quickstart/)** - 高速体験開始
-- **[ローカル開発](./docs/quickstart/local-development.md)** - 開発環境構築
-- **[デプロイガイド](./docs/quickstart/deployment.md)** - GCP本格運用
+- **[クイックスタート](./docs/01-quickstart.md)** - 5分で始める基本セットアップ
+- **[🚀 デプロイガイド](./docs/04-deployment.md)** - 並列デプロイ・最適化機能
+- **[🔧 環境変数リファレンス](./docs/09-environment-variables.md)** - 完全設定ガイド
 
 ### 🔧 開発・カスタマイズ
-- **[開発者ガイド](./docs/development/)** - アーキテクチャ・拡張方法
-- **[📡 API仕様](./docs/API.md)** - 統合API仕様書（全エンドポイント・型定義・SDKサンプル）
-- **[レストラン検索実装](./docs/restaurant-search-implementation.md)** - レストラン検索機能の詳細
-- **[環境変数管理](./docs/environment-variables-management.md)** - 設定管理ガイド
-- **[上級者向け](./docs/advanced/)** - 高度なカスタマイズ
+- **[アーキテクチャ](./docs/02-architecture.md)** - システム構成・設計思想
+- **[📡 API仕様](./docs/03-api-reference.md)** - 統合API仕様書（全エンドポイント）
+- **[開発ガイド](./docs/05-development.md)** - カスタマイズ・拡張方法
+- **[レストラン検索実装](./docs/07-restaurant-search.md)** - レストラン検索機能詳細
+- **[トラブルシューティング](./docs/08-troubleshooting.md)** - 問題解決・FAQ
 
 ## 🛠️ 技術スタック
 

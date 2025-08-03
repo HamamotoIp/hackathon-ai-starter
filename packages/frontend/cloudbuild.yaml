@@ -1,0 +1,87 @@
+steps:
+  # キャッシュ復元（並列）
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'pull-cache'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker pull gcr.io/$PROJECT_ID/frontend:deps || echo "No deps cache found"
+        docker pull gcr.io/$PROJECT_ID/frontend:latest || echo "No latest cache found"
+
+  # 依存関係レイヤーをビルド
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-deps'
+    args:
+      - 'build'
+      - '--target'
+      - 'deps'
+      - '--cache-from'
+      - 'gcr.io/$PROJECT_ID/frontend:deps'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend:deps'
+      - '.'
+    waitFor: ['pull-cache']
+
+  # 最終イメージをビルド
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-final'
+    args:
+      - 'build'
+      - '--cache-from'
+      - 'gcr.io/$PROJECT_ID/frontend:deps'
+      - '--cache-from'
+      - 'gcr.io/$PROJECT_ID/frontend:latest'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend:latest'
+      - '.'
+    waitFor: ['build-deps']
+
+  # 依存関係キャッシュをプッシュ（並列）
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-deps'
+    args: ['push', 'gcr.io/$PROJECT_ID/frontend:deps']
+    waitFor: ['build-deps']
+
+  # イメージをContainer Registryにプッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-build'
+    args: ['push', 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID']
+    waitFor: ['build-final']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-latest'
+    args: ['push', 'gcr.io/$PROJECT_ID/frontend:latest']
+    waitFor: ['build-final']
+
+  # Cloud Runにデプロイ（環境変数は別途設定）
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy ${_SERVICE_NAME} \
+          --image gcr.io/$PROJECT_ID/frontend:$BUILD_ID \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --service-account ${_SERVICE_ACCOUNT} \
+          --memory 512Mi \
+          --cpu 1 \
+          --max-instances 3 \
+          --min-instances 0 \
+          --concurrency 100 \
+          --timeout 300 \
+          --execution-environment gen2 \
+          --update-env-vars NODE_ENV=production,VERTEX_AI_PROJECT_ID=$PROJECT_ID,VERTEX_AI_LOCATION=${_REGION}
+    waitFor: ['push-build']
+
+options:
+  machineType: 'E2_HIGHCPU_32'  # 8 → 32 CPUに強化
+  diskSizeGb: '200'             # 100GB → 200GBに拡張
+  substitutionOption: 'ALLOW_LOOSE'
+  
+timeout: '1200s'
