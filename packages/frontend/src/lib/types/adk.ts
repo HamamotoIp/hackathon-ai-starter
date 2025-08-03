@@ -41,7 +41,7 @@ export interface ADKStreamQueryRequest {
 
 /** ADK SSEイベントデータ（エスケープ問題解決対応）
  * 
- * Restaurant Search Agentの6段階処理に対応：
+ * Tourism Spots Search Agentの6段階処理に対応：
  * - 各エージェントのレスポンスを適切に解析
  * - HTMLOutputスキーマ（structured_html, final_html）に対応
  * - 1行形式HTML出力に対応
@@ -57,7 +57,7 @@ export interface ADKSSEEventData {
   };
   text?: string;
   output?: string;
-  html?: string;  // レストラン検索レスポンス用
+  html?: string;  // 観光スポット検索レスポンス用
   author?: string;
   invocation_id?: string;
   id?: string;

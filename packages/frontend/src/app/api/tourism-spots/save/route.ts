@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     const datePath = `${timestamp.getFullYear()}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${String(timestamp.getDate()).padStart(2, '0')}`;
     
     // Cloud StorageにHTMLファイルを保存
-    const bucketName = process.env.RESTAURANT_BUCKET_NAME ?? `${process.env.VERTEX_AI_PROJECT_ID}-restaurant-results`;
-    const fileName = `restaurant-results/${datePath}/result_${resultId}.html`;
+    const bucketName = process.env.TOURISM_SPOTS_BUCKET_NAME ?? `${process.env.VERTEX_AI_PROJECT_ID}-tourism-spots-results`;
+    const fileName = `tourism-spots-results/${datePath}/result_${resultId}.html`;
     
     const bucket = storage.bucket(bucketName);
     const file = bucket.file(fileName);
@@ -92,13 +92,13 @@ export async function POST(request: NextRequest) {
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
     // Firestoreにメタデータを保存
-    const docRef = db.collection('restaurant-results').doc(resultId);
+    const docRef = db.collection('tourism-spots-results').doc(resultId);
     const resultData = {
       id: resultId,
       query,
       searchParams: searchParams ?? {},
       htmlStorageUrl: publicUrl,
-      title: title ?? `レストラン検索結果 - ${query.substring(0, 20)}${query.length > 20 ? '...' : ''}`,
+      title: title ?? `観光スポット検索結果 - ${query.substring(0, 20)}${query.length > 20 ? '...' : ''}`,
       createdAt: timestamp,
       updatedAt: timestamp,
       tags: extractTags(query, searchParams),
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       resultId,
-      url: `/restaurant-search/saved/${resultId}`,
+      url: `/tourism-spots/saved/${resultId}`,
       htmlUrl: publicUrl,
       title: resultData.title,
     });
@@ -139,25 +139,24 @@ function extractTags(query: string, searchParams?: Record<string, unknown>): str
   // エリアタグ
   if (searchParams?.area) tags.push(`エリア:${searchParams.area}`);
   
-  // シーンタグ
-  if (searchParams?.scene) tags.push(`シーン:${searchParams.scene}`);
+  // カテゴリタグ
+  if (searchParams?.category) tags.push(`カテゴリ:${searchParams.category}`);
   
-  // 時間タグ
-  if (searchParams?.time) tags.push(`時間:${searchParams.time}`);
+  // 季節タグ
+  if (searchParams?.season) tags.push(`季節:${searchParams.season}`);
   
-  // ジャンル推定
-  const genreKeywords = {
-    'フレンチ': ['フレンチ', 'フランス料理'],
-    'イタリアン': ['イタリアン', 'パスタ', 'ピザ'],
-    '和食': ['和食', '日本料理', '寿司'],
-    '中華': ['中華', '中国料理'],
-    'カフェ': ['カフェ', 'コーヒー'],
+  // カテゴリ推定
+  const categoryKeywords = {
+    '歴史': ['歴史', '史跡', '文化財', '遺跡', '城'],
+    '自然': ['自然', '公園', '山', '海', '川', '花'],
+    '現代': ['現代', 'タワー', 'ビル', 'ショッピング', '都市'],
+    '文化': ['文化', '美術館', '博物館', '神社', '寺'],
   };
   
   const lowerQuery = query.toLowerCase();
-  for (const [genre, keywords] of Object.entries(genreKeywords)) {
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
     if (keywords.some(keyword => lowerQuery.includes(keyword.toLowerCase()))) {
-      tags.push(`ジャンル:${genre}`);
+      tags.push(`カテゴリ:${category}`);
       break;
     }
   }

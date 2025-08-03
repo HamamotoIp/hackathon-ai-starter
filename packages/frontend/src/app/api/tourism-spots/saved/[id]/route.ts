@@ -41,7 +41,7 @@ export async function GET(
     }
 
     // Firestoreからメタデータを取得
-    const docRef = db.collection('restaurant-results').doc(id);
+    const docRef = db.collection('tourism-spots-results').doc(id);
     const doc = await docRef.get();
 
     if (!doc.exists) {
@@ -136,7 +136,7 @@ export async function PATCH(
       );
     }
 
-    const docRef = db.collection('restaurant-results').doc(id);
+    const docRef = db.collection('tourism-spots-results').doc(id);
     const updateData: Record<string, unknown> = {
       updatedAt: new Date(),
     };
@@ -176,13 +176,13 @@ export async function DELETE(
     }
 
     // TODO: Cloud Storageのファイルも削除する場合
-    // const doc = await db.collection('restaurant-results').doc(id).get();
+    // const doc = await db.collection('tourism-spots-results').doc(id).get();
     // if (doc.exists) {
     //   const data = doc.data();
     //   // Cloud Storageファイル削除処理
     // }
 
-    await db.collection('restaurant-results').doc(id).delete();
+    await db.collection('tourism-spots-results').doc(id).delete();
 
     return NextResponse.json({
       success: true,

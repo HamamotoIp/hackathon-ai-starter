@@ -231,7 +231,7 @@ mkdir src/lib/features/new-feature
 ```typescript
 // 推奨：機能別インポート
 import { processAnalysis } from '@/lib/features/analysis/adk-processor';
-import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
+import { CloudTourismSpotsStorage } from '@/lib/features/tourism-spots/tourism-storage';
 
 // 推奨：共通処理インポート
 import { apiClient } from '@/lib/core/api/client';
@@ -312,7 +312,7 @@ gcloud run services delete SERVICE_NAME --region=us-central1
 
 # 2. Cloud Storage削除
 gsutil rm -r gs://PROJECT_ID-images
-gsutil rm -r gs://PROJECT_ID-restaurant-results
+gsutil rm -r gs://PROJECT_ID-tourism-spots-results
 
 # 3. Firestore削除（注意：データは復元不可）
 gcloud firestore databases delete --database="(default)"

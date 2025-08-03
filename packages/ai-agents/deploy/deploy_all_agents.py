@@ -9,7 +9,7 @@ from datetime import datetime
 
 # 各デプロイスクリプトをインポート
 from deploy_analysis import deploy_analysis_agent
-from deploy_restaurant_search import deploy_restaurant_search_agent
+from deploy_tourism_spots import deploy_tourism_spots_agent
 
 
 def deploy_all_agents():
@@ -38,18 +38,18 @@ def deploy_all_agents():
         }
     
     try:
-        # 2. Restaurant Search Agent デプロイ
-        print("\n[2/2] Restaurant Search Agent")
-        restaurant_search_app = deploy_restaurant_search_agent()
-        deployment_results['restaurant_search'] = {
+        # 2. Tourism Spots Search Agent デプロイ
+        print("\n[2/2] Tourism Spots Search Agent")
+        tourism_spots_app = deploy_tourism_spots_agent()
+        deployment_results['tourism_spots_search'] = {
             'status': 'success',
-            'resource_name': restaurant_search_app.resource_name
+            'resource_name': tourism_spots_app.resource_name
         }
         # 完了メッセージは個別スクリプトが出力
         
     except Exception as e:
-        print(f"❌ Restaurant Search Agent デプロイ失敗: {e}")
-        deployment_results['restaurant_search'] = {
+        print(f"❌ Tourism Spots Search Agent デプロイ失敗: {e}")
+        deployment_results['tourism_spots_search'] = {
             'status': 'failed',
             'error': str(e)
         }
@@ -87,13 +87,13 @@ def deploy_all_agents():
                 print("ANALYSIS_AGENT_URL=<analysis_agent_url.txtから取得>")
         
         
-        if 'restaurant_search' in deployment_results and deployment_results['restaurant_search']['status'] == 'success':
+        if 'tourism_spots_search' in deployment_results and deployment_results['tourism_spots_search']['status'] == 'success':
             try:
-                with open('../restaurant_search_agent_url.txt', 'r') as f:
+                with open('../tourism_spots_search_agent_url.txt', 'r') as f:
                     url = f.read().strip()
-                print(f"RESTAURANT_SEARCH_AGENT_URL={url}")
+                print(f"TOURISM_SPOTS_SEARCH_AGENT_URL={url}")
             except FileNotFoundError:
-                print("RESTAURANT_SEARCH_AGENT_URL=<restaurant_search_agent_url.txtから取得>")
+                print("TOURISM_SPOTS_SEARCH_AGENT_URL=<tourism_spots_search_agent_url.txtから取得>")
     
     return deployment_results
 

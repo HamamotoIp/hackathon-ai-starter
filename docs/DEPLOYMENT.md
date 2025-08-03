@@ -27,9 +27,9 @@ packages/frontend/src/lib/
 │   ├── analysis/         # 分析機能（ADK Agent）
 │   │   ├── adk-processor.ts
 │   │   └── types.ts
-│   └── restaurant-search/  # レストラン検索（ADK Agent）
+│   └── tourism-spots/     # 観光スポット検索（ADK Agent）
 │       ├── adk-processor.ts
-│       ├── storage-service.ts
+│       ├── tourism-storage.ts
 │       └── types.ts
 ├── core/                 # 共通処理
 │   ├── adk/             # ADK共通処理
@@ -76,8 +76,7 @@ packages/frontend/src/lib/
 ```bash
 # 既存エージェント
 ./deploy-single-agent.sh deploy_analysis.py
-./deploy-single-agent.sh deploy_ui_generation.py
-./deploy-single-agent.sh deploy_restaurant_search.py
+./deploy-single-agent.sh deploy_tourism_spots.py
 
 # 新規エージェント
 ./deploy-single-agent.sh deploy_new_agent.py

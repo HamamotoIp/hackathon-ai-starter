@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-飲食店検索エージェントデプロイスクリプト
+観光スポット検索エージェントデプロイスクリプト
 """
 import os
 import sys
@@ -11,14 +11,14 @@ from vertexai import init, agent_engines
 
 # ADK標準構造からエージェントをインポート
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from restaurant_search_agent.agent import root_agent as restaurant_search_agent
+from tourism_spots_agent.agent import root_agent as tourism_spots_agent
 
 # ログ設定（警告以上のみ表示）
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-def deploy_restaurant_search_agent():
-    """飲食店検索エージェントをAgent Engineにデプロイ"""
+def deploy_tourism_spots_agent():
+    """観光スポット検索エージェントをAgent Engineにデプロイ"""
     # .envファイルから環境変数を読み込み
     env_path = os.path.join(os.path.dirname(__file__), "../../../scripts/.env")
     if os.path.exists(env_path):
@@ -31,7 +31,7 @@ def deploy_restaurant_search_agent():
     if not project_id:
         raise ValueError("PROJECT_ID not found in .env file. Please set PROJECT_ID in .env")
     
-    print(f"🚀 飲食店検索エージェントデプロイ中...")
+    print(f"🚀 観光スポット検索エージェントデプロイ中...")
     
     # Vertex AI初期化
     init(project=project_id, location=location, 
@@ -39,15 +39,15 @@ def deploy_restaurant_search_agent():
     
     # Agent Engineにデプロイ
     remote_app = agent_engines.create(
-        restaurant_search_agent,
+        tourism_spots_agent,
         requirements=[
             "google-cloud-aiplatform[adk,agent_engines]>=1.88.0",
             "pydantic>=2.0.0"
         ],
-        extra_packages=["restaurant_search_agent"],
+        extra_packages=["tourism_spots_agent"],
         env_vars={"VERTEX_AI_PROJECT_ID": project_id},
-        display_name="AI Chat Starter Kit - Restaurant Search Agent",
-        description="飲食店検索とHTML記事生成専用エージェント"
+        display_name="AI Chat Starter Kit - Tourism Spots Search Agent",
+        description="観光スポット検索とHTML記事生成専用エージェント"
     )
     
     # デプロイ完了まで待機
@@ -59,10 +59,10 @@ def deploy_restaurant_search_agent():
         # URL生成とファイル保存
         agent_url = f"https://{location}-aiplatform.googleapis.com/v1/{remote_app.resource_name}:streamQuery?alt=sse"
         
-        with open('restaurant_search_agent_url.txt', 'w') as f:
+        with open('tourism_spots_search_agent_url.txt', 'w') as f:
             f.write(agent_url)
         
-        print("✅ 飲食店検索エージェントデプロイ完了")
+        print("✅ 観光スポット検索エージェントデプロイ完了")
         print(f"URL: {agent_url}")
         
         return remote_app
@@ -70,7 +70,7 @@ def deploy_restaurant_search_agent():
     except Exception as e:
         # エラーログ保存
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        with open(f'restaurant_search_deploy_{timestamp}.log', 'w') as f:
+        with open(f'tourism_spots_deploy_{timestamp}.log', 'w') as f:
             f.write(f"Error: {str(e)}\n")
             f.write(f"Timestamp: {datetime.now().isoformat()}\n")
         
@@ -79,8 +79,8 @@ def deploy_restaurant_search_agent():
 def main():
     """メイン実行関数"""
     try:
-        deploy_restaurant_search_agent()
-        print("\n🎉 飲食店検索エージェントデプロイ完了！")
+        deploy_tourism_spots_agent()
+        print("\n🎉 観光スポット検索エージェントデプロイ完了！")
         return 0
     except Exception as e:
         print(f"❌ エラー: {e}")

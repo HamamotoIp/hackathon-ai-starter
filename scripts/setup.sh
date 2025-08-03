@@ -26,10 +26,10 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="user:$CURRENT_USE
 
 echo "📦 ストレージバケット設定中..."
 BUCKET_NAME="$PROJECT_ID-images"
-RESTAURANT_BUCKET_NAME="$PROJECT_ID-restaurant-results"
+TOURISM_SPOTS_BUCKET_NAME="$PROJECT_ID-tourism-spots-results"
 gsutil ls "gs://$BUCKET_NAME" >/dev/null 2>&1 || gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$BUCKET_NAME" >/dev/null 2>&1
-gsutil ls "gs://$RESTAURANT_BUCKET_NAME" >/dev/null 2>&1 || gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$RESTAURANT_BUCKET_NAME" >/dev/null 2>&1
-gsutil iam ch allUsers:objectViewer "gs://$RESTAURANT_BUCKET_NAME" >/dev/null 2>&1
+gsutil ls "gs://$TOURISM_SPOTS_BUCKET_NAME" >/dev/null 2>&1 || gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$TOURISM_SPOTS_BUCKET_NAME" >/dev/null 2>&1
+gsutil iam ch allUsers:objectViewer "gs://$TOURISM_SPOTS_BUCKET_NAME" >/dev/null 2>&1
 
 echo "🗄️ Firestoreデータベース設定中..."
 gcloud firestore databases list --project="$PROJECT_ID" | grep -q "(default)" || gcloud firestore databases create --location="$REGION" --project="$PROJECT_ID" --quiet >/dev/null 2>&1

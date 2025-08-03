@@ -18,13 +18,13 @@ packages/frontend/src/
 │   ├── simple-chat/         # シンプルチャット（Vertex AI Direct）
 │   ├── ai-features/         # AI機能統合ページ（ADK Agent）
 │   ├── ui-builder/          # UI生成専用ツール
-│   ├── restaurant-search/   # レストラン検索・履歴管理
+│   ├── tourism-spots/      # 観光スポット検索・履歴管理
 │   ├── content-management/  # 画像アップロード・管理
 │   ├── api/                 # API Routes
 │   │   ├── chat/basic/      # Vertex AI Direct API
 │   │   ├── analysis/        # ADK Analysis Agent API
 │   │   ├── ui-generation/   # ADK UI Generation Agent API
-│   │   ├── restaurant-search/    # レストラン検索関連API
+│   │   ├── tourism-spots/        # 観光スポット検索関連API
 │   │   ├── images/upload/   # Cloud Storage画像API
 │   │   └── debug/           # デバッグ・環境確認API
 │   ├── layout.tsx           # 共通レイアウト
@@ -61,11 +61,11 @@ npm run dev
 VERTEX_AI_PROJECT_ID=your-gcp-project-id
 VERTEX_AI_LOCATION=us-central1
 BUCKET_NAME=your-bucket-name
-RESTAURANT_BUCKET_NAME=your-restaurant-bucket-name
+TOURISM_SPOTS_BUCKET_NAME=your-tourism-spots-bucket-name
 SERVICE_ACCOUNT_EMAIL=your-service-account@project.iam.gserviceaccount.com
 ANALYSIS_AGENT_URL=https://region-aiplatform.googleapis.com/v1/projects/.../reasoningEngines/...:streamQuery?alt=sse
 UI_GENERATION_AGENT_URL=https://region-aiplatform.googleapis.com/v1/projects/.../reasoningEngines/...:streamQuery?alt=sse
-RESTAURANT_SEARCH_AGENT_URL=https://region-aiplatform.googleapis.com/v1/projects/.../reasoningEngines/...:streamQuery?alt=sse
+TOURISM_SPOTS_SEARCH_AGENT_URL=https://region-aiplatform.googleapis.com/v1/projects/.../reasoningEngines/...:streamQuery?alt=sse
 ```
 
 ### 3. AIエンジン連携（任意）
@@ -123,7 +123,7 @@ npm run build && npm run start
 | `/simple-chat` | シンプルチャット | Vertex AI直接呼び出し | 高速チャット |
 | `/ai-features` | **AI機能統合** | 分析レポート生成 | **推奨メインページ** |
 | `/ui-builder` | UI生成ツール | HTML/Tailwind生成専用 | UI作成・プロトタイプ |
-| `/restaurant-search` | レストラン検索 | 特集記事生成・保存・管理 | レストラン情報検索 |
+| `/tourism-spots` | 観光スポット検索 | 特集記事生成・保存・管理 | 観光スポット情報検索 |
 | `/content-management` | 画像管理 | ドラッグ&ドロップアップロード・Cloud Storage | ファイル管理 |
 
 ### AI機能詳細
@@ -146,11 +146,11 @@ npm run build && npm run start
 - **用途**: HTML/Tailwind生成、UIコンポーネント作成
 - **API**: `/api/ui-generation`
 
-#### 4. レストラン検索 (`/restaurant-search`)
-- **AI**: ADK Restaurant Search Agent (ADK 1.93.0)
+#### 4. 観光スポット検索 (`/tourism-spots`)
+- **AI**: ADK Tourism Spots Search Agent (ADK 1.93.0)
 - **レスポンス**: 15-30秒
-- **用途**: レストラン特集記事生成、検索履歴管理
-- **API**: `/api/restaurant-search`, `/api/restaurant-search/save`, `/api/restaurant-search/history`
+- **用途**: 観光スポット特集記事生成、検索履歴管理
+- **API**: `/api/tourism-spots`, `/api/tourism-spots/save`, `/api/tourism-spots/history`
 - **保存先**: Cloud Storage (HTML) + Firestore (メタデータ)
 
 #### 5. 画像管理 (`/content-management`)

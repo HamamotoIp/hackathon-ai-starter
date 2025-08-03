@@ -19,9 +19,9 @@ export default function HomePage() {
           <p className="text-gray-600">分析レポート生成のAgent Engine機能</p>
         </Link>
         
-        <Link href="/restaurant-search" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">🍽️ レストラン特集記事</h2>
-          <p className="text-gray-600">AIが生成するレストラン特集記事の閲覧・管理</p>
+        <Link href="/tourism-spots" className="block p-4 border rounded hover:bg-gray-50">
+          <h2 className="text-xl font-semibold">🏛️ 観光スポット検索</h2>
+          <p className="text-gray-600">AIが生成する観光スポット記事の閲覧・管理</p>
         </Link>
       </div>
     </div>

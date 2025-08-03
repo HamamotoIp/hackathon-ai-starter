@@ -58,7 +58,7 @@ export type AIProcessingStatus = 'idle' | 'processing' | 'completed' | 'error';
 export const API_ENDPOINTS = {
   BASIC_CHAT: '/api/chat/basic',
   ANALYSIS: '/api/analysis',
-  RESTAURANT_SEARCH: '/api/restaurant-search',
+  TOURISM_SPOTS: '/api/tourism-spots',
   DEBUG: '/api/debug',
   IMAGE_UPLOAD: '/api/images/upload'
 } as const;

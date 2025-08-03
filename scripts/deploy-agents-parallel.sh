@@ -25,7 +25,7 @@ deploy_agent() {
 }
 
 deploy_agent "deploy_analysis.py" &
-deploy_agent "deploy_restaurant_search.py" &
+deploy_agent "deploy_tourism_spots.py" &
 
 wait
 cd ../../../..

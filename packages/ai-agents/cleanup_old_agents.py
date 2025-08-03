@@ -33,13 +33,13 @@ def get_current_agents() -> Dict[str, str]:
                 agents['analysis'] = engine_id
     
     
-    # Restaurant Search Agent
-    if os.path.exists('restaurant_search_agent_url.txt'):
-        with open('restaurant_search_agent_url.txt', 'r') as f:
+    # Tourism Spots Search Agent
+    if os.path.exists('tourism_spots_search_agent_url.txt'):
+        with open('tourism_spots_search_agent_url.txt', 'r') as f:
             url = f.read().strip()
             engine_id = extract_engine_id(url)
             if engine_id:
-                agents['restaurant_search'] = engine_id
+                agents['tourism_spots_search'] = engine_id
     
     return agents
 
