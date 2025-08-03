@@ -79,13 +79,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Restaurant history error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('History error details:', {
-      message: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined,
-      projectId: process.env.VERTEX_AI_PROJECT_ID
-    });
     
     return NextResponse.json(
       { 

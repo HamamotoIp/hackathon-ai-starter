@@ -195,14 +195,11 @@ function createUIGenerationMessage(message: string, options?: UIGenerationOption
  * ADKレスポンス解析（完全再構築版）
  */
 function parseADKResponse(responseData: string): string {
-  console.log('[ADK Response Parser] Raw response length:', responseData.length);
-  console.log('[ADK Response Parser] Raw response preview:', responseData.substring(0, 200));
   
   try {
     // Step 1: 直接JSONレスポンスのチェック（最優先）
     const directResult = tryParseDirectJSON(responseData);
     if (directResult) {
-      console.log('[ADK Response Parser] Direct JSON parsing successful');
       return directResult;
     }
     
@@ -234,19 +231,23 @@ function tryParseDirectJSON(responseData: string): string | null {
   try {
     const jsonParsed = JSON.parse(responseData);
     
-    // パターン1: レストラン検索の標準形式
-    if (jsonParsed.html && typeof jsonParsed.html === 'string') {
-      return cleanHTMLContent(jsonParsed.html);
+    // HTML系のパターン（レストラン検索・UI生成）
+    const htmlPatterns = [
+      jsonParsed.html,
+      jsonParsed.structured_html?.html,
+      jsonParsed.final_html?.html
+    ];
+    
+    for (const htmlContent of htmlPatterns) {
+      if (htmlContent && typeof htmlContent === 'string') {
+        return cleanHTMLContent(htmlContent);
+      }
     }
     
-    // パターン2: HTMLOutputスキーマ形式
-    if (jsonParsed.structured_html?.html && typeof jsonParsed.structured_html.html === 'string') {
-      return cleanHTMLContent(jsonParsed.structured_html.html);
-    }
-    
-    // パターン3: final_html形式
-    if (jsonParsed.final_html?.html && typeof jsonParsed.final_html.html === 'string') {
-      return cleanHTMLContent(jsonParsed.final_html.html);
+    // テキスト系のパターン（分析機能）
+    const textContent = jsonParsed.content?.parts?.[0]?.text;
+    if (textContent && typeof textContent === 'string') {
+      return textContent;
     }
     
     return null;

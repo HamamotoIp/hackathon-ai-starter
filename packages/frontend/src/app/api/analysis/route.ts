@@ -30,8 +30,33 @@ export async function POST(req: NextRequest) {
     const result = await processAnalysis(serviceUrl, body.message);
     const processingTime = Date.now() - startTime;
 
-    // ADKレスポンスをそのまま使用（解析は既にadk-agent.ts内で実行済み）
-    const finalResult = result;
+    // ADKレスポンスを解析してテキストを抽出
+    let finalResult: string;
+    try {
+      // マークダウンコードブロックを除去
+      let cleanedResult = result;
+      if (result.includes('```json') && result.includes('```')) {
+        // ```json と ``` の間のコンテンツを抽出
+        const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonMatch?.[1]) {
+          cleanedResult = jsonMatch[1];
+        }
+      }
+      
+      // レスポンスがJSONの場合、content.parts[0].textを抽出
+      const parsedResult = JSON.parse(cleanedResult);
+      if (parsedResult.content?.parts?.[0]?.text) {
+        finalResult = parsedResult.content.parts[0].text;
+      } else if (parsedResult.text) {
+        finalResult = parsedResult.text;
+      } else {
+        // JSONだがテキストプロパティがない場合、結果全体をテキストとして扱う
+        finalResult = cleanedResult;
+      }
+    } catch {
+      // JSONでない場合、結果全体をテキストとして扱う
+      finalResult = result;
+    }
 
     const response: AnalysisAPIResponse = {
       success: true,

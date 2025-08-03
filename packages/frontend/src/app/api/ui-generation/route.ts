@@ -30,40 +30,12 @@ export async function POST(req: NextRequest) {
     const result = await processUIGeneration(serviceUrl, body.message, body.options);
     const processingTime = Date.now() - startTime;
 
-    // UI生成結果の解析
-    // ADKエージェントからのレスポンスを解析してHTMLを取得
-    let html: string;
-    let metadata: { deviceType: DeviceType; responsive: boolean } = {
+    // ADKエージェントから既に処理されたHTMLを取得
+    const html = result;
+    const metadata: { deviceType: DeviceType; responsive: boolean } = {
       deviceType: (body.options?.deviceType as DeviceType) ?? "auto",
       responsive: true
     };
-
-    try {
-      // マークダウンコードブロックを除去
-      let cleanedResult = result;
-      if (result.includes('```json') && result.includes('```')) {
-        // ```json と ``` の間のコンテンツを抽出
-        const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
-        if (jsonMatch?.[1]) {
-          cleanedResult = jsonMatch[1];
-        }
-      }
-      
-      // レスポンスがJSONの場合、パースしてhtmlプロパティを取得
-      const parsedResult = JSON.parse(cleanedResult);
-      if (parsedResult.html) {
-        html = parsedResult.html;
-        if (parsedResult.metadata) {
-          metadata = { ...metadata, ...parsedResult.metadata };
-        }
-      } else {
-        // JSONだがhtmlプロパティがない場合、結果全体をHTMLとして扱う
-        html = cleanedResult;
-      }
-    } catch {
-      // JSONでない場合、結果全体をHTMLとして扱う
-      html = result;
-    }
 
     const uiResult: UIGenerationResult = {
       html,

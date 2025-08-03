@@ -15,7 +15,6 @@ if (!getApps().length) {
       initializeApp();
     }
   } catch (error) {
-    console.error('Firebase initialization error:', error);
     throw error;
   }
 }
@@ -121,14 +120,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Restaurant save error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined,
-      projectId: process.env.VERTEX_AI_PROJECT_ID,
-      bucketName: process.env.RESTAURANT_BUCKET_NAME
-    });
     
     return NextResponse.json(
       { 

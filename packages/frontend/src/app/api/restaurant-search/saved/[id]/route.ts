@@ -91,8 +91,7 @@ export async function GET(
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
         
-      } catch (error) {
-        console.error('HTML取得エラー:', error);
+      } catch {
         return new NextResponse(
           '<div style="padding: 20px; text-align: center;"><h2>コンテンツを表示できませんでした</h2><p>HTMLファイルの読み込みに失敗しました。</p></div>',
           { 
@@ -113,8 +112,7 @@ export async function GET(
       },
     });
 
-  } catch (error) {
-    console.error('取得エラー:', error);
+  } catch {
     return NextResponse.json(
       { error: '取得に失敗しました' },
       { status: 500 }
