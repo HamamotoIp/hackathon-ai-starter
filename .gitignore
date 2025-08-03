@@ -31,11 +31,16 @@ yarn-error.log*
 pnpm-debug.log*
 
 # === Environment Variables ===
-.env*
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.*.local
 **/.env
+!.env.example
 
 # === Configuration Files ===
-.env
 lifecycle.json
 
 # === Agent URLs and Debug Scripts ===
