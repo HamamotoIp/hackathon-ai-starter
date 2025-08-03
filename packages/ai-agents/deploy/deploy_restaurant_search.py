@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def deploy_restaurant_search_agent():
     """飲食店検索エージェントをAgent Engineにデプロイ"""
     # .envファイルから環境変数を読み込み
-    env_path = os.path.join(os.path.dirname(__file__), "../../../.env")
+    env_path = os.path.join(os.path.dirname(__file__), "../../../scripts/.env")
     if os.path.exists(env_path):
         load_dotenv(env_path)
     

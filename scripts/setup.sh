@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source load-env.sh
+source ./load-env.sh
 load_env
 REGION=${REGION:-us-central1}
 ENVIRONMENT=${ENVIRONMENT:-dev}
@@ -35,9 +35,9 @@ echo "🗄️ Firestoreデータベース設定中..."
 gcloud firestore databases list --project="$PROJECT_ID" | grep -q "(default)" || gcloud firestore databases create --location="$REGION" --project="$PROJECT_ID" --quiet >/dev/null 2>&1
 
 echo "🤖 エージェントデプロイ中..."
-./scripts/deploy-agents-parallel.sh
+./deploy-agents-parallel.sh
 
 echo "🌐 フロントエンドデプロイ中..."
-./scripts/deploy-frontend.sh
+./deploy-frontend.sh
 
 echo "✅ デプロイ完了！"

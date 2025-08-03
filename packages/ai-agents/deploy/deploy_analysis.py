@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 def deploy_analysis_agent():
     """Analysis AgentをAgent Engineにデプロイ"""
     # .envファイルから環境変数を読み込み
-    env_path = os.path.join(os.path.dirname(__file__), "../../../.env")
+    env_path = os.path.join(os.path.dirname(__file__), "../../../scripts/.env")
     if os.path.exists(env_path):
         load_dotenv(env_path)
     

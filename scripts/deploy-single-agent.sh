@@ -14,7 +14,7 @@ fi
 
 AGENT_SCRIPT="$1"
 
-source ../load-env.sh
+source ./load-env.sh
 load_env
 REGION=${REGION:-us-central1}
 

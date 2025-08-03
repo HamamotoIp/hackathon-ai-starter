@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # .envから環境変数を読み込み
     from dotenv import load_dotenv
     
-    env_path = os.path.join(os.path.dirname(__file__), "../../../.env")
+    env_path = os.path.join(os.path.dirname(__file__), "../../../scripts/.env")
     load_dotenv(env_path)
     
     # 環境変数チェック

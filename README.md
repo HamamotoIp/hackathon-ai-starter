@@ -19,7 +19,7 @@ npm install && npm run dev
 ```bash
 cp .env.example .env
 # .envでPROJECT_IDを設定
-./setup.sh
+./scripts/setup.sh
 ```
 
 ## 🎯 特徴
@@ -27,7 +27,6 @@ cp .env.example .env
 ### 🌟 主要機能
 - **💬 AIチャット** - Vertex AI直接統合、ストリーミング
 - **📊 分析レポート** - ADK Analysis Agent
-- **🎨 UI生成** - デバイス最適化HTML生成
 - **🍽️ レストラン検索** - 特集記事生成・保存・管理
 
 ### 🚀 技術スタック
@@ -39,25 +38,25 @@ cp .env.example .env
 
 | スクリプト | 説明 | 使用場面 |
 |-----------|------|----------|
-| `setup.sh` | 全体統合デプロイ | 初回・本格運用 |
-| `deploy-agents-parallel.sh` | エージェント並列デプロイ | エージェント更新 |
-| `deploy-frontend.sh` | フロントエンドデプロイ | フロントエンド更新 |
-| `deploy-single-agent.sh` | 単独エージェントデプロイ | 開発・デバッグ |
-| `cleanup_old_agents.sh` | 古いエージェント削除 | クリーンアップ |
+| `scripts/setup.sh` | 全体統合デプロイ | 初回・本格運用 |
+| `scripts/deploy-agents-parallel.sh` | エージェント並列デプロイ | エージェント更新 |
+| `scripts/deploy-frontend.sh` | フロントエンドデプロイ | フロントエンド更新 |
+| `scripts/deploy-single-agent.sh` | 単独エージェントデプロイ | 開発・デバッグ |
+| `scripts/cleanup_old_agents.sh` | 古いエージェント削除 | クリーンアップ |
 
 ### 基本的な使い方
 ```bash
 # 初回デプロイ
-./setup.sh
+./scripts/setup.sh
 
 # エージェント更新
-./deploy-agents-parallel.sh
+./scripts/deploy-agents-parallel.sh
 
 # フロントエンド更新
-./deploy-frontend.sh
+./scripts/deploy-frontend.sh
 
 # 単独エージェント
-./deploy-single-agent.sh deploy_analysis.py
+./scripts/deploy-single-agent.sh deploy_analysis.py
 ```
 
 ## 🏗️ アーキテクチャ
@@ -70,7 +69,6 @@ cp .env.example .env
 
 🤖 AI Agents
 ├── Analysis Agent
-├── UI Generation Agent
 └── Restaurant Search Agent
 
 ☁️ GCP Infrastructure

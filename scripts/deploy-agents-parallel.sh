@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ../load-env.sh
+source ./load-env.sh
 load_env
 REGION=${REGION:-us-central1}
 
@@ -28,4 +28,4 @@ deploy_agent "deploy_analysis.py" &
 deploy_agent "deploy_restaurant_search.py" &
 
 wait
-cd ../../..
+cd ../../../..

@@ -19,11 +19,11 @@ cp .env.example .env
 
 | スクリプト | 説明 | 実行時間目安 |
 |-----------|------|-------------|
-| `setup.sh` | 全体統合デプロイ | 10-15分 |
-| `deploy-agents-parallel.sh` | エージェント並列デプロイ | 5-8分 |
-| `deploy-frontend.sh` | フロントエンドデプロイ | 3-5分 |
-| `deploy-single-agent.sh` | 単独エージェントデプロイ | 2-3分 |
-| `cleanup_old_agents.sh` | 古いエージェント削除 | 1-2分 |
+| `setup.sh` | 全体統合デプロイ | 8-12分 |
+| `scripts/deploy-agents-parallel.sh` | エージェント並列デプロイ | 4-6分 |
+| `scripts/deploy-frontend.sh` | フロントエンドデプロイ | 3-5分 |
+| `scripts/deploy-single-agent.sh` | 単独エージェントデプロイ | 2-3分 |
+| `scripts/cleanup_old_agents.sh` | 古いエージェント削除 | 1-2分 |
 
 ## 基本的な使い方
 
