@@ -56,6 +56,7 @@ export default function SimpleChatPage() {
         </div>
         <div className="p-6">
           <div className="space-y-4">
+
             {/* チャット履歴 */}
             <div className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-lg p-4 space-y-4 bg-gray-50">
               {messages.length === 0 && (
