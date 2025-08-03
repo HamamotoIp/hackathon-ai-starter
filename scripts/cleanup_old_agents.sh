@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source load-env.sh
+source ../load-env.sh
 load_env
 REGION=${REGION:-us-central1}
 
@@ -11,7 +11,7 @@ gcloud services enable aiplatform.googleapis.com --quiet >/dev/null 2>&1
 export VERTEX_AI_PROJECT_ID="$PROJECT_ID"
 export VERTEX_AI_LOCATION="$REGION"
 
-cd packages/ai-agents
+cd ../packages/ai-agents
 
 [ ! -d "venv" ] && python -m venv venv
 source venv/bin/activate

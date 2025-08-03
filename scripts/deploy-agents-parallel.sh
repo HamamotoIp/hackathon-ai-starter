@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source load-env.sh
+source ../load-env.sh
 load_env
 REGION=${REGION:-us-central1}
 
@@ -11,7 +11,7 @@ gcloud services enable aiplatform.googleapis.com --quiet >/dev/null 2>&1
 STAGING_BUCKET="$PROJECT_ID-agent-engine-staging"
 gsutil ls "gs://$STAGING_BUCKET" >/dev/null 2>&1 || gsutil mb -p "$PROJECT_ID" -c STANDARD -l "$REGION" "gs://$STAGING_BUCKET" >/dev/null
 
-cd packages/ai-agents
+cd ../packages/ai-agents
 
 [ ! -d "venv" ] && python -m venv venv
 source venv/bin/activate
@@ -25,8 +25,7 @@ deploy_agent() {
 }
 
 deploy_agent "deploy_analysis.py" &
-deploy_agent "deploy_ui_generation.py" &
 deploy_agent "deploy_restaurant_search.py" &
 
 wait
-cd ../..
+cd ../../..

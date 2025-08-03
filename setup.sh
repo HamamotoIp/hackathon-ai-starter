@@ -35,9 +35,9 @@ echo "🗄️ Firestoreデータベース設定中..."
 gcloud firestore databases list --project="$PROJECT_ID" | grep -q "(default)" || gcloud firestore databases create --location="$REGION" --project="$PROJECT_ID" --quiet >/dev/null 2>&1
 
 echo "🤖 エージェントデプロイ中..."
-./deploy-agents-parallel.sh
+./scripts/deploy-agents-parallel.sh
 
 echo "🌐 フロントエンドデプロイ中..."
-./deploy-frontend.sh
+./scripts/deploy-frontend.sh
 
 echo "✅ デプロイ完了！"
