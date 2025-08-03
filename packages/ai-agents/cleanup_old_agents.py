@@ -32,13 +32,6 @@ def get_current_agents() -> Dict[str, str]:
             if engine_id:
                 agents['analysis'] = engine_id
     
-    # UI Generation Agent
-    if os.path.exists('ui_generation_agent_url.txt'):
-        with open('ui_generation_agent_url.txt', 'r') as f:
-            url = f.read().strip()
-            engine_id = extract_engine_id(url)
-            if engine_id:
-                agents['ui_generation'] = engine_id
     
     # Restaurant Search Agent
     if os.path.exists('restaurant_search_agent_url.txt'):
@@ -65,7 +58,7 @@ def list_all_reasoning_engines() -> List[Tuple[str, str, str]]:
         location = os.getenv('VERTEX_AI_LOCATION', 'us-central1')
         
         if not project_id:
-            raise ValueError("PROJECT_ID not found in config.sh")
+            raise ValueError("VERTEX_AI_PROJECT_ID not found in .env")
         
         # リージョナルエンドポイントを使用
         api_endpoint = f"{location}-aiplatform.googleapis.com"
@@ -206,26 +199,16 @@ def cleanup_old_agents(dry_run: bool = True) -> None:
 def main():
     """メイン関数"""
     
-    # config.shから環境変数を読み込み
-    config_path = os.path.join(os.path.dirname(__file__), "../../config.sh")
-    if os.path.exists(config_path):
-        # config.shからPROJECT_IDとREGIONを読み取り
-        with open(config_path, 'r') as f:
-            config_content = f.read()
-        
-        import re
-        project_match = re.search(r'PROJECT_ID="([^"]+)"', config_content)
-        region_match = re.search(r'REGION="([^"]+)"', config_content)
-        
-        if project_match:
-            os.environ['VERTEX_AI_PROJECT_ID'] = project_match.group(1)
-        if region_match:
-            os.environ['VERTEX_AI_LOCATION'] = region_match.group(1)
+    # .envから環境変数を読み込み
+    from dotenv import load_dotenv
+    
+    env_path = os.path.join(os.path.dirname(__file__), "../../.env")
+    load_dotenv(env_path)
     
     # Vertex AI初期化
     project_id = os.getenv('VERTEX_AI_PROJECT_ID')
     if not project_id:
-        print("❌ PROJECT_ID not found in config.sh. Please set PROJECT_ID in config.sh")
+        print("❌ VERTEX_AI_PROJECT_ID not found in .env. Please set VERTEX_AI_PROJECT_ID in .env")
         sys.exit(1)
     
     try:

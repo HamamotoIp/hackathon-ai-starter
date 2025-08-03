@@ -19,19 +19,9 @@ export default function HomePage() {
           <p className="text-gray-600">分析レポート生成のAgent Engine機能</p>
         </Link>
         
-        <Link href="/ui-builder" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">🎨 UI生成ツール</h2>
-          <p className="text-gray-600">HTML/CSS生成とプレビュー</p>
-        </Link>
-        
         <Link href="/restaurant-search" className="block p-4 border rounded hover:bg-gray-50">
           <h2 className="text-xl font-semibold">🍽️ レストラン特集記事</h2>
           <p className="text-gray-600">AIが生成するレストラン特集記事の閲覧・管理</p>
-        </Link>
-        
-        <Link href="/content-management" className="block p-4 border rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">📁 コンテンツ管理</h2>
-          <p className="text-gray-600">テキストコンテンツの作成・編集・管理</p>
         </Link>
       </div>
     </div>
