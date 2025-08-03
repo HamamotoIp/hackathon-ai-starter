@@ -1,222 +1,71 @@
-# レストラン検索エージェント レスポンス形式ドキュメント
+# レストラン検索API仕様（統合版）
 
-## 概要
+## 📋 重要な更新
 
-このドキュメントでは、Google Cloud Reasoning Engine（ADK Agent）を使用したレストラン検索エージェントのレスポンス形式について詳細に説明します。
+**このドキュメントは統合されました。**
 
-## エージェント構成
+最新の完全なAPI仕様は以下をご参照ください：
+- **[📡 メインAPI仕様書](../docs/API.md)** - 全APIエンドポイント統合版
 
-レストラン検索エージェントは以下の5つのサブエージェントで構成されています：
+## 📍 クイックリファレンス
 
-1. **SimpleIntentAgent**: ユーザー入力の意図理解
-2. **SimpleSearchAgent**: 2段階検索の実行
-3. **SimpleSelectionAgent**: 検索結果から5店舗を選定
-4. **SimpleDescriptionAgent**: 各店舗の説明文生成
-5. **SimpleUIAgent**: HTML記事の生成
+レストラン検索関連のAPIエンドポイント：
+- `POST /api/restaurant-search` - レストラン特集記事生成
+- `POST /api/restaurant-search/save` - 検索結果保存
+- `GET /api/restaurant-search/history` - 検索履歴取得
+- `GET /api/restaurant-search/saved/[id]` - 個別結果取得
+- `PATCH /api/restaurant-search/saved/[id]` - 結果更新
+- `DELETE /api/restaurant-search/saved/[id]` - 結果削除
 
-## レスポンス形式
+## 🔄 移行済み情報
 
-### 1. 全体構造
+以下の詳細情報は **[📡 メインAPI仕様書](../docs/API.md)** に統合されました：
 
-```json
-{
-  "content": {
-    "parts": [{"text": "エージェントの出力テキスト"}],
-    "role": "model"
-  },
-  "usage_metadata": {...},
-  "invocation_id": "...",
-  "author": "エージェント名",
-  "actions": {
-    "state_delta": {
-      "output_key": "エージェントの出力データ"
-    },
-    "artifact_delta": {},
-    "requested_auth_configs": {}
-  },
-  "id": "...",
-  "timestamp": 1753708543.366816
-}
-```
+- ✅ 完全なAPI仕様とサンプルコード
+- ✅ TypeScript型定義
+- ✅ エラーハンドリング詳細
+- ✅ データ構造仕様
+- ✅ セキュリティ制限
+- ✅ SDK使用例（JavaScript/Python/curl）
 
-### 2. 各エージェントの出力
+## 🚀 すぐに始める
 
-#### SimpleIntentAgent
-```json
-{
-  "author": "SimpleIntentAgent",
-  "actions": {
-    "state_delta": {
-      "search_params": "```json\n{\n    \"area\": \"銀座\",\n    \"scene\": \"ビジネス\",\n    \"time\": \"ディナー\",\n    \"requests\": [\"和食\"]\n}\n```"
-    }
-  }
-}
-```
-
-#### SimpleSearchAgent
-```json
-{
-  "author": "SimpleSearchAgent",
-  "actions": {
-    "state_delta": {
-      "search_results": "```tool_code\ntwo_step_search(area='銀座', scene='ビジネス', cuisine='和食')\n```"
-    }
-  }
-}
-```
-
-#### SimpleSelectionAgent
-```json
-{
-  "author": "SimpleSelectionAgent",
-  "actions": {
-    "state_delta": {
-      "selected_restaurants": "```json\n{\n    \"selected_restaurants\": [\n        {\n            \"name\": \"銀座 KOSO\",\n            \"area\": \"銀座\",\n            \"genre\": \"和食\",\n            \"description\": \"...\",\n            \"reason\": \"...\"\n        }\n    ]\n}\n```"
-    }
-  }
-}
-```
-
-#### SimpleDescriptionAgent
-```json
-{
-  "author": "SimpleDescriptionAgent",
-  "actions": {
-    "state_delta": {
-      "descriptions": "```json\n{\n    \"descriptions\": [\n        {\n            \"name\": \"銀座 KOSO\",\n            \"description\": \"150文字程度の詳細説明...\"\n        }\n    ]\n}\n```"
-    }
-  }
-}
-```
-
-#### SimpleUIAgent（最終出力）
-```json
-{
-  "author": "SimpleUIAgent",
-  "actions": {
-    "state_delta": {
-      "html": "```html\n<!DOCTYPE html>\n<html lang=\"ja\">...</html>\n```"
-    }
-  }
-}
-```
-
-### 3. 最終HTML出力の詳細
-
-最終的なHTML出力は以下の特徴を持ちます：
-
-- **場所**: `actions.state_delta.html`
-- **形式**: ````html`タグで囲まれた完全なHTMLドキュメント
-- **文字エンコーディング**: Unicodeエスケープ（例：`\u9280\u5ea7` = 銀座）
-- **構造**: 完全なHTML5ドキュメント（DOCTYPE、head、body含む）
-
-#### HTMLの実際の例
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>銀座 和食 ビジネス会食 特集</title>
-  <style>
-    /* レスポンシブデザインのCSS */
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>銀座 和食 ビジネス会食におすすめのお店</h1>
-    <div class="card-grid">
-      <div class="card">
-        <h2>銀座 KOSO</h2>
-        <p>詳細説明...</p>
-      </div>
-      <!-- 他の店舗カード -->
-    </div>
-  </div>
-</body>
-</html>
-```
-
-## フロントエンド処理
-
-### 1. レスポンス解析
-
-```typescript
-function parseADKResponse(responseData: string): string {
-  // SSE形式のレスポンスを行ごとに分割
-  const lines = responseData.split('\n');
-  const dataLines = lines.filter(line => line.startsWith('data: '));
-  
-  for (const line of dataLines) {
-    const jsonData = line.replace('data: ', '').trim();
-    const parsedData = JSON.parse(jsonData);
-    
-    // 最終的なHTML出力を検索
-    if (parsedData.actions?.state_delta?.html) {
-      return cleanHTMLContent(parsedData.actions.state_delta.html);
-    }
-  }
-}
-```
-
-### 2. HTML クリーニング
-
-```typescript
-function cleanHTMLContent(content: string): string {
-  // ```htmlタグの除去
-  let cleaned = content
-    .replace(/^```html\s*\n?/i, '')
-    .replace(/\n?```\s*$/i, '')
-    .trim();
-  
-  // Unicodeエスケープのデコード
-  cleaned = cleaned.replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => {
-    return String.fromCharCode(parseInt(hex, 16));
+```javascript
+// レストラン検索 + 自動保存の例
+async function searchAndSave(query) {
+  // 1. 記事生成
+  const searchResult = await fetch('/api/restaurant-search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: query })
   });
   
-  // その他のエスケープ文字の処理
-  cleaned = cleaned.replace(/\\n/g, '\n');
-  cleaned = cleaned.replace(/\\t/g, '\t');
-  cleaned = cleaned.replace(/\\"/g, '"');
-  cleaned = cleaned.replace(/\\\\/g, '\\');
+  const data = await searchResult.json();
   
-  return cleaned;
+  // 2. 自動保存
+  if (data.success) {
+    await fetch('/api/restaurant-search/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        htmlContent: data.result,
+        query: query,
+        title: `レストラン検索: ${query}`,
+        processingTimeMs: data.processingTimeMs
+      })
+    });
+  }
 }
 ```
 
-## トラブルシューティング
+## API エンドポイント
 
-### よくある問題
-
-1. **HTMLが文字列のまま表示される**
-   - 原因：Unicodeエスケープが正しくデコードされていない
-   - 解決：`cleanHTMLContent`関数でエスケープ処理を実行
-
-2. **スタイルが適用されない**
-   - 原因：CSSの`all: 'initial'`でスタイルがリセットされている
-   - 解決：スタイルリセットを削除
-
-3. **部分的なHTMLが表示される**
-   - 原因：レスポンスの途中でHTMLを取得している
-   - 解決：最後の`SimpleUIAgent`の出力のみを使用
-
-### デバッグ用ログ
-
-```typescript
-console.log('[DEBUG] Raw ADK Response:', responseData.substring(0, 500));
-console.log('[DEBUG] Parsed SSE Event:', JSON.stringify(parsedData));
-console.log('[DEBUG] Found HTML in actions.state_delta.html');
-console.log('[DEBUG] Returning HTML content:', htmlContent.substring(0, 200));
-```
-
-## API仕様
-
-### エンドポイント
+### 1. 検索API（既存）
 ```
 POST /api/restaurant-search
 ```
 
-### リクエスト
+**リクエスト**:
 ```json
 {
   "message": "銀座でビジネス会食に使える和食のお店を探している",
@@ -224,7 +73,7 @@ POST /api/restaurant-search
 }
 ```
 
-### レスポンス
+**レスポンス**:
 ```json
 {
   "success": true,
@@ -232,12 +81,286 @@ POST /api/restaurant-search
   "processingMode": "adk_agent",
   "processingTimeMs": 18900,
   "sessionId": "generated-session-id",
-  "timestamp": "2025-01-27T12:34:56.789Z"
+  "timestamp": "2025-01-27T12:34:56.789Z",
+  "workflowComplete": true,      // HTMLの完全性チェック結果
+  "finalAgent": "SimpleUIAgent"   // workflowCompleteがtrueの場合のみ存在
 }
 ```
 
+**備考**:
+- `workflowComplete`: HTMLが`<!DOCTYPE html>`で始まり`</html>`で終わる場合にtrue
+- `finalAgent`: 現在は"SimpleUIAgent"または"unknown"を返す
+
+### 2. 保存API（新規）
+```
+POST /api/restaurant-search/save
+```
+
+**リクエスト**:
+```json
+{
+  "htmlContent": "<!DOCTYPE html><html>...</html>",
+  "query": "銀座でビジネス会食に使える和食のお店",
+  "searchParams": {
+    "area": "銀座",
+    "scene": "ビジネス",
+    "time": "ディナー",
+    "requests": ["和食"]
+  },
+  "title": "銀座 和食 ビジネス会食特集",
+  "processingTimeMs": 18900
+}
+```
+
+**レスポンス**:
+```json
+{
+  "success": true,
+  "resultId": "550e8400-e29b-41d4-a716-446655440000",  // UUID v4形式
+  "url": "/restaurant-search/saved/550e8400-e29b-41d4-a716-446655440000",
+  "htmlUrl": "https://storage.googleapis.com/{project-id}-restaurant-results/restaurant-results/2025/01/27/result_550e8400-e29b-41d4-a716-446655440000.html",
+  "title": "銀座 和食 ビジネス会食特集"
+}
+```
+
+**セキュリティ制限**:
+- HTMLコンテンツ: 最大1MB
+- クエリ: 最大1000文字
+- タグは自動生成（エリア、シーン、時間、ジャンル）
+
+### 3. 履歴取得API（新規）
+```
+GET /api/restaurant-search/history?limit=10&tag=和食&search=銀座
+```
+
+**レスポンス**:
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "query": "銀座でビジネス会食に使える和食のお店",
+      "searchParams": {
+        "area": "銀座",
+        "scene": "ビジネス",
+        "time": "ディナー",
+        "requests": ["和食"]
+      },
+      "htmlStorageUrl": "https://storage.googleapis.com/{project-id}-restaurant-results/restaurant-results/2025/01/27/result_550e8400-e29b-41d4-a716-446655440000.html",
+      "title": "銀座 和食 ビジネス会食特集",
+      "createdAt": "2025-01-27T12:34:56.789Z",
+      "updatedAt": "2025-01-27T12:34:56.789Z",
+      "tags": ["エリア:銀座", "シーン:ビジネス", "時間:ディナー", "ジャンル:和食"],
+      "isPublic": true,  // ハッカソン用にデフォルトtrue
+      "metadata": {
+        "processingTimeMs": 18900,
+        "agentVersion": "1.0.0"
+      }
+    }
+  ],
+  "totalCount": 1,
+  "availableTags": ["エリア:銀座", "シーン:ビジネス", "時間:ディナー", "ジャンル:和食"]
+}
+```
+
+**備考**:
+- タグフィルターはFirestoreのarray-containsクエリを使用
+- キーワード検索はクライアント側でフィルタリング（query, titleの部分一致）
+
+### 4. 個別結果操作API（新規）
+
+#### GET - 個別結果取得
+```
+GET /api/restaurant-search/saved/[id]
+```
+
+**レスポンス**:
+```json
+{
+  "success": true,
+  "result": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "query": "銀座でビジネス会食に使える和食のお店",
+    "searchParams": { /* ... */ },
+    "htmlStorageUrl": "https://storage.googleapis.com/...",
+    "title": "銀座 和食 ビジネス会食特集",
+    "createdAt": "2025-01-27T12:34:56.789Z",
+    "updatedAt": "2025-01-27T12:34:56.789Z",
+    "tags": ["エリア:銀座", "シーン:ビジネス"],
+    "isPublic": true,
+    "metadata": { /* ... */ }
+  }
+}
+```
+
+#### PATCH - タイトル/タグ更新
+```
+PATCH /api/restaurant-search/saved/[id]
+```
+
+**リクエスト**:
+```json
+{
+  "title": "新しいタイトル",
+  "tags": ["新しいタグ1", "新しいタグ2"]  // オプション
+}
+```
+
+#### DELETE - 削除
+```
+DELETE /api/restaurant-search/saved/[id]
+```
+
+**備考**: Firestoreのドキュメントのみ削除。Cloud Storageのファイルは保持される。
+
+## データ構造
+
+### Firestore メタデータ構造
+
+**コレクション**: `restaurant-results`
+
+```typescript
+interface SavedRestaurantResult {
+  id: string;                    // ドキュメントID (UUID v4)
+  query: string;                 // 元の検索クエリ
+  searchParams: {                // 検索パラメータ
+    area?: string;
+    scene?: string;
+    time?: string;
+    requests?: string[];
+  };
+  htmlStorageUrl: string;        // Cloud Storage URL
+  title: string;                 // 表示タイトル
+  createdAt: string;            // 作成日時 (ISO 8601)
+  updatedAt: string;            // 更新日時 (ISO 8601)
+  tags: string[];               // タグ配列（自動生成）
+  isPublic: boolean;            // 公開設定（デフォルトtrue）
+  metadata: {                   // メタデータ
+    processingTimeMs: number;
+    agentVersion: string;       // "1.0.0"
+  };
+}
+```
+
+### Cloud Storage ファイル構造
+
+```
+gs://[project-id]-restaurant-results/
+├── restaurant-results/
+│   ├── 2025/
+│   │   ├── 01/
+│   │   │   ├── 27/
+│   │   │   │   ├── result_550e8400-e29b-41d4-a716-446655440000.html
+│   │   │   │   └── ...
+│   │   │   └── ...
+│   │   └── ...
+│   └── ...
+```
+
+**バケット名**: `{VERTEX_AI_PROJECT_ID}-restaurant-results` または環境変数`BUCKET_NAME`で指定
+
+## フロントエンド実装
+
+### CloudRestaurantStorage クラス
+
+```typescript
+import { CloudRestaurantStorage } from '@/lib/services/cloud-restaurant-storage';
+
+// 検索結果を保存
+const saveResponse = await CloudRestaurantStorage.save({
+  htmlContent: htmlResult,
+  query: searchQuery,
+  searchParams: { area: "銀座", scene: "ビジネス" },
+  title: "カスタムタイトル",
+  processingTimeMs: 18900
+});
+
+// 履歴を取得
+const history = await CloudRestaurantStorage.getHistory({
+  limit: 20,
+  tag: "和食",
+  search: "銀座"
+});
+
+// 個別結果を取得
+const result = await CloudRestaurantStorage.getById("result_id");
+
+// HTMLコンテンツを直接取得
+const htmlContent = await CloudRestaurantStorage.getHtmlContent(result.htmlStorageUrl);
+```
+
+### 表示パターン
+
+1. **履歴一覧**: Firestoreメタデータから一覧表示
+2. **詳細表示**: Cloud StorageからHTMLを取得してレンダリング
+3. **フィルタリング**: タグや検索キーワードで絞り込み
+
+## Phase 2 への展望
+
+Phase 2では以下の機能を実装予定：
+
+### エージェントレスポンス解析機能
+
+```typescript
+// Phase 2で実装予定の機能
+interface AgentResponseData {
+  intentAnalysis: SearchParams;      // SimpleIntentAgent出力
+  searchResults: RestaurantData[];   // SimpleSearchAgent出力  
+  selectedRestaurants: Restaurant[]; // SimpleSelectionAgent出力
+  descriptions: Description[];       // SimpleDescriptionAgent出力
+  finalHtml: string;                // SimpleUIAgent出力
+}
+```
+
+### 段階的レスポンス表示
+
+```typescript
+// リアルタイムでエージェントの進行状況を表示
+function displayAgentProgress(response: AgentResponseData) {
+  showIntentAnalysis(response.intentAnalysis);
+  showSearchResults(response.searchResults);
+  showSelectedRestaurants(response.selectedRestaurants);
+  showDescriptions(response.descriptions);
+  renderFinalHtml(response.finalHtml);
+}
+```
+
+## トラブルシューティング
+
+### Phase 1 関連の問題
+
+1. **保存に失敗する**
+   - 原因：Cloud Storage権限不足またはFirestore接続エラー
+   - 解決：IAM設定とサービスアカウントキーを確認
+
+2. **HTMLが表示されない**
+   - 原因：Cloud Storage URLにアクセスできない
+   - 解決：バケットの公開設定またはCORS設定を確認
+
+3. **履歴が取得できない**
+   - 原因：Firestoreセキュリティルールまたはインデックス不足
+   - 解決：セキュリティルールとインデックスを確認
+
+### デバッグ用ログ
+
+```typescript
+console.log('[DEBUG] Saving result:', { query, htmlLength: htmlContent.length });
+console.log('[DEBUG] Storage URL:', htmlStorageUrl);
+console.log('[DEBUG] Firestore doc:', firestoreDoc);
+```
+
+## 環境変数
+
+### 必須環境変数
+- `RESTAURANT_SEARCH_AGENT_URL`: ADK Agentのエンドポイント
+- `VERTEX_AI_PROJECT_ID`: Google Cloud プロジェクトID
+
+### オプション環境変数
+- `BUCKET_NAME`: Cloud Storageバケット名（デフォルト: `{VERTEX_AI_PROJECT_ID}-restaurant-results`）
+
 ## 更新履歴
 
-- **2025-01-27**: 初版作成
-- **2025-01-27**: Unicodeエスケープ処理の改善
-- **2025-01-27**: HTMLレンダリング問題の修正
+- **2025-02-01**: 実装に合わせてドキュメント全面更新
+- **2025-01-31**: Phase 1アーキテクチャに更新（Cloud Storage + Firestore実装）
+- **2025-01-27**: 初版作成（エージェントレスポンス解析ベース）
