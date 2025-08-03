@@ -25,13 +25,13 @@ cp .env.example .env
 ## 🎯 特徴
 
 ### 🌟 主要機能
-- **💬 AIチャット** - Vertex AI直接統合、ストリーミング
-- **📊 分析レポート** - ADK Analysis Agent
-- **🍽️ レストラン検索** - 特集記事生成・保存・管理
+- **💬 AIチャット** - Vertex AI直接統合、ストリーミング対応
+- **📊 分析レポート** - ADK Analysis Agent（データ分析・統計処理・トレンド分析）
+- **🍽️ レストラン検索** - 特集記事生成・保存・管理（固定データベース使用）
 
 ### 🚀 技術スタック
-- **Next.js 15** + **React 19** + **TypeScript**
-- **Google ADK 1.93** + **Vertex AI**
+- **Next.js 15.3.1** + **React 19** + **TypeScript**
+- **Google ADK 1.93.0** + **Vertex AI（Gemini 2.0 Flash）**
 - **Cloud Run** + **Cloud Storage** + **Firestore**
 
 ## 📋 スクリプト一覧
