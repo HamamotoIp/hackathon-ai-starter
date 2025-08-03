@@ -23,59 +23,34 @@ class TwoStepSearchTool(BaseTool):
         )
     
     async def run_async(self, search_params: Dict[str, Any]) -> str:
-        """レストランの2段階検索を実行"""
+        """固定レストランデータを返す"""
         try:
-            all_results = []
-            
             # パラメータの取得
             area = search_params.get('area', '')
             scene = search_params.get('scene', '')
             time = search_params.get('time', '')
             requests = search_params.get('requests', [])
             
-            # Step 1: 基本検索
+            # 検索クエリを構築（ログ用）
             basic_query = f"{area} {scene} {time} レストラン"
             if requests:
                 basic_query += " " + " ".join(requests)
             
-            try:
-                # ADKエージェント内ではGoogle検索はLLMエージェントに委譲する方が適切
-                # 直接google_searchを呼び出すのではなく、検索専用エージェントを作成
-                print(f"基本検索実行中: {basic_query}")
-                # 実際の検索はSimpleSearchAgentで行うため、ここではスキップ
-                # フォールバックデータを使用しない場合は空のリストを返す
-                all_results = []
-            except Exception as e:
-                print(f"基本検索エラー: {e}")
+            print(f"固定データ検索: {basic_query}")
             
-            # Google検索が動作しない場合は、より良いフォールバックを使用
-            if len(all_results) < 5:
-                print(f"フォールバック検索を使用: {area} {scene} {time}")
-            
-            # 重複を除去
-            unique_results = {}
-            for result in all_results:
-                name = result.get('name', '')
-                if name and name not in unique_results:
-                    unique_results[name] = result
-            
-            # 最大10件
-            final_results = list(unique_results.values())[:10]
-            
-            # 結果が空の場合はフォールバック
-            if not final_results:
-                final_results = self._get_fallback_restaurants(search_params)
+            # 固定データを取得
+            restaurants = self._get_restaurant_data(search_params)
             
             return json.dumps({
-                "restaurants": final_results,
-                "total_found": len(final_results),
+                "restaurants": restaurants,
+                "total_found": len(restaurants),
                 "search_query": basic_query,
-                "status": "success" if final_results else "no_results"
+                "status": "success"
             }, ensure_ascii=False, indent=2)
             
         except Exception as e:
             return json.dumps({
-                "restaurants": self._get_fallback_restaurants(search_params),
+                "restaurants": self._get_restaurant_data(search_params),
                 "total_found": 5,
                 "status": "error",
                 "error_message": str(e)
@@ -167,37 +142,116 @@ class TwoStepSearchTool(BaseTool):
         
         return 'レストラン'
     
-    def _get_fallback_restaurants(self, params: Dict) -> List[Dict]:
-        """フォールバック用のレストランデータ"""
-        area = params.get('area', '東京')
+    def _get_restaurant_data(self, params: Dict) -> List[Dict]:
+        """エリアとシーンに応じた固定レストランデータ"""
+        area = params.get('area', '渋谷')
         scene = params.get('scene', 'デート')
         
-        # より自然な店名を生成
-        import random
-        restaurant_names = {
-            'フレンチ': ['ルミエール', 'シェ・ピエール', 'ラ・ベルテ', 'ル・ジャルダン', 'ビストロ・ソレイユ'],
-            '和食': ['季節料理 花月', '割烹 なだ万', '和ダイニング 雅', '日本料理 青山', '料亭 花鳥風月'],
-            'イタリアン': ['トラットリア・ミラノ', 'ピッツェリア・ナポリ', 'リストランテ・ローマ', 'オステリア・ヴェネツィア'],
-            '中華': ['龍華楼', '福満園', '天香閣', '金龍軒', '華味軒']
+        # エリア別のレストランデータベース
+        restaurant_database = {
+            '渋谷': {
+                'イタリアン': [
+                    {'name': 'リストランテ・ヒロ', 'description': '本格イタリアンと厳選ワインが楽しめる隠れ家的名店'},
+                    {'name': 'ピッツェリア・マリナーラ', 'description': '薪窯で焼く本格ナポリピザが自慢'},
+                ],
+                'フレンチ': [
+                    {'name': 'ビストロ・ルミエール', 'description': '気軽に楽しめるビストロスタイルのフレンチ'},
+                    {'name': 'ル・ジャルダン', 'description': '都会の喧騒を忘れる緑豊かなテラス席が人気'},
+                ],
+                '和食': [
+                    {'name': '日本料理 青山', 'description': '旬の食材を活かした繊細な和食'},
+                    {'name': '割烹 なだ万', 'description': '伝統の技と現代のセンスが融合した老舗'},
+                ],
+                '中華': [
+                    {'name': '龍華楼', 'description': '本格四川料理と飲茶が楽しめる'},
+                ]
+            },
+            '新宿': {
+                'イタリアン': [
+                    {'name': 'トラットリア・ナポリ', 'description': '新宿の夜景を眺めながら楽しむイタリアン'},
+                ],
+                'フレンチ': [
+                    {'name': 'シェ・ピエール', 'description': '新宿の高層階から見下ろす絶景とフレンチ'},
+                ],
+                '和食': [
+                    {'name': '季節料理 花月', 'description': '四季の移ろいを表現した創作和食'},
+                ],
+                '中華': [
+                    {'name': '福満園', 'description': '本格広東料理の老舗'},
+                ]
+            },
+            '銀座': {
+                'イタリアン': [
+                    {'name': 'リストランテ・ローマ', 'description': '銀座の洗練された雰囲気で味わう本格イタリアン'},
+                ],
+                'フレンチ': [
+                    {'name': 'ラ・ベルテ', 'description': '銀座の一等地で味わう至極のフレンチ'},
+                ],
+                '和食': [
+                    {'name': '料亭 花鳥風月', 'description': '銀座の格式ある料亭で極上のおもてなし'},
+                ],
+                '中華': [
+                    {'name': '天香閣', 'description': '銀座で愛され続ける高級中華'},
+                ]
+            }
         }
         
+        # デフォルトエリア（指定がない場合）
+        if area not in restaurant_database:
+            area = '渋谷'
+        
+        area_restaurants = restaurant_database[area]
         restaurants = []
-        genres = ['フレンチ', '和食', 'イタリアン', '中華']
         
-        for i, genre in enumerate(genres[:4]):  # 最大4件
-            names = restaurant_names.get(genre, ['レストラン'])
-            selected_name = random.choice(names)
-            
-            restaurants.append({
-                'name': f'{selected_name} {area}店',
-                'area': f'{area}駅周辺',
-                'genre': genre,
-                'description': f'{area}で{scene}に人気の{genre}レストラン。落ち着いた雰囲気と確かな味で評判',
-                'features': ['個室あり', '予約可'] if i % 2 == 0 else ['カウンター席', 'テラス席'],
-                'price_range': '¥4,000-8,000'
-            })
+        # 全ジャンルから1-2店舗ずつ選択
+        for genre, places in area_restaurants.items():
+            for i, place in enumerate(places[:2]):  # 最大2店舗
+                restaurants.append({
+                    'name': place['name'],
+                    'area': f'{area}駅周辺',
+                    'genre': genre,
+                    'description': place['description'],
+                    'features': self._get_features_for_scene(scene, genre),
+                    'price_range': self._get_price_range(genre),
+                    'access': f'{area}駅徒歩5分',
+                    'atmosphere': self._get_atmosphere(scene)
+                })
         
-        return restaurants
+        return restaurants[:6]  # 最大6件
+    
+    def _get_features_for_scene(self, scene: str, genre: str) -> List[str]:
+        """シーンに応じた特徴を返す"""
+        base_features = ['予約可', '個室あり']
+        
+        if 'デート' in scene:
+            return base_features + ['夜景', '雰囲気◎']
+        elif '接待' in scene:
+            return base_features + ['落ち着いた空間', '高級感']
+        elif '女子会' in scene or 'ランチ' in scene:
+            return base_features + ['おしゃれ', 'インスタ映え']
+        else:
+            return base_features
+    
+    def _get_price_range(self, genre: str) -> str:
+        """ジャンルに応じた価格帯を返す"""
+        price_map = {
+            'フレンチ': '¥6,000-12,000',
+            'イタリアン': '¥4,000-8,000', 
+            '和食': '¥5,000-10,000',
+            '中華': '¥3,000-6,000'
+        }
+        return price_map.get(genre, '¥4,000-8,000')
+    
+    def _get_atmosphere(self, scene: str) -> str:
+        """シーンに応じた雰囲気を返す"""
+        if 'デート' in scene:
+            return 'ロマンチック'
+        elif '接待' in scene:
+            return '落ち着いた高級感'
+        elif '女子会' in scene:
+            return '明るく華やか'
+        else:
+            return '居心地の良い'
 
 # エージェントの定義
 # 1. 意図理解エージェント
