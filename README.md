@@ -51,12 +51,14 @@ cp .env.example .env
 
 # エージェント更新
 ./scripts/deploy-agents-parallel.sh
+./scripts/deploy-frontend.sh  # 環境変数更新のため
 
 # フロントエンド更新
 ./scripts/deploy-frontend.sh
 
-# 単独エージェント
+# 単独エージェント開発
 ./scripts/deploy-single-agent.sh deploy_analysis.py
+./scripts/deploy-frontend.sh  # 環境変数更新のため
 ```
 
 ## 🏗️ アーキテクチャ

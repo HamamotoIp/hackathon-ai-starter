@@ -78,6 +78,9 @@ packages/frontend/src/lib/
 ./deploy-single-agent.sh deploy_analysis.py
 ./deploy-single-agent.sh deploy_tourism_spots.py
 
+# デプロイ後にフロントエンドも更新（環境変数を最新化）
+./deploy-frontend.sh
+
 # 新規エージェント
 ./deploy-single-agent.sh deploy_new_agent.py
 ```
@@ -114,13 +117,22 @@ packages/frontend/src/lib/
 
 ### deploy-frontend.sh
 フロントエンドのみデプロイ
-- エージェントURLを自動取得
+- エージェントURLを自動取得（`*_agent_url.txt`ファイルから読み込み）
 - Cloud Buildでビルド・デプロイ
-- 環境変数を自動設定
+- 環境変数を自動設定（`.env.production`を動的生成）
+
+**自動設定される環境変数:**
+- `ANALYSIS_AGENT_URL`
+- `TOURISM_SPOTS_SEARCH_AGENT_URL`
+- `BUCKET_NAME`
+- `TOURISM_SPOTS_BUCKET_NAME`
+- `SERVICE_ACCOUNT_EMAIL`
 
 ```bash
 ./deploy-frontend.sh
 ```
+
+**注意:** `.env.production`ファイルは自動生成されるため、手動編集しないでください。環境変数の変更は`deploy-frontend.sh`スクリプトで行います。
 
 ### deploy-single-agent.sh
 単独エージェントデプロイ（開発・デバッグ用）

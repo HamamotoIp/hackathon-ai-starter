@@ -154,19 +154,60 @@
 ```
 
 #### GET /api/tourism-spots/saved/[id]
-個別記事取得（未実装）
+個別記事取得
 
-**注意:** この機能は現在実装されていません。個別記事の表示はフロントエンドで直接Cloud StorageとFirestoreから取得しています。
+**リクエスト:**
+```
+GET /api/tourism-spots/saved/550e8400-e29b-41d4-a716-446655440000
+```
+
+**レスポンス:**
+```json
+{
+  "success": true,
+  "result": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "東京で歴史を感じられる春の観光スポット特集",
+    "htmlContent": "<html>...</html>",
+    "query": "東京 歴史 春",
+    "createdAt": "2025-08-03T12:34:56.789Z",
+    "updatedAt": "2025-08-03T12:34:56.789Z",
+    "metadata": {
+      "processingTimeMs": 8000,
+      "agentVersion": "1.0.0"
+    }
+  }
+}
+```
 
 #### PUT /api/tourism-spots/saved/[id]
-記事更新（未実装）
+記事更新（タイトル変更）
 
-**注意:** この機能は現在実装されていません。タイトル更新はフロントエンドで直接Firestoreを更新しています。
+**リクエスト:**
+```json
+{
+  "title": "新しいタイトル"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "success": true,
+  "message": "タイトルを更新しました"
+}
+```
 
 #### DELETE /api/tourism-spots/saved/[id]
-記事削除（未実装）
+記事削除
 
-**注意:** この機能は現在実装されていません。削除処理はフロントエンドで直接Cloud StorageとFirestoreから削除しています。
+**レスポンス:**
+```json
+{
+  "success": true,
+  "message": "記事を削除しました"
+}
+```
 
 ## エラーレスポンス
 
