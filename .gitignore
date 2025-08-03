@@ -39,8 +39,10 @@ config.sh
 lifecycle.json
 
 # === Agent URLs and Debug Scripts ===
-packages/ai-agents/*_url.txt
+packages/ai-agents/*_agent_url.txt
+*_agent_url.txt
 debug-agent-api.sh
+debug_*.py
 
 # === Development Environment ===
 .devcontainer/

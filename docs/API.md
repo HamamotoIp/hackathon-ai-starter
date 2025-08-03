@@ -81,16 +81,21 @@ UI生成（ADK UI Generation Agent）
 **リクエスト:**
 ```json
 {
-  "query": "渋谷 デート イタリアン"
+  "message": "渋谷 デート イタリアン"
 }
 ```
 
 **レスポンス:**
 ```json
 {
+  "success": true,
   "result": "<html>...</html>",
+  "processingMode": "adk_agent",
   "processingTimeMs": 8000,
-  "success": true
+  "sessionId": "user-123",
+  "timestamp": "2025-08-03T12:34:56.789Z",
+  "workflowComplete": true,
+  "finalAgent": "SimpleUIAgent"
 }
 ```
 
@@ -100,9 +105,11 @@ UI生成（ADK UI Generation Agent）
 **リクエスト:**
 ```json
 {
-  "title": "記事タイトル",
   "htmlContent": "<html>...</html>",
-  "tags": ["渋谷", "デート"]
+  "query": "渋谷 デート イタリアン",
+  "searchParams": {},
+  "title": "渋谷でデートに使えるイタリアンレストラン特集",
+  "processingTimeMs": 8000
 }
 ```
 
@@ -110,8 +117,10 @@ UI生成（ADK UI Generation Agent）
 ```json
 {
   "success": true,
-  "id": "article-123",
-  "storageUrl": "https://storage.googleapis.com/..."
+  "resultId": "550e8400-e29b-41d4-a716-446655440000",
+  "url": "/restaurant-search/saved/550e8400-e29b-41d4-a716-446655440000",
+  "htmlUrl": "https://storage.googleapis.com/project-restaurant-results/restaurant-results/2025/08/03/result_550e8400-e29b-41d4-a716-446655440000.html",
+  "title": "渋谷でデートに使えるイタリアンレストラン特集"
 }
 ```
 
@@ -119,64 +128,48 @@ UI生成（ADK UI Generation Agent）
 保存済み記事一覧
 
 **クエリパラメータ:**
-- `limit`: 取得件数（デフォルト: 20）
-- `tag`: タグフィルタ
-- `keyword`: キーワード検索
+- `limit`: 取得件数（デフォルト: 10、最大: 100）
+- `tag`: タグフィルタ（例: "エリア:渋谷"）
+- `search`: キーワード検索（クエリとタイトルで検索）
 
 **レスポンス:**
 ```json
 {
   "success": true,
-  "articles": [
+  "results": [
     {
-      "id": "article-123",
-      "title": "記事タイトル",
-      "createdAt": "2025-01-27T12:34:56.789Z",
-      "tags": ["渋谷", "デート"],
-      "storageUrl": "https://storage.googleapis.com/..."
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "渋谷でデートに使えるイタリアンレストラン特集",
+      "query": "渋谷 デート イタリアン",
+      "createdAt": "2025-08-03T12:34:56.789Z",
+      "updatedAt": "2025-08-03T12:34:56.789Z",
+      "tags": ["エリア:渋谷", "シーン:デート", "ジャンル:イタリアン"],
+      "htmlStorageUrl": "https://storage.googleapis.com/...",
+      "metadata": {
+        "processingTimeMs": 8000,
+        "agentVersion": "1.0.0"
+      }
     }
-  ]
+  ],
+  "availableTags": ["エリア:渋谷", "シーン:デート", "ジャンル:イタリアン"],
+  "totalCount": 10
 }
 ```
 
 #### GET /api/restaurant-search/saved/[id]
-個別記事取得
+個別記事取得（未実装）
 
-**レスポンス:**
-```json
-{
-  "success": true,
-  "article": {
-    "id": "article-123",
-    "title": "記事タイトル",
-    "htmlContent": "<html>...</html>",
-    "createdAt": "2025-01-27T12:34:56.789Z",
-    "tags": ["渋谷", "デート"]
-  }
-}
-```
+**注意:** この機能は現在実装されていません。個別記事の表示はフロントエンドで直接Cloud StorageとFirestoreから取得しています。
 
 #### PUT /api/restaurant-search/saved/[id]
-記事更新
+記事更新（未実装）
 
-**リクエスト:**
-```json
-{
-  "title": "新しいタイトル",
-  "tags": ["新宿", "ランチ"]
-}
-```
+**注意:** この機能は現在実装されていません。タイトル更新はフロントエンドで直接Firestoreを更新しています。
 
 #### DELETE /api/restaurant-search/saved/[id]
-記事削除
+記事削除（未実装）
 
-**レスポンス:**
-```json
-{
-  "success": true,
-  "message": "記事が削除されました"
-}
-```
+**注意:** この機能は現在実装されていません。削除処理はフロントエンドで直接Cloud StorageとFirestoreから削除しています。
 
 ## エラーレスポンス
 
@@ -205,7 +198,24 @@ const data = await response.json();
 const response = await fetch('/api/restaurant-search', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ query: '渋谷 デート' })
+  body: JSON.stringify({ message: '渋谷 デート' })
 });
 const data = await response.json();
+
+// 検索結果を保存
+const saveResponse = await fetch('/api/restaurant-search/save', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    htmlContent: data.result,
+    query: '渋谷 デート',
+    title: '渋谷のデートスポット特集',
+    processingTimeMs: data.processingTimeMs
+  })
+});
+const saveData = await saveResponse.json();
+
+// 履歴を取得
+const historyResponse = await fetch('/api/restaurant-search/history?limit=10');
+const historyData = await historyResponse.json();
 ```
