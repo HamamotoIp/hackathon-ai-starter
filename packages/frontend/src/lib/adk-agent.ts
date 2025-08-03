@@ -1,9 +1,8 @@
 /**
  * ADK Agent処理ヘルパー - サーバーサイド専用
  * 
- * このモジュールは3つのADK Agentと統合します：
+ * このモジュールは2つのADK Agentと統合します：
  * - Analysis Agent: データ分析・レポート生成
- * - UI Generation Agent: HTML/CSS生成
  * - Restaurant Search Agent: 6段階処理による飲食店検索
  * 
  * Restaurant Search Agentの革新的実装：
@@ -28,7 +27,6 @@ import type {
   ADKStreamQueryRequest,
   ADKSSEEventData
 } from '@/lib/api';
-import type { UIGenerationOptions } from '@/lib/ai-features';
 
 /**
  * ADK Agent - Analysis処理
@@ -49,26 +47,6 @@ export async function processAnalysis(
   }
 }
 
-/**
- * ADK Agent - UI Generation処理
- */
-export async function processUIGeneration(
-  serviceUrl: string,
-  message: string,
-  options?: UIGenerationOptions
-): Promise<string> {
-  if (!serviceUrl) {
-    throw new Error('ADK Agent URLが設定されていません');
-  }
-
-  try {
-    const sessionId = await createADKSession(serviceUrl);
-    const structuredMessage = createUIGenerationMessage(message, options);
-    return await sendADKMessage(serviceUrl, sessionId, structuredMessage);
-  } catch (error) {
-    throw new Error(`UI Generation処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
 
 /**
  * ADK Agent - 飲食店検索処理
@@ -179,17 +157,6 @@ async function sendADKMessage(
   return parseADKResponse(response.data as string);
 }
 
-/**
- * UI生成用の構造化メッセージ作成
- */
-function createUIGenerationMessage(message: string, options?: UIGenerationOptions): string {
-  const structuredMessage = {
-    type: "ui_generation",
-    user_prompt: message,
-    device_type: options?.deviceType ?? "auto"
-  };
-  return JSON.stringify(structuredMessage);
-}
 
 /**
  * ADKレスポンス解析（完全再構築版）

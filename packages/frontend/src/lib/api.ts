@@ -12,8 +12,6 @@
 import { 
   BaseAIRequest, 
   BaseAIResponse, 
-  UIGenerationOptions, 
-  UIGenerationResult, 
   AIErrorResponse
 } from './ai-features';
 
@@ -33,15 +31,6 @@ export interface AnalysisAPIResponse extends BaseAIResponse {
   result: string;
 }
 
-/** UI生成APIリクエスト */
-export interface UIGenerationAPIRequest extends BaseAIRequest {
-  options?: UIGenerationOptions;
-}
-
-/** UI生成APIレスポンス */
-export interface UIGenerationAPIResponse extends BaseAIResponse {
-  result: UIGenerationResult;
-}
 
 /** 飲食店検索APIレスポンス（エスケープ問題解決版）
  * 
@@ -158,7 +147,6 @@ export interface RestaurantSearchResponse {
 export const API_ENDPOINTS = {
   BASIC_CHAT: '/api/chat/basic',
   ANALYSIS: '/api/analysis',
-  UI_GENERATION: '/api/ui-generation',
   RESTAURANT_SEARCH: '/api/restaurant-search',
   DEBUG: '/api/debug',
   IMAGE_UPLOAD: '/api/images/upload'
@@ -186,10 +174,3 @@ export function isSuccessResponse(response: unknown): response is BaseAIResponse
          (response as { success: boolean }).success === true;
 }
 
-/** UI生成レスポンスかチェック */
-export function isUIGenerationResponse(response: unknown): response is UIGenerationAPIResponse {
-  return isSuccessResponse(response) && 
-         'result' in response && 
-         typeof (response as { result: unknown }).result === 'object' &&
-         'html' in (response as { result: { html?: unknown } }).result;
-}

@@ -6,11 +6,11 @@
 
 import { useState } from 'react';
 import type { AIProcessingStatus } from '@/lib/ai-features';
-import type { AnalysisAPIResponse, UIGenerationAPIResponse } from '@/lib/api';
+import type { AnalysisAPIResponse } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
 
 interface FeatureCardConfig {
-  type: 'analysis_report' | 'ui_generation';
+  type: 'analysis_report';
   name: string;
   description: string;
   placeholder: string;
@@ -21,7 +21,7 @@ interface FeatureCardProps {
   config: FeatureCardConfig;
 }
 
-type APIResponseType = AnalysisAPIResponse | UIGenerationAPIResponse | { error: string };
+type APIResponseType = AnalysisAPIResponse | { error: string };
 
 export default function FeatureCard({ config }: FeatureCardProps) {
   const [input, setInput] = useState('');
@@ -36,19 +36,7 @@ export default function FeatureCard({ config }: FeatureCardProps) {
     setResponse(null);
 
     try {
-      let result;
-      
-      if (config.type === 'analysis_report') {
-        result = await apiClient.analysis({ message: input });
-      } else if (config.type === 'ui_generation') {
-        result = await apiClient.uiGeneration({ 
-          message: input,
-          options: { deviceType: 'auto' }
-        });
-      } else {
-        throw new Error('Unknown feature type');
-      }
-
+      const result = await apiClient.analysis({ message: input });
       setResponse(result);
       setStatus('completed');
     } catch (error) {
@@ -74,24 +62,6 @@ export default function FeatureCard({ config }: FeatureCardProps) {
       );
     }
 
-    // UI生成機能の場合はHTMLプレビュー
-    if (config.type === 'ui_generation' && 'result' in response && typeof response.result === 'object' && 'html' in response.result) {
-      return (
-        <div className="space-y-3">
-          <div className="bg-gray-50 p-3 rounded">
-            <div className="text-sm font-medium mb-2">生成されたHTML:</div>
-            <iframe
-              srcDoc={response.result.html}
-              className="w-full h-64 border rounded"
-              title="Generated UI Preview"
-            />
-          </div>
-          <div className="text-xs text-gray-500">
-            {getProcessingModeText()} - {response.processingTimeMs}ms
-          </div>
-        </div>
-      );
-    }
 
     // 通常のテキストレスポンス
     return (

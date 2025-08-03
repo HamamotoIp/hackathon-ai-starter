@@ -10,9 +10,7 @@ import type {
 } from '@/lib/ai-features';
 import type { 
   BasicChatAPIResponse,
-  AnalysisAPIResponse,
-  UIGenerationAPIRequest,
-  UIGenerationAPIResponse
+  AnalysisAPIResponse
 } from '@/lib/api';
 
 
@@ -40,17 +38,11 @@ export class AIAPIClient {
     return this.fetchAPI('/api/analysis', request);
   }
   
-  /**
-   * UI生成実行
-   */
-  async uiGeneration(request: UIGenerationAPIRequest): Promise<UIGenerationAPIResponse> {
-    return this.fetchAPI('/api/ui-generation', request);
-  }
   
   /**
    * 汎用API呼び出し
    */
-  private async fetchAPI<T>(endpoint: string, request: BaseAIRequest | UIGenerationAPIRequest): Promise<T> {
+  private async fetchAPI<T>(endpoint: string, request: BaseAIRequest): Promise<T> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: 'POST',

@@ -6,8 +6,7 @@
 // AI機能タイプ
 export type AIFeatureType = 
   | 'basic_chat'
-  | 'analysis_report'
-  | 'ui_generation';
+  | 'analysis_report';
 
 // 処理モード
 export type ProcessingMode = 
@@ -18,8 +17,6 @@ export type ProcessingMode =
 // コストティア
 export type CostTier = 'low' | 'medium' | 'high';
 
-// デバイスタイプ（UI生成用）
-export type DeviceType = 'desktop' | 'tablet' | 'mobile' | 'auto';
 
 // 基本リクエスト
 export interface BaseAIRequest {
@@ -36,19 +33,6 @@ export interface BaseAIResponse {
   sessionId?: string;
 }
 
-// UI生成オプション
-export interface UIGenerationOptions {
-  deviceType?: DeviceType;
-}
-
-// UI生成結果
-export interface UIGenerationResult {
-  html: string;
-  metadata?: {
-    deviceType: DeviceType;
-    responsive: boolean;
-  };
-}
 
 // エラーレスポンス
 export interface AIErrorResponse {
