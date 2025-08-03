@@ -15,6 +15,36 @@ cp .env.example .env
 # .envでPROJECT_IDを設定
 ```
 
+## アーキテクチャ
+
+### フロントエンド構造（リファクタリング後）
+```
+packages/frontend/src/lib/
+├── features/              # 機能別モジュール
+│   ├── chat/             # チャット機能（Vertex AI Direct）
+│   │   ├── vertex-ai-provider.ts
+│   │   └── types.ts
+│   ├── analysis/         # 分析機能（ADK Agent）
+│   │   ├── adk-processor.ts
+│   │   └── types.ts
+│   └── restaurant-search/  # レストラン検索（ADK Agent）
+│       ├── adk-processor.ts
+│       ├── storage-service.ts
+│       └── types.ts
+├── core/                 # 共通処理
+│   ├── adk/             # ADK共通処理
+│   │   ├── client.ts
+│   │   └── response-parser.ts
+│   ├── api/             # API関連
+│   │   ├── client.ts
+│   │   └── helpers.ts
+│   └── utils/           # ユーティリティ
+│       └── sanitize.ts
+└── types/               # 共通型定義
+    ├── api-common.ts
+    └── adk.ts
+```
+
 ## スクリプト一覧
 
 | スクリプト | 説明 | 実行時間目安 |
@@ -173,12 +203,27 @@ mkdir packages/ai-agents/new_agent
 # 既存のdeploy_analysis.pyを参考に
 ```
 
-### 3. テストデプロイ
+### 3. フロントエンド統合
+```bash
+# 1. 機能別ディレクトリ作成
+mkdir packages/frontend/src/lib/features/new-feature
+
+# 2. 型定義作成
+# packages/frontend/src/lib/features/new-feature/types.ts
+
+# 3. ADK処理作成
+# packages/frontend/src/lib/features/new-feature/adk-processor.ts
+
+# 4. APIルート作成
+# packages/frontend/src/app/api/new-feature/route.ts
+```
+
+### 4. テストデプロイ
 ```bash
 ./deploy-single-agent.sh deploy_new_agent.py
 ```
 
-### 4. 並列デプロイに追加
+### 5. 並列デプロイに追加
 ```bash
 # deploy-agents-parallel.sh に追加
 deploy_agent "deploy_new_agent.py" &
@@ -187,10 +232,23 @@ deploy_agent "deploy_new_agent.py" &
 ## ベストプラクティス
 
 ### 開発フロー
-1. ローカルでテスト
-2. 単独エージェントデプロイでテスト
-3. 並列デプロイで全体テスト
-4. フロントエンドに統合
+1. **ローカル開発**
+   ```bash
+   cd packages/frontend
+   npm run dev
+   ```
+2. **型チェック**
+   ```bash
+   npm run type-check
+   npm run lint
+   ```
+3. **ビルドテスト**
+   ```bash
+   npm run build
+   ```
+4. **単独エージェントデプロイでテスト**
+5. **並列デプロイで全体テスト**
+6. **フロントエンドに統合**
 
 ### コスト最適化
 - 開発時は単独デプロイを活用

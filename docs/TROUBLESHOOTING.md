@@ -88,7 +88,41 @@ pip install -r requirements.txt
 
 ### フロントエンド関連
 
-#### 7. npm install失敗
+#### 7. TypeScriptエラー
+```
+ERROR: Cannot find module '@/lib/...' or its corresponding type declarations
+```
+
+**解決方法:**
+```bash
+# 型チェック実行
+npm run type-check
+
+# インポートパス確認（新しい構造）
+# × import { ... } from '@/lib/api-client';
+# ○ import { ... } from '@/lib/core/api/client';
+
+# × import { ... } from '@/lib/ai-features';  
+# ○ import { ... } from '@/lib/types/api-common';
+```
+
+#### 8. ビルドエラー
+```
+ERROR: Failed to compile
+```
+
+**解決方法:**
+```bash
+# クリーンビルド
+rm -rf .next
+npm run build
+
+# 依存関係再インストール
+rm -rf node_modules package-lock.json
+npm install
+```
+
+#### 9. npm install失敗
 ```
 ERROR: EACCES: permission denied
 ```
@@ -103,7 +137,7 @@ sudo chown -R $(whoami) /usr/local/lib/node_modules
 npm install --unsafe-perm
 ```
 
-#### 8. ポート使用中
+#### 10. ポート使用中
 ```
 ERROR: Port 3000 is already in use
 ```
@@ -122,7 +156,7 @@ npm run dev -- -p 3001
 
 ### Cloud Run関連
 
-#### 9. メモリ不足
+#### 11. メモリ不足
 ```
 ERROR: Container memory limit exceeded
 ```
@@ -136,7 +170,7 @@ MEMORY="1Gi"  # 512Mi → 1Gi
 ./deploy-frontend.sh
 ```
 
-#### 10. タイムアウトエラー
+#### 12. タイムアウトエラー
 ```
 ERROR: Request timeout
 ```
@@ -151,7 +185,7 @@ gcloud run services update SERVICE_NAME \
 
 ### ストレージ関連
 
-#### 11. バケット作成失敗
+#### 13. バケット作成失敗
 ```
 ERROR: Bucket already exists
 ```
@@ -165,7 +199,7 @@ BUCKET_NAME="$PROJECT_ID-images-$(date +%s)"
 gsutil ls gs://existing-bucket-name
 ```
 
-#### 12. Firestore未初期化
+#### 14. Firestore未初期化
 ```
 ERROR: Firestore database not found
 ```
@@ -180,9 +214,33 @@ gcloud firestore databases create \
 
 ## パフォーマンス改善
 
+### フロントエンド開発効率化
+
+#### 1. 構造整理後の開発フロー
+```bash
+# 型チェックとビルド
+npm run type-check && npm run build
+
+# 機能別開発（例：新しいAI機能追加）
+mkdir src/lib/features/new-feature
+# types.ts, adk-processor.ts を作成
+# src/app/api/new-feature/route.ts を作成
+```
+
+#### 2. インポートパスの正規化
+```typescript
+// 推奨：機能別インポート
+import { processAnalysis } from '@/lib/features/analysis/adk-processor';
+import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
+
+// 推奨：共通処理インポート
+import { apiClient } from '@/lib/core/api/client';
+import { sanitizeHTML } from '@/lib/core/utils/sanitize';
+```
+
 ### デプロイ高速化
 
-#### 1. 並列デプロイ使用
+#### 3. 並列デプロイ使用
 ```bash
 # 順次デプロイ（遅い）
 ./deploy-agents.sh
@@ -191,7 +249,7 @@ gcloud firestore databases create \
 ./deploy-agents-parallel.sh
 ```
 
-#### 2. キャッシュ活用
+#### 4. キャッシュ活用
 ```bash
 # Docker キャッシュクリア
 gcloud builds submit --no-cache
@@ -202,7 +260,7 @@ npm cache clean --force
 
 ### リソース最適化
 
-#### 1. Cloud Run設定
+#### 5. Cloud Run設定
 ```bash
 # .env で最適化
 MEMORY="512Mi"      # 最小限
@@ -211,7 +269,7 @@ MAX_INSTANCES="1"   # コスト削減
 MIN_INSTANCES="0"   # アイドル課金回避
 ```
 
-#### 2. 不要なエージェント削除
+#### 6. 不要なエージェント削除
 ```bash
 # 古いエージェント確認
 ./cleanup_old_agents.sh

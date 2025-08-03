@@ -7,6 +7,10 @@
   - 本番: `https://your-app.run.app`
 - **認証**: なし
 - **形式**: JSON
+- **アーキテクチャ**: 機能別に整理されたlibディレクトリ構造
+  - `lib/features/{chat,analysis,restaurant-search}/` - 機能別モジュール
+  - `lib/core/{adk,api,utils}/` - 共通処理
+  - `lib/types/` - 共通型定義
 
 ## エンドポイント一覧
 
@@ -40,43 +44,36 @@
 **リクエスト:**
 ```json
 {
-  "input": "分析したいテキスト"
+  "message": "分析したいテキスト",
+  "sessionId": "user-123"
 }
 ```
 
 **レスポンス:**
 ```json
 {
-  "result": "分析結果",
+  "success": true,
+  "result": "# 分析結果サマリー\n・主要な発見事項...\n\n## 詳細分析\n...",
+  "processingMode": "adk_agent",
   "processingTimeMs": 5000,
-  "success": true
+  "sessionId": "user-123",
+  "timestamp": "2025-08-03T12:34:56.789Z"
 }
 ```
 
-#### POST /api/ui-generation
-UI生成（ADK UI Generation Agent）
-
-**リクエスト:**
-```json
-{
-  "description": "ログインフォーム",
-  "deviceType": "desktop"
-}
-```
-
-**レスポンス:**
-```json
-{
-  "html": "<div>...</div>",
-  "processingTimeMs": 4000,
-  "success": true
-}
-```
 
 ### レストラン検索
 
 #### POST /api/restaurant-search
-レストラン特集記事生成
+レストラン特集記事生成（ADK Restaurant Search Agent - 6段階処理）
+
+**処理フロー**:
+1. SimpleIntentAgent: ユーザー入力から検索パラメータ抽出
+2. SimpleSearchAgent: 固定レストランデータ取得
+3. SimpleSelectionAgent: 条件に最適な5店舗選定
+4. SimpleDescriptionAgent: 魅力的な説明文生成
+5. SimpleUIAgent: 美しいHTML記事生成
+6. HTMLExtractorAgent: 最終HTML抽出
 
 **リクエスト:**
 ```json
@@ -185,6 +182,22 @@ UI生成（ADK UI Generation Agent）
 
 ### フロントエンドからの呼び出し
 
+**推奨方法: APIクライアント使用**
+```typescript
+import { apiClient } from '@/lib/core/api/client';
+
+// チャット
+const chatResponse = await apiClient.basicChat({ 
+  message: 'こんにちは' 
+});
+
+// 分析
+const analysisResponse = await apiClient.analysis({ 
+  message: '分析したいデータ' 
+});
+```
+
+**直接fetch使用例**
 ```typescript
 // チャット
 const response = await fetch('/api/chat', {
@@ -202,20 +215,36 @@ const response = await fetch('/api/restaurant-search', {
 });
 const data = await response.json();
 
-// 検索結果を保存
-const saveResponse = await fetch('/api/restaurant-search/save', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    htmlContent: data.result,
-    query: '渋谷 デート',
-    title: '渋谷のデートスポット特集',
-    processingTimeMs: data.processingTimeMs
-  })
+// 検索結果を保存（CloudRestaurantStorageクラス使用推奨）
+import { CloudRestaurantStorage } from '@/lib/features/restaurant-search/storage-service';
+
+const storage = new CloudRestaurantStorage();
+const saveResult = await storage.saveResult({
+  htmlContent: data.result,
+  query: '渋谷 デート',
+  title: '渋谷のデートスポット特集',
+  processingTimeMs: data.processingTimeMs
 });
-const saveData = await saveResponse.json();
 
 // 履歴を取得
-const historyResponse = await fetch('/api/restaurant-search/history?limit=10');
-const historyData = await historyResponse.json();
+const history = await storage.getHistory({ limit: 10 });
+```
+
+## 型定義の場所
+
+```typescript
+// 共通型
+import type { BaseAIRequest, BaseAIResponse } from '@/lib/types/api-common';
+
+// チャット型
+import type { BasicChatAPIResponse } from '@/lib/features/chat/types';
+
+// 分析型
+import type { AnalysisAPIResponse } from '@/lib/features/analysis/types';
+
+// レストラン検索型
+import type { 
+  RestaurantSearchAPIResponse, 
+  SavedRestaurantResult 
+} from '@/lib/features/restaurant-search/types';
 ```
